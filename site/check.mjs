@@ -24,6 +24,7 @@ requireText("Video has no autoplay", !/<video[^>]*\bautoplay\b/i.test(html) && !
 requireText("New benefit copy is present", /APP-AWARE PROFILES/.test(html) && /Pin up to three actions/.test(html) && /Easy remote or larger controls/.test(html));
 requireText("Compatibility limits and privacy route are clear", /compatible Android TV and Google TV devices/.test(html) && /support Android TV Remote Service v2/.test(html) && /href="privacy\/"/.test(html));
 requireText("Native FAQ is available", (html.match(/<details>/g) || []).length >= 4 && /<summary>Which TVs/.test(html));
+requireText("Expanded FAQ uses a horizontal minus", /faq-list details\[open\] summary:after\{content:"-"\}/.test(css) && !/faq-list details\[open\] summary::after\s*\{\s*transform:\s*rotate\(45deg\)/.test(css));
 requireText("Responsive CSS includes required layout and safe-area support", /@media\s*\(max-width:\s*740px\)/.test(css) && /@media\s*\(max-width:\s*420px\)/.test(css) && /env\(safe-area-inset-bottom\)/.test(css) && /data-mobile-cta-bar/.test(html));
 requireText("CTA space adjusts to its rendered height", /data-mobile-cta-bar/.test(js) && /ResizeObserver/.test(js) && /--mobile-cta-reserve/.test(js));
 requireText("Reduced motion and visible keyboard focus", /prefers-reduced-motion:\s*reduce/.test(css) && /prefers-reduced-motion:\s*reduce/.test(js) && /:focus-visible\s*\{[^}]*outline:/.test(css));
