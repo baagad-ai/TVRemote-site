@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#0D0F12">
+    <link rel="canonical" href="https://baagad-ai.github.io/TVRemote-site/privacy/">
+    <meta name="description" content="How The Remote handles local app data, optional diagnostics, this website, and Play beta opt-in.">
+    <title>Privacy policy · The Remote</title>
+    <link rel="icon" href="../assets/focus-key.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header policy-header">
+      <a class="brand" href="../" aria-label="The Remote, home">
+        <img class="brand-mark" src="../assets/focus-key.svg" alt="">
+        <span class="brand-name">The Remote</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="../">Home</a>
+      </nav>
+    </header>
+
+    <main class="policy-main page-width" id="main" tabindex="-1">
+      <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span> PRIVACY, IN PLAIN LANGUAGE</p>
+      <h1>Privacy policy</h1>
+      <p class="policy-date">Last updated: 2 October 2026</p>
+      <p class="policy-lede">The Remote is a free phone remote for compatible Android TV and Google TV. The app has no account, ads, analytics, purchases, subscription, or developer-operated cloud relay.</p>
+
+      <section class="policy-section" aria-labelledby="app-data">
+        <h2 id="app-data">Information used by the app</h2>
+        <p>To connect to a TV, the app discovers devices on your local network and uses the TV address, service name, pairing status, certificate fingerprint, and a non-exportable Android Keystore identity. You may save a TV name, room, favorites, shortcut choices, compatibility confirmations, and remote preferences on your phone. These stay in the app's private local storage. The same app installed on a TV may save fingerprints of phones that you explicitly approve for its optional search companion.</p>
+        <p>When you press a remote control, share text, open a video link, or start a TV search, the app sends the relevant command or text to your selected TV over the local network. Regular YouTube Search sends the query in a YouTube-on-TV app link; YouTube can process that link under its own privacy policy. Other supported TV searches use the optional local TV companion. Pairing codes, search queries, and text drafts are held only as long as the current action needs them; The Remote does not keep a search or typing history.</p>
+        <p>The optional TV search companion uses Android Accessibility only after you enable it in TV settings and approve a paired phone. For a search you start, it checks the foreground app against a fixed supported-package list and finds a visible Search field. It does not use this access to read passwords, browse unrelated apps, or send screen contents to the developer. You can disable its access in the TV's Accessibility settings and revoke paired phones on the TV.</p>
+      </section>
+
+      <section class="policy-section" aria-labelledby="diagnostics">
+        <h2 id="diagnostics">Support diagnostics</h2>
+        <p>If you choose to share support diagnostics, the app previews a text snapshot before opening Android's app chooser. The snapshot contains the app version and build code, build type, Android API level, and selected app preference settings. It excludes TV names, addresses, pairing data, typed text, logs, files, and credentials. Nothing is uploaded automatically. The app you choose to receive the snapshot handles it under its own privacy policy.</p>
+      </section>
+
+      <section class="policy-section" aria-labelledby="sharing">
+        <h2 id="sharing">Sharing and security</h2>
+        <p>The app does not operate a developer server or cloud relay. Commands and text go to the TV you selected; your TV and the app receiving a query may process them. Links you deliberately open leave The Remote for your browser or the relevant provider app. Local control connections use certificate-pinned TLS. Private pairing keys stay in Android Keystore and are not included in backups. App backup is disabled.</p>
+      </section>
+
+      <section class="policy-section" aria-labelledby="site-beta">
+        <h2 id="site-beta">Website and beta participation</h2>
+        <p>This policy and the beta information page are hosted with GitHub Pages. GitHub's <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">General Privacy Statement</a> describes visit information GitHub may process, including IP addresses, request times, pages viewed, and links clicked. The Remote does not add analytics, advertising, or tracking scripts to these pages.</p>
+        <p>When beta access is available, the beta button opens the official Google Play opt-in. This website has no signup form and does not collect signup details. Google Play handles testing participation under <a href="https://policies.google.com/privacy" rel="noopener">Google’s privacy policy</a>; eligibility and access details are shown in the opt-in flow.</p>
+      </section>
+
+      <section class="policy-section" aria-labelledby="retention">
+        <h2 id="retention">Retention and deletion</h2>
+        <p>Saved TV and preference data stays on your device until you remove a TV, clear the app's storage, or uninstall the app. Forgetting a TV removes its saved connection and pairing identity on the phone. On the TV, use <strong>Revoke paired phones</strong> in The Remote's TV setup screen to remove companion approvals, or clear or uninstall the TV app. Transient drafts and enrollment proofs are cleared on completion, cancellation, timeout, or when you leave the relevant app flow. Because there is no The Remote account, there is no account data to delete from a developer server.</p>
+      </section>
+
+    </main>
+
+    <footer class="site-footer page-width policy-footer">
+      <a class="footer-brand" href="../"><span class="footer-mark" aria-hidden="true">⌃</span>The Remote</a>
+      <p>Free Android remote · Compatible Android TV and Google TV</p>
+      <a href="../">Back to home</a>
+    </footer>
+  </body>
+</html>
