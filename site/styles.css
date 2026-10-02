@@ -81,7 +81,7 @@ img, svg, video { display: block; max-width: 100%; }
   position: absolute;
   z-index: -1;
   top: -165px;
-  right: -210px;
+  right: 0;
   width: min(68vw, 900px);
   height: 820px;
   pointer-events: none;
@@ -313,7 +313,7 @@ h1 span, h2 span { color: var(--lime); }
   .brand-mark { width: 33px; height: 33px; }
   .brand-name { font-size: 16px; }
   .header-cta { display: none; }
-  .page-glow { top: 30px; right: -150px; width: 600px; height: 600px; opacity: .68; }
+  .page-glow { top: 30px; right: 0; width: min(100vw, 600px); height: 600px; opacity: .68; }
   .hero { display: flex; flex-direction: column; align-items: stretch; gap: 0; padding-block: 79px 56px; }
   .hero-copy { padding: 0; }
   .eyebrow { gap: 9px; margin-bottom: 17px; font-size: 9px; letter-spacing: .13em; }

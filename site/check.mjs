@@ -23,6 +23,10 @@ requireText("Video remains a static non-interactive placeholder by default", /da
 requireText("Configured video uses native controls and no autoplay", /data-beta-video controls playsinline preload="metadata"/.test(html) && !/<video[^>]*\bautoplay\b/i.test(html) && !/\.play\s*\(/.test(js));
 requireText("Reduced motion support", /prefers-reduced-motion:\s*reduce/.test(css) && /prefers-reduced-motion:\s*reduce/.test(js));
 requireText("Responsive breakpoints include compact, phone, and tablet layouts", /min-width:\s*320px/.test(css) && /max-width:\s*360px/.test(css) && /max-width:\s*680px/.test(css) && /max-width:\s*900px/.test(css));
+const pageGlow = css.match(/\.page-glow\s*\{([^}]*)\}/)?.[1] ?? "";
+const mobileGlow = css.match(/@media \(max-width:\s*680px\) \{[\s\S]*?\.page-glow\s*\{([^}]*)\}/)?.[1] ?? "";
+requireText("Decorative glow is constrained within wide viewports", /right:\s*0\b/.test(pageGlow) && /width:\s*min\(68vw,\s*900px\)/.test(pageGlow));
+requireText("Decorative glow is constrained within mobile viewports", /right:\s*0\b/.test(mobileGlow) && /width:\s*min\(100vw,\s*600px\)/.test(mobileGlow));
 requireText("Mobile safe-area CTA", /env\(safe-area-inset-bottom\)/.test(css) && /class="mobile-cta-bar"/.test(html));
 requireText("Keyboard focus is visible", /:focus-visible\s*\{[^}]*outline:/.test(css));
 requireText("Dedicated YouTube route leads the features", /<h3>Straight to YouTube search<\/h3>/.test(html));
