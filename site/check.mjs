@@ -12,6 +12,7 @@ const js = read("site.js");
 const config = read("config.js");
 
 requireText("Semantic main landmark", /<main\b[^>]*id="main"/.test(html));
+requireText("Top anchor target stays at document start, outside sticky header", /<body\b(?=[^>]*\bid="top")/i.test(html) && !/<header\b[^>]*\bid="top"/i.test(html));
 requireText("Skip link", /class="skip-link"\s+href="#main"/.test(html));
 requireText("Beta CTA is explicitly unavailable until configured", /data-beta-cta[^>]*disabled/.test(html) && /betaOptInUrl:\s*""/.test(config));
 requireText("Beta CTA explanation", /id="beta-status"[^>]*role="status"/.test(html));
