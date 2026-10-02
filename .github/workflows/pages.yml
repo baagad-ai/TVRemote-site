@@ -35,6 +35,7 @@ jobs:
         run: |
           node --check site/site.js
           node --check site/config.js
+          node --check site/build.mjs
           node site/check.mjs
           node site/check-config.mjs
 
@@ -59,7 +60,8 @@ jobs:
         run: |
           mkdir _site
           cp site/index.html site/styles.css site/site.js site/config.js _site/
-          cp -R site/assets site/privacy _site/
+          cp -R site/assets site/privacy site/vendor _site/
+          node site/build.mjs _site
       - name: Package the public site
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

@@ -6,7 +6,7 @@
 window.remoteSiteConfig = Object.freeze({
   betaOptInUrl: "",
   betaCtaLabel: "Join the beta",
-  betaStatus: "The beta opt-in link will be added here when sign-up is ready.",
+  betaStatus: "The official Google Play beta opt-in will appear here when it is ready.",
   videoSrc: "",
   videoPoster: "",
   videoCaptions: ""

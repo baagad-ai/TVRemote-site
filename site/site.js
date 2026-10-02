@@ -10,14 +10,25 @@
       const link = document.createElement("a");
       link.className = button.className;
       link.href = configuredUrl;
-      link.textContent = config.betaCtaLabel || "Join the beta";
       link.setAttribute("aria-describedby", "beta-status");
+
+      const label = document.createElement("span");
+      label.textContent = config.betaCtaLabel || "Join the beta";
+      const arrow = document.createElement("span");
+      arrow.className = "cta-arrow";
+      arrow.setAttribute("aria-hidden", "true");
+      arrow.textContent = String.fromCharCode(8594);
+      link.append(label, arrow);
       button.replaceWith(link);
     });
+
     if (betaStatus) {
-      betaStatus.textContent = config.betaStatus || "The official Play opt-in is ready.";
+      const statusLabel = betaStatus.querySelector?.("[data-beta-status-label]");
+      if (statusLabel) statusLabel.textContent = config.betaStatus || "The official Play opt-in is ready.";
+      else betaStatus.textContent = config.betaStatus || "The official Play opt-in is ready.";
       betaStatus.classList.add("is-open");
     }
+
     const betaAnswer = document.querySelector("[data-beta-answer]");
     if (betaAnswer) betaAnswer.textContent = "Use the beta button to open the official Play opt-in. Eligibility and access details are shown there; no signup details are collected on this page.";
     document.querySelectorAll(".mobile-cta-note").forEach((note) => {
@@ -42,54 +53,71 @@
       video.append(track);
     }
     const videoIntro = document.querySelector("[data-video-intro]");
-    if (videoIntro) videoIntro.textContent = "See The Remote in use. Start the video when you’re ready.";
+    if (videoIntro) videoIntro.textContent = "See The Remote in use. Start the video when you are ready.";
     video.hidden = false;
     videoPlaceholder.hidden = true;
-    if (videoCaption) videoCaption.textContent = "The Remote beta walkthrough · Use the player controls to watch.";
+    if (videoCaption) videoCaption.textContent = "The Remote beta walkthrough. Use the player controls to watch.";
   }
 
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const revealItems = document.querySelectorAll("[data-reveal]");
-  if (reduceMotion.matches || !("IntersectionObserver" in window)) {
-    revealItems.forEach((item) => item.classList.add("is-visible"));
-  } else {
-    const revealObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-visible");
-        observer.unobserve(entry.target);
+  const mobileCtaBar = document.querySelector("[data-mobile-cta-bar]");
+  if (mobileCtaBar && document.body) {
+    const updateCtaReserve = () => {
+      if (window.getComputedStyle(mobileCtaBar).display === "none") return;
+      const reserve = Math.ceil(mobileCtaBar.getBoundingClientRect().height + 24);
+      document.body.style.setProperty("--mobile-cta-reserve", reserve + "px");
+    };
+    updateCtaReserve();
+    if ("ResizeObserver" in window) {
+      const ctaObserver = new ResizeObserver(updateCtaReserve);
+      ctaObserver.observe(mobileCtaBar);
+    }
+    window.addEventListener("resize", updateCtaReserve, { passive: true });
+  }
+
+  const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+  if (!motionPreference.matches && window.gsap && window.ScrollTrigger) {
+    const gsap = window.gsap;
+    const ScrollTrigger = window.ScrollTrigger;
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.fromTo(
+      [".hero-copy", ".hero-scene"],
+      { y: 12, opacity: 0.97 },
+      { y: 0, opacity: 1, duration: 0.55, ease: "power2.out", stagger: 0.06, clearProps: "transform,opacity" }
+    );
+
+    document.querySelectorAll(".search-proof, .benefit-card, .compatibility-section, .film-section, .questions-section, .closing-section").forEach((item) => {
+      ScrollTrigger.create({
+        trigger: item,
+        start: "top 88%",
+        once: true,
+        onEnter: () => gsap.fromTo(item, { y: 10, opacity: 0.97 }, {
+          y: 0, opacity: 1, duration: 0.42, ease: "power2.out", clearProps: "transform,opacity"
+        })
       });
-    }, { threshold: 0.12, rootMargin: "0px 0px -36px 0px" });
-    revealItems.forEach((item) => revealObserver.observe(item));
-  }
+    });
 
-  const tiltCard = document.querySelector("[data-tilt]");
-  const finePointer = window.matchMedia("(pointer: fine)");
-  if (tiltCard && finePointer.matches && !reduceMotion.matches) {
-    let frame = 0;
-    let point = null;
-    const drawTilt = () => {
-      frame = 0;
-      if (!point || reduceMotion.matches) return;
-      const rect = tiltCard.getBoundingClientRect();
-      const x = (point.x - rect.left) / rect.width - 0.5;
-      const y = (point.y - rect.top) / rect.height - 0.5;
-      tiltCard.style.setProperty("--tilt-x", `${(-y * 3.5).toFixed(2)}deg`);
-      tiltCard.style.setProperty("--tilt-y", `${(x * 4.5).toFixed(2)}deg`);
-    };
-    tiltCard.addEventListener("pointermove", (event) => {
-      if (reduceMotion.matches) return;
-      point = { x: event.clientX, y: event.clientY };
-      if (!frame) frame = requestAnimationFrame(drawTilt);
-    }, { passive: true });
-    const resetTilt = () => {
-      if (frame) cancelAnimationFrame(frame);
-      frame = 0;
-      point = null;
-      tiltCard.style.setProperty("--tilt-x", "0deg");
-      tiltCard.style.setProperty("--tilt-y", "0deg");
-    };
-    tiltCard.addEventListener("pointerleave", resetTilt, { passive: true });
-    reduceMotion.addEventListener("change", resetTilt);
+    document.querySelectorAll(".benefit-card").forEach((card) => {
+      ScrollTrigger.create({
+        trigger: card,
+        start: "top 72%",
+        end: "bottom 34%",
+        onToggle: (trigger) => card.classList.toggle("is-current", trigger.isActive)
+      });
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) gsap.ticker.sleep();
+      else {
+        gsap.ticker.wake();
+        ScrollTrigger.refresh();
+      }
+    });
+
+    motionPreference.addEventListener("change", (event) => {
+      if (!event.matches) return;
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      gsap.globalTimeline.clear();
+      document.querySelectorAll(".benefit-card.is-current").forEach((card) => card.classList.remove("is-current"));
+    });
   }
 })();

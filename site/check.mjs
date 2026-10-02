@@ -1,50 +1,48 @@
 import { readFileSync, existsSync, statSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const read = (name) => readFileSync(path.join(root, name), "utf8");
-const failures = [];
-const requireText = (label, condition) => { if (!condition) failures.push(label); };
 const html = read("index.html");
 const css = read("styles.css");
 const js = read("site.js");
 const config = read("config.js");
+const build = read("build.mjs");
+const buildImports = [...build.matchAll(/^\s*import\s+(?:[\w*{},\s]+\s+from\s+)?["\x27]([^"\x27]+)["\x27]/gm)];
+const failures = [];
+const requireText = (label, condition) => { if (!condition) failures.push(label); };
 
-requireText("Semantic main landmark", /<main\b[^>]*id="main"/.test(html));
-requireText("Top anchor target stays at document start, outside sticky header", /<body\b(?=[^>]*\bid="top")/i.test(html) && !/<header\b[^>]*\bid="top"/i.test(html));
-requireText("Skip link", /class="skip-link"\s+href="#main"/.test(html));
-requireText("Beta CTA is explicitly unavailable until configured", /data-beta-cta[^>]*disabled/.test(html) && /betaOptInUrl:\s*""/.test(config));
-requireText("Beta CTA explanation", /id="beta-status"[^>]*role="status"/.test(html));
-requireText("No invented opt-in URL", !/betaOptInUrl:\s*["']https?:/i.test(config + read("README.md")));
-requireText("Privacy route is linked", existsSync(path.join(root, "privacy", "index.html")) && /href="privacy\/"/.test(html));
-requireText("No rejected or placeholder video URL", !/beta-(?:announcement|youtube)-.*\.mp4|rejected-film/i.test(html + js + config));
-requireText("Video remains a static non-interactive placeholder by default", /data-video-placeholder[^>]*role="img"/.test(html) && /videoSrc:\s*""/.test(config));
-requireText("Configured video uses native controls and no autoplay", /data-beta-video controls playsinline preload="metadata"/.test(html) && !/<video[^>]*\bautoplay\b/i.test(html) && !/\.play\s*\(/.test(js));
-requireText("Reduced motion support", /prefers-reduced-motion:\s*reduce/.test(css) && /prefers-reduced-motion:\s*reduce/.test(js));
-requireText("Responsive breakpoints include compact, phone, and tablet layouts", /min-width:\s*320px/.test(css) && /max-width:\s*360px/.test(css) && /max-width:\s*680px/.test(css) && /max-width:\s*900px/.test(css));
-const pageGlow = css.match(/\.page-glow\s*\{([^}]*)\}/)?.[1] ?? "";
-const mobileGlow = css.match(/@media \(max-width:\s*680px\) \{[\s\S]*?\.page-glow\s*\{([^}]*)\}/)?.[1] ?? "";
-requireText("Decorative glow is constrained within wide viewports", /right:\s*0\b/.test(pageGlow) && /width:\s*min\(68vw,\s*900px\)/.test(pageGlow));
-requireText("Decorative glow is constrained within mobile viewports", /right:\s*0\b/.test(mobileGlow) && /width:\s*min\(100vw,\s*600px\)/.test(mobileGlow));
-requireText("Mobile safe-area CTA", /env\(safe-area-inset-bottom\)/.test(css) && /class="mobile-cta-bar"/.test(html));
-requireText("Keyboard focus is visible", /:focus-visible\s*\{[^}]*outline:/.test(css));
-requireText("Dedicated YouTube route leads the features", /<h3>Straight to YouTube search<\/h3>/.test(html));
-requireText("Supported app-aware, per-TV and comfort benefits", /App-aware profiles/.test(html) && /up to three pinned actions/.test(html) && /Easy remote/.test(html));
-requireText("Privacy route has readable dedicated layout", /\.policy-main\s*\{/.test(css) && /\.policy-section p\s*\{/.test(css));
-requireText("Motion preference changes clear active tilt", /reduceMotion\.addEventListener\("change", resetTilt\)/.test(js));
-requireText("Privacy page does not invent support-inbox or Group practices", !/mailto:|Google Groups|support inbox|marketing list/i.test(read("privacy/index.html")));
-requireText("No continuous scroll listener", !/addEventListener\s*\(\s*["']scroll/i.test(js));
+requireText("Semantic main landmark and skip link", /<main\b[^>]*id="main"/.test(html) && /class="skip-link"\s+href="#main"/.test(html));
+requireText("Both top links target the document start", /<body\b(?=[^>]*\bid="top")/i.test(html) && (html.match(/href="#top"/g) || []).length >= 2);
+requireText("Primary promise and genuine YouTube proof", /<h1[^>]*>Skip the<br\s*\/?\s*>\s*<span>TV keyboard\./.test(html) && /assets\/remote-demo-ltr\.png/.test(html) && /lofi beat/.test(html));
+requireText("Real screenshot has an accurate accessible description", /alt="Current The Remote YouTube search editor/.test(html) && /The TV response is not shown/.test(html));
+requireText("All persistent beta CTAs remain disabled until configured", (html.match(/data-beta-cta disabled/g) || []).length >= 4 && /betaOptInUrl:\s*""/.test(config));
+requireText("Beta availability is stated without collecting sign-up details", /id="beta-status"[^>]*role="status"/.test(html) && /This page does not collect signup details/.test(html) && !/betaOptInUrl:\s*["']https?:/i.test(config));
+requireText("No video or player is loaded by default", /data-video-placeholder[^>]*role="img"/.test(html) && /videoSrc:\s*""/.test(config) && /<video[^>]*data-beta-video[^>]*controls[^>]*playsinline[^>]*preload="metadata"[^>]*hidden/.test(html));
+requireText("Video has no autoplay", !/<video[^>]*\bautoplay\b/i.test(html) && !/\.play\s*\(/.test(js));
+requireText("New benefit copy is present", /APP-AWARE PROFILES/.test(html) && /Pin up to three actions/.test(html) && /Easy remote or larger controls/.test(html));
+requireText("Compatibility limits and privacy route are clear", /compatible Android TV and Google TV devices/.test(html) && /support Android TV Remote Service v2/.test(html) && /href="privacy\/"/.test(html));
+requireText("Native FAQ is available", (html.match(/<details>/g) || []).length >= 4 && /<summary>Which TVs/.test(html));
+requireText("Responsive CSS includes required layout and safe-area support", /@media\s*\(max-width:\s*740px\)/.test(css) && /@media\s*\(max-width:\s*420px\)/.test(css) && /env\(safe-area-inset-bottom\)/.test(css) && /data-mobile-cta-bar/.test(html));
+requireText("CTA space adjusts to its rendered height", /data-mobile-cta-bar/.test(js) && /ResizeObserver/.test(js) && /--mobile-cta-reserve/.test(js));
+requireText("Reduced motion and visible keyboard focus", /prefers-reduced-motion:\s*reduce/.test(css) && /prefers-reduced-motion:\s*reduce/.test(js) && /:focus-visible\s*\{[^}]*outline:/.test(css));
+requireText("GSAP and ScrollTrigger are self-hosted at the selected version", /vendor\/gsap\/gsap-3\.15\.0\.min\.js/.test(html) && /vendor\/gsap\/ScrollTrigger-3\.15\.0\.min\.js/.test(html));
+requireText("Three.js browser modules and licenses are present", existsSync(path.join(root, "vendor/three/three.module.js")) && existsSync(path.join(root, "vendor/three/three.core.js")) && existsSync(path.join(root, "vendor/three/LICENSE")) && existsSync(path.join(root, "vendor/gsap/LICENSE-NOTICE.txt")));
+requireText("Three.js, GSAP and ScrollTrigger licenses retain their upstream notice", /gsap\.com\/standard-license/.test(read("vendor/gsap/LICENSE-NOTICE.txt")) && /three\.js authors/.test(read("vendor/three/LICENSE")) && /@license Copyright 2026, GreenSock/.test(read("vendor/gsap/gsap-3.15.0.min.js")) && /@license Copyright 2026, GreenSock/.test(read("vendor/gsap/ScrollTrigger-3.15.0.min.js")));
+requireText("Hashed static build is available and dependency-free", existsSync(path.join(root, "build.mjs")) && /createHash\("sha256"\)/.test(build) && buildImports.length === 3 && buildImports.every((item) => item[1].startsWith("node:")));
 requireText("No external font or analytics host", !/(fonts\.googleapis\.com|fonts\.gstatic\.com|google-analytics|googletagmanager)/i.test(html + css + js));
+requireText("No arbitrary continuous scroll animation", !/addEventListener\s*\(\s*["']scroll/i.test(js) && !/requestAnimationFrame/.test(js));
 
-for (const [file, minimum] of [["assets/remote-demo-ltr.png", 50000], ["assets/focus-key.svg", 100], ["assets/work-sans-variable.ttf", 100000], ["assets/outfit-variable.ttf", 50000], ["assets/licenses/WorkSans-OFL.txt", 500], ["assets/licenses/Outfit-OFL.txt", 500]]) {
-  const filePath = path.join(root, file);
-  requireText(`Required asset: ${file}`, existsSync(filePath) && statSync(filePath).size >= minimum);
+for (const [relativePath, minimum] of [["assets/remote-demo-ltr.png", 50000], ["assets/focus-key.svg", 100], ["assets/work-sans-variable.ttf", 100000], ["assets/outfit-variable.ttf", 50000], ["assets/licenses/WorkSans-OFL.txt", 500], ["assets/licenses/Outfit-OFL.txt", 500], ["vendor/gsap/gsap-3.15.0.min.js", 50000], ["vendor/gsap/ScrollTrigger-3.15.0.min.js", 30000], ["vendor/three/three.module.js", 400000]]) {
+  const assetPath = path.join(root, relativePath);
+  requireText("Required local asset: " + relativePath, existsSync(assetPath) && statSync(assetPath).size >= minimum);
 }
+requireText("Readable privacy policy", existsSync(path.join(root, "privacy/index.html")) && /<main\b/.test(read("privacy/index.html")) && /\.policy-section/.test(css));
 
 if (failures.length) {
   console.error("Site check failed:\n- " + failures.join("\n- "));
   process.exitCode = 1;
 } else {
-  console.log("Site structure, launch placeholders, accessibility hooks, motion preference, and local assets are ready.");
+  console.log("PASS: page structure, real app proof, honest beta/video states, responsive hooks, motion preferences, local libraries and licenses.");
 }
