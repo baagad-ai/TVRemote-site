@@ -243,7 +243,7 @@ h1 span, h2 span { color: var(--lime); }
 .film-copy > p:not(.eyebrow) { max-width: 370px; margin: 23px 0 0; font-size: 14px; line-height: 1.65; }
 .film-copy .film-no-autoplay { margin-top: 13px !important; color: var(--soft) !important; font-size: 11px !important; }
 .film-stage { min-width: 0; margin: 0; }
-.film-placeholder { position: relative; display: flex; overflow: hidden; min-height: 280px; aspect-ratio: 16 / 9; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgb(246 247 251 / 12%); border-radius: 25px; background: radial-gradient(ellipse at 50% 110%, rgb(213 255 117 / 10%), transparent 45%), linear-gradient(140deg, #1C2128, #12161A 70%); text-align: center; }
+.film-placeholder { position: relative; display: flex; overflow: hidden; width: 100%; min-width: 0; min-height: 280px; aspect-ratio: 16 / 9; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgb(246 247 251 / 12%); border-radius: 25px; background: radial-gradient(ellipse at 50% 110%, rgb(213 255 117 / 10%), transparent 45%), linear-gradient(140deg, #1C2128, #12161A 70%); text-align: center; }
 .film-frame-lines { position: absolute; inset: 13px; border: 1px solid rgb(246 247 251 / 8%); border-radius: 18px; pointer-events: none; }
 .film-frame-lines::before, .film-frame-lines::after { position: absolute; width: 34px; height: 34px; border-color: var(--lime); border-style: solid; border-width: 1px 0 0 1px; opacity: .52; content: ""; }
 .film-frame-lines::before { top: 12px; left: 12px; }
@@ -251,7 +251,7 @@ h1 span, h2 span { color: var(--lime); }
 .film-focus { z-index: 1; width: clamp(72px, 10vw, 105px); height: auto; filter: drop-shadow(0 9px 25px rgb(213 255 117 / 8%)); }
 .film-state { display: inline-flex; z-index: 1; align-items: center; gap: 8px; margin-top: 12px; color: #C0C7D0; font-size: 8px; font-weight: 720; letter-spacing: .15em; }
 .film-state-dot { width: 6px; height: 6px; border-radius: 50%; background: #A7B28D; }
-.film-placeholder-copy { z-index: 1; margin: 8px 0 0; color: #EEF0F3; font-family: "Outfit", "Work Sans", system-ui, sans-serif; font-size: clamp(16px, 2vw, 21px); font-weight: 510; letter-spacing: -.025em; }
+.film-placeholder-copy { z-index: 1; max-width: calc(100% - 32px); overflow-wrap: anywhere; margin: 8px 0 0; color: #EEF0F3; font-family: "Outfit", "Work Sans", system-ui, sans-serif; font-size: clamp(16px, 2vw, 21px); font-weight: 510; letter-spacing: -.025em; }
 .film-caption { margin: 12px 1px 0; color: var(--soft); font-size: 10px; }
 .film-player { width: 100%; max-height: 76svh; aspect-ratio: 16 / 9; border: 1px solid rgb(246 247 251 / 12%); border-radius: 25px; background: #080A0C; }
 
@@ -329,7 +329,7 @@ h1 span, h2 span { color: var(--lime); }
   .phone-rim { padding: 5px; border-radius: 30px; }
   .phone-screen-crop { border-radius: 25px; }
   .phone-figure figcaption { max-width: 300px; margin-top: 10px; font-size: 9px; }
-  .visual-orbit { width: min(116%, 440px); }
+  .visual-orbit { width: min(100%, 440px); }
   .route-tag { top: 5%; right: 0; padding: 9px 10px; font-size: 7px; }
   .route-tag i { width: 9px; margin-inline: 2px; }
   .note-left { top: 38%; left: 0; }
