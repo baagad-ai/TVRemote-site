@@ -33,6 +33,7 @@ class Element {
     if (selector.includes("a, button")) return ["A", "BUTTON", "INPUT", "SELECT", "TEXTAREA", "SUMMARY"].includes(this.tagName) || this.tabIndex >= 0;
     return false;
   }
+  closest(selector) { return selector === ".story-chapter" ? this.storyChapter || null : null; }
   contains(node) { return Boolean(node) && (node === this || this.children.some((child) => child === node || child.replacement === node)); }
   focus() { this.focused = true; }
   blur() { this.focused = false; }
@@ -54,21 +55,23 @@ class Element {
   }
 }
 function run(config, { reduce = false, motion = false, mobile = true, scrollY = 0, triggerTop = 1000 } = {}) {
-  const ctas = Array.from({ length: 4 }, () => new Element("Beta access coming soon"));
+  const ctas = Array.from({ length: 4 }, () => new Element("Google Play link coming soon"));
   ctas.forEach((cta) => { cta.disabled = true; });
   const nodes = {
-    betaStatus: new Element("Google Play beta access is not open yet."),
-    betaStatusLabel: new Element("Google Play beta access is not open yet."),
-    betaAnswer: new Element("Not yet from this page."),
-    note: new Element("Google Play beta access is not open yet."), mobileBar: new Element(),
+    betaStatus: new Element("The Remote already has testers."),
+    betaStatusLabel: new Element("The Remote already has testers."),
+    betaAnswer: new Element("The Remote already has testers."),
+    note: new Element("The official beta sign-up link is on its way."), mobileBar: new Element(),
     headerCta: ctas[0], heroCta: ctas[1], closingCta: ctas[2], mobileCta: ctas[3],
-    cards: [new Element(), new Element(), new Element()],
+    storyChapters: [new Element(), new Element(), new Element()],
+    storyStages: [new Element(), new Element(), new Element()],
     hero: new Element(), search: new Element(), heading: new Element(), compatibility: new Element(),
     questionsHeading: new Element(), closing: new Element(), other: new Element(), faq: new Element(),
     heroTargets: Array.from({ length: 5 }, () => new Element()),
     heroActions: [new Element(), new Element()], phone: new Element(), searchShot: new Element()
   };
-  [nodes.search, nodes.heading, ...nodes.cards, nodes.compatibility, nodes.questionsHeading, nodes.faq, nodes.closing].forEach((node) => {
+  nodes.storyStages.forEach((stage, index) => { stage.storyChapter = nodes.storyChapters[index]; });
+  [nodes.search, nodes.heading, ...nodes.storyChapters, nodes.compatibility, nodes.questionsHeading, nodes.faq, nodes.closing].forEach((node) => {
     node.rect = { ...node.rect, top: triggerTop, bottom: triggerTop + node.rect.height };
   });
   nodes.mobileBar.children = [nodes.mobileCta];
@@ -80,7 +83,7 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
   const selectorMap = {
     "[data-beta-answer]": nodes.betaAnswer, "[data-mobile-cta-bar]": nodes.mobileBar,
     ".hero-cta": nodes.heroCta.replacement || nodes.heroCta,
-    ".search-proof": nodes.search, ".section-heading": nodes.heading,
+    ".search-proof": nodes.search,
     ".compatibility-section": nodes.compatibility,
     ".questions-heading": nodes.questionsHeading, ".closing-section": nodes.closing,
     ".hero": nodes.hero, ".scene-phone": nodes.phone, ".search-shot-frame": nodes.searchShot
@@ -132,8 +135,9 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
       querySelectorAll: (selector) => {
         if (selector === "[data-beta-cta]") return ctas.map((button) => button.replacement || button);
         if (selector === ".mobile-cta-note") return [nodes.note];
-        if (selector === ".benefit-card") return nodes.cards;
-        if (selector === ".benefit-card.is-current") return nodes.cards.filter((card) => card.classList.contains("is-current"));
+        if (selector === ".story-chapter") return nodes.storyChapters;
+        if (selector === ".story-stage") return nodes.storyStages;
+        if (selector === ".story-chapter.is-current") return nodes.storyChapters.filter((chapter) => chapter.classList.contains("is-current"));
         if (selector === ".hero-copy .eyebrow, .hero-copy h1, .hero-lede, .hero-facts, .availability") return nodes.heroTargets;
         if (selector === ".hero-actions > .hero-cta, .hero-actions > .text-link") return nodes.heroActions;
         if (selector === ".faq-list details") return [nodes.faq];
@@ -171,8 +175,8 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
 
 const absent = run({});
 assert(absent.ctas.every((button) => !button.replacement));
-assert.match(absent.nodes.betaAnswer.textContent, /Not yet/);
-assert.match(absent.nodes.betaStatus.textContent, /not open yet/);
+assert.match(absent.nodes.betaAnswer.textContent, /already has testers/);
+assert.match(absent.nodes.betaStatus.textContent, /already has testers/);
 assert.equal(absent.nodes.body.style["--mobile-cta-reserve"], "88px");
 assert.equal(absent.nodes.mobileBar.attributes["aria-hidden"], "true");
 assert.equal(absent.nodes.mobileBar.attributes.inert, "");
@@ -217,8 +221,8 @@ assert.equal(reduced.gsapCalls.length, 0);
 const animated = run({}, { motion: true });
 assert(animated.gsapCalls.length >= 1);
 const revealTriggers = animated.triggers.filter((trigger) => trigger.options.animation);
-assert(revealTriggers.length >= 9);
-assert(animated.timelines.length >= 9);
+assert(revealTriggers.length >= 8);
+assert(animated.timelines.length >= 8);
 assert(animated.timelines.every((timeline) => timeline.steps.length > 0));
 assert(revealTriggers.every((trigger) => trigger.options.animation && trigger.options.scrub === 0.45 && trigger.options.start() === "top bottom" && typeof trigger.options.end === "function"));
 assert(animated.timelines.every((timeline) => timeline.progressValue === 0));
@@ -231,21 +235,22 @@ assert.equal(closingCtaMotion[1].y, 38);
 assert.equal(closingCtaMotion[2].y, 0);
 assert.equal("autoAlpha" in closingCtaMotion[1], false);
 assert.equal("autoAlpha" in closingCtaMotion[2], false);
-assert(animated.gsapCalls.some((call) => call[1]?.y === 44));
+assert(animated.gsapCalls.some((call) => call[1]?.y === 68));
 assert(animated.gsapCalls.some((call) => call[1]?.y === 46));
+assert(animated.gsapCalls.some((call) => call[1]?.y === 38 && call[2]?.y === -50));
 const sectionTimelinesOpaque = animated.timelines.every((timeline) => timeline.steps.every((step) => {
   return !("autoAlpha" in (step[1] || {})) && !("autoAlpha" in (step[2] || {}));
 }));
 assert(sectionTimelinesOpaque);
-assert(animated.triggers.length >= 12);
+assert(animated.triggers.length >= 11);
 animated.triggers.at(-1).options.onToggle({ isActive: true });
-assert(animated.nodes.cards[2].classList.contains("is-current"));
+assert(animated.nodes.storyChapters[2].classList.contains("is-current"));
 animated.setHidden(true); animated.handlers["document:visibilitychange"](); assert.equal(animated.values().slept, 1); animated.setHidden(false); animated.handlers["document:visibilitychange"](); assert.equal(animated.values().woke, 1); assert.equal(animated.values().refreshed, 1);
 animated.media.matches = true;
 animated.media.events.change({ matches: true });
 assert.equal(animated.values().cleared, 1);
 assert(animated.triggers.every((trigger) => trigger.killed));
-assert(!animated.nodes.cards[2].classList.contains("is-current"));
+assert(!animated.nodes.storyChapters[2].classList.contains("is-current"));
 const restored = run({}, { motion: true, scrollY: 400, triggerTop: 600 });
 assert(restored.timelines.every((timeline) => timeline.progressValue > 0.5 && timeline.progressValue < 0.6));
 const desktopAnimated = run({}, { motion: true, mobile: false });

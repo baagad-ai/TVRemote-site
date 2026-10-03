@@ -358,18 +358,14 @@
       { selector: ".search-shot figcaption", y: 22, duration: 0.36 }
     ]);
 
-    const benefitHeading = document.querySelector(".section-heading");
-    revealSequence(benefitHeading, [
-      { selector: ".eyebrow", y: 20, duration: 0.38 },
-      { selector: "h2", y: 42, duration: 0.56 },
-      { selector: ":scope > p:last-child", y: 28, duration: 0.42 }
-    ]);
-    document.querySelectorAll(".benefit-card").forEach((card) => {
-      revealSequence(card, [
-        { selector: ".card-label", y: 18, duration: 0.34 },
-        { selector: "h3", y: 40, duration: 0.48 },
-        { selector: "p:not(.card-label)", y: 30, duration: 0.42 },
-        { selector: ".profile-options, .pin-count, .comfort-words", y: 40, scale: 0.95, duration: 0.54 }
+    const storyChapters = Array.from(document.querySelectorAll(".story-chapter"));
+    storyChapters.forEach((chapter) => {
+      revealSequence(chapter, [
+        { selector: ".story-copy .eyebrow", y: 28, duration: 0.4 },
+        { selector: ".story-copy h2", y: 68, duration: 0.68 },
+        { selector: ".story-copy > p", y: 46, duration: 0.54, stagger: 0.1 },
+        { selector: ".story-main-shot", y: 76, scale: 0.93, duration: 0.84 },
+        { selector: ".story-detail", y: 62, scale: 0.94, duration: 0.72 }
       ]);
     });
 
@@ -413,12 +409,21 @@
       });
     }
 
-    document.querySelectorAll(".benefit-card").forEach((card) => {
+    const storyStages = document.querySelectorAll(".story-stage");
+    storyStages.forEach((stage) => {
+      motionTargets.add(stage);
+      gsap.fromTo(stage, { y: 38 }, {
+        y: -50, ease: "none",
+        scrollTrigger: { trigger: stage.closest(".story-chapter"), start: "top bottom", end: "bottom top", scrub: 0.45, invalidateOnRefresh: true }
+      });
+    });
+
+    storyChapters.forEach((chapter) => {
       ScrollTrigger.create({
-        trigger: card,
-        start: "top 72%",
-        end: "bottom 34%",
-        onToggle: (trigger) => card.classList.toggle("is-current", trigger.isActive)
+        trigger: chapter,
+        start: "top 62%",
+        end: "bottom 38%",
+        onToggle: (trigger) => chapter.classList.toggle("is-current", trigger.isActive)
       });
     });
 
@@ -436,7 +441,7 @@
       revealTimelines.forEach((timeline) => timeline.kill());
       gsap.globalTimeline.clear();
       gsap.set(Array.from(motionTargets), { clearProps: "transform,opacity,visibility" });
-      document.querySelectorAll(".benefit-card.is-current").forEach((card) => card.classList.remove("is-current"));
+      document.querySelectorAll(".story-chapter.is-current").forEach((chapter) => chapter.classList.remove("is-current"));
     });
   }
 })();

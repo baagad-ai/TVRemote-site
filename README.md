@@ -7,21 +7,25 @@ This public repository contains The Remote beta landing page and privacy policy.
 
 The Remote is a free Android phone remote for compatible Android TV and Google TV devices. Compatibility and available controls vary by TV and its Android TV Remote Service version.
 
-Google Play beta access is not open yet. This page does not collect signup details or use analytics. The app does not require an account or route remote commands through a developer-operated cloud relay.
+The Remote already has testers. The public Google Play beta sign-up link is being prepared and will be added here when it is ready. This page does not collect signup details or use analytics. The app does not require an account or route remote commands through a developer-operated cloud relay.
 
 ## Landing-page copy
 
-- Lead with a viewer task or benefit: search YouTube from a phone, identify a TV by room, or reach a pinned control.
+- Lead with a viewer task or benefit: search YouTube from a phone, review a shared link, choose app controls, or identify a TV by room.
 - Give each heading, label, and caption enough context to make the action or benefit clear. Avoid narrating how the page or its artwork was built.
-- Describe screenshots and illustrations accurately. Name what is visible, and say when a TV result or other outcome is not shown.
+- Describe screenshots and illustrations accurately. The showcase captures show local demo screens; name what is visible and never imply that a TV is connected, a command was sent, or playback was confirmed.
 - Limit claims to shipped features and compatible devices. Do not promise support for every TV or add invented results, testimonials, counts, or endorsements.
-- Keep beta copy honest. Leave the Google Play CTA disabled until the official opt-in URL is ready; this page does not collect signup details.
+- Keep beta copy honest: testers already use The Remote, but the public opt-in link is pending. Leave the Google Play CTA disabled until its official URL is ready; this page does not collect signup details.
+
+## Showcase screenshot notes
+
+The native PNGs in `site/assets/showcase/` are unaltered captures from the app's local demo. Sample TV entries are UI fixtures, and displayed app actions are not reports from a connected TV. The screenshots do not demonstrate a command being sent, playback, or a saved edit. Per-image source and capture-state details are in [`site/SHOWCASE-PROVENANCE.md`](site/SHOWCASE-PROVENANCE.md).
 
 ## Static build
 
 The source is in `site/`. The GitHub Pages workflow stages an explicit file allowlist, then runs `node site/build.mjs _site`. The build adds and verifies SHA-256 query versions for local stylesheets, scripts and module imports, fonts, images, and media in the staged output. Public page and privacy URLs remain stable.
 
-The site is static HTML, CSS, and JavaScript; it has no framework or runtime package installation. GSAP and ScrollTrigger 3.15.0 are self-hosted for reduced-motion-aware entrances and scroll-linked benefit emphasis. The Three.js 0.186.1 distribution and its license are in `site/vendor/three/`; the hero retains a complete static poster, and no WebGL scene is started until its scene module is available.
+The site is static HTML, CSS, and JavaScript; it has no framework or runtime package installation. GSAP and ScrollTrigger 3.15.0 are self-hosted for reduced-motion-aware entrances and reversible, scroll-linked story movement. The Three.js 0.186.1 distribution and its license are in `site/vendor/three/`; the hero retains a complete static poster, and no WebGL scene is started until its scene module is available.
 
 Third-party notices:
 
