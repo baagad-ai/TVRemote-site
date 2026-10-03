@@ -324,45 +324,37 @@
     const sequenceStart = () => narrowMotion.matches ? "top 70%" : "top 78%";
     const revealSequence = (trigger, steps) => {
       if (!trigger) return;
-      let timeline = null;
-      const createTimeline = () => {
-        const sequence = gsap.timeline({ paused: true });
-        let cursor = 0;
-        steps.forEach((step) => {
-          const targets = Array.from(trigger.querySelectorAll(step.selector));
-          if (!targets.length) return;
-          targets.forEach((target) => motionTargets.add(target));
-          const duration = step.duration || 0.58;
-          const stagger = step.stagger ?? 0.07;
-          const position = cursor === 0 ? 0 : Math.max(0, cursor - 0.09);
-          const keepVisible = targets.every((target) => target.matches("a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])"));
-          sequence.fromTo(targets, {
-            y: step.y ?? 22,
-            autoAlpha: keepVisible ? 1 : 0,
-            scale: step.scale ?? 1,
-            rotation: step.rotation ?? 0
-          }, {
-            y: 0,
-            autoAlpha: 1,
-            scale: 1,
-            rotation: 0,
-            duration,
-            ease: step.ease || "power3.out",
-            stagger
-          }, position);
-          cursor = position + duration + Math.max(0, targets.length - 1) * stagger;
-        });
-        revealTimelines.add(sequence);
-        return sequence;
-      };
+      const timeline = gsap.timeline({ paused: true });
+      let cursor = 0;
+      steps.forEach((step) => {
+        const targets = Array.from(trigger.querySelectorAll(step.selector));
+        if (!targets.length) return;
+        targets.forEach((target) => motionTargets.add(target));
+        const duration = step.duration || 0.58;
+        const stagger = step.stagger ?? 0.07;
+        const position = cursor === 0 ? 0 : Math.max(0, cursor - 0.09);
+        const travel = Math.min(step.y ?? 8, 10);
+        timeline.fromTo(targets, {
+          y: travel,
+          scale: step.scale ?? 1,
+          rotation: step.rotation ?? 0,
+          immediateRender: false
+        }, {
+          y: 0,
+          scale: 1,
+          rotation: 0,
+          duration,
+          ease: step.ease || "power3.out",
+          stagger
+        }, position);
+        cursor = position + duration + Math.max(0, targets.length - 1) * stagger;
+      });
+      revealTimelines.add(timeline);
       ScrollTrigger.create({
         trigger,
         start: sequenceStart,
-        onEnter: () => {
-          if (!timeline) timeline = createTimeline();
-          timeline.play(0);
-        },
-        onLeaveBack: () => timeline?.reverse()
+        onEnter: () => timeline.play(0),
+        onLeaveBack: () => timeline.reverse()
       });
     };
 

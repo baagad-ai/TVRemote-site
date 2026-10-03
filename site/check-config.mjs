@@ -232,7 +232,13 @@ assert(animated.timelines.every((timeline) => timeline.played && timeline.steps.
 revealTriggers.forEach((trigger) => trigger.options.onLeaveBack());
 assert(animated.timelines.every((timeline) => timeline.reversed));
 const closingReveal = animated.triggers.find((trigger) => trigger.options.trigger === animated.nodes.closing && trigger.options.onEnter);
-assert.equal(animated.timelines[animated.triggers.filter((trigger) => trigger.options.onEnter).indexOf(closingReveal)].steps.at(-1)[1].autoAlpha, 1);
+const closingTimeline = animated.timelines[animated.triggers.filter((trigger) => trigger.options.onEnter).indexOf(closingReveal)];
+const closingCtaMotion = closingTimeline.steps.at(-1);
+assert.equal(closingCtaMotion[1].immediateRender, false);
+assert.equal(closingCtaMotion[1].y, 10);
+assert.equal(closingCtaMotion[2].y, 0);
+assert.equal("autoAlpha" in closingCtaMotion[1], false);
+assert.equal("autoAlpha" in closingCtaMotion[2], false);
 assert(animated.triggers.length >= 13);
 animated.triggers.at(-1).options.onToggle({ isActive: true });
 assert(animated.nodes.cards[2].classList.contains("is-current"));
