@@ -10,6 +10,7 @@ class Element {
     this.textContent = text; this.className = ""; this.hidden = false; this.children = [];
     this.tagName = "DIV";
     this.attributes = {}; this.events = {}; this.classes = new Set(); this.styles = {};
+    this.open = false;
     this.display = "block";
     this.rect = { height: 72, top: 1000, bottom: 1072, left: 20, right: 340 };
     this.classList = {
@@ -24,8 +25,8 @@ class Element {
     };
     this.style = { setProperty: (key, value) => { this.styles[key] = value; }, removeProperty: (key) => { delete this.styles[key]; } };
   }
-  setAttribute(key, value) { this.attributes[key] = value; }
-  removeAttribute(key) { delete this.attributes[key]; }
+  setAttribute(key, value) { this.attributes[key] = value; if (key === "open") this.open = true; }
+  removeAttribute(key) { delete this.attributes[key]; if (key === "open") this.open = false; }
   toggleAttribute(key, force) { if (force) this.attributes[key] = ""; else delete this.attributes[key]; }
   matches(selector) {
     if (selector === ":disabled") return this.disabled === true;
@@ -55,13 +56,18 @@ class Element {
   }
 }
 function run(config, { reduce = false, motion = false, mobile = true, scrollY = 0, triggerTop = 1000 } = {}) {
-  const ctas = Array.from({ length: 4 }, () => new Element("Google Play link coming soon"));
+  const ctas = Array.from({ length: 4 }, () => new Element("Closed beta enrollment soon"));
   ctas.forEach((cta) => { cta.disabled = true; });
   const nodes = {
     betaStatus: new Element("The Remote already has testers."),
     betaStatusLabel: new Element("The Remote already has testers."),
-    betaAnswer: new Element("The Remote already has testers."),
-    note: new Element("The official beta sign-up link is on its way."), mobileBar: new Element(),
+    betaAnswer: new Element("The closed-test release is not available yet."),
+    closingTitle: new Element("Closed beta enrollment is being prepared."),
+    closingCopy: new Element("The Remote already has testers. When the Play closed-test release is available, join the tester Group first, then return here to opt in."),
+    betaEnrollment: new Element(), betaSummary: new Element("How do I join the closed beta?"),
+    groupJoin: new Element("Join the tester Group"),
+    playOptIn: new Element("Open Google Play opt-in"),
+    note: new Element("Public closed beta enrollment is being prepared."), mobileBar: new Element(),
     headerCta: ctas[0], heroCta: ctas[1], closingCta: ctas[2], mobileCta: ctas[3],
     storyChapters: [new Element(), new Element(), new Element()],
     storyStages: [new Element(), new Element(), new Element()],
@@ -70,6 +76,11 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
     heroTargets: Array.from({ length: 5 }, () => new Element()),
     heroActions: [new Element(), new Element()], phone: new Element(), searchShot: new Element()
   };
+  nodes.groupJoin.disabled = true;
+  nodes.playOptIn.disabled = true;
+  nodes.betaEnrollment.open = true;
+  nodes.betaEnrollment.querySelector = (selector) => selector === "summary" ? nodes.betaSummary : null;
+  nodes.betaSummary.tagName = "SUMMARY";
   nodes.storyStages.forEach((stage, index) => { stage.storyChapter = nodes.storyChapters[index]; });
   [nodes.search, nodes.heading, ...nodes.storyChapters, nodes.compatibility, nodes.questionsHeading, nodes.faq, nodes.closing].forEach((node) => {
     node.rect = { ...node.rect, top: triggerTop, bottom: triggerTop + node.rect.height };
@@ -81,7 +92,9 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
   nodes.betaStatus.querySelector = (selector) => selector === "[data-beta-status-label]" ? nodes.betaStatusLabel : null;
   const media = { matches: reduce, events: {}, addEventListener(key, fn) { this.events[key] = fn; } };
   const selectorMap = {
-    "[data-beta-answer]": nodes.betaAnswer, "[data-mobile-cta-bar]": nodes.mobileBar,
+    "[data-beta-answer]": nodes.betaAnswer, "[data-beta-group-join]": nodes.groupJoin,
+    "[data-beta-closing-title]": nodes.closingTitle, "[data-beta-closing-copy]": nodes.closingCopy,
+    "[data-beta-play-opt-in]": nodes.playOptIn, "[data-mobile-cta-bar]": nodes.mobileBar,
     ".hero-cta": nodes.heroCta.replacement || nodes.heroCta,
     ".search-proof": nodes.search,
     ".compatibility-section": nodes.compatibility,
@@ -130,7 +143,7 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
     document: {
       body: (nodes.body = { style: { setProperty(key, value) { this[key] = value; }, removeProperty(key) { delete this[key]; } } }),
       hidden: false,
-      getElementById: () => nodes.betaStatus,
+      getElementById: (id) => id === "beta-enrollment" ? nodes.betaEnrollment : nodes.betaStatus,
       querySelector: (selector) => selectorMap[selector] || null,
       querySelectorAll: (selector) => {
         if (selector === "[data-beta-cta]") return ctas.map((button) => button.replacement || button);
@@ -150,7 +163,7 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
     ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe() {} },
     IntersectionObserver: MockIntersectionObserver
   };
-  const tracked = [...ctas, ...nodes.heroActions];
+  const tracked = [...ctas, ...nodes.heroActions, nodes.betaSummary];
   tracked.forEach((element) => {
     element.focus = function () { this.focused = true; context.document.activeElement = this; };
     element.blur = function () { this.focused = false; if (context.document.activeElement === this) context.document.activeElement = null; };
@@ -168,15 +181,28 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
     observers.find((observer) => observer.targets.includes(cta))?.callback([{ target: cta, isIntersecting: visible, intersectionRatio: visible ? 1 : 0 }]);
     flushFrames();
   };
+  const setGuideVisible = (visible, open = true) => {
+    if (open) nodes.betaEnrollment.setAttribute("open", "");
+    else nodes.betaEnrollment.removeAttribute("open");
+    nodes.betaEnrollment.rect = { height: 500, top: visible ? 100 : 1000, bottom: visible ? 600 : 1500, left: 20, right: 370 };
+    nodes.betaEnrollment.events.toggle?.();
+    flushFrames();
+  };
   return { ctas, nodes, document: context.document, media: motionMedia, mobileMedia, handlers, triggers, timelines, gsapCalls, observers,
-    setCtaVisible,
+    setCtaVisible, setGuideVisible,
     resize: () => resizeCallback?.(), setHidden: (value) => { context.document.hidden = value; }, values: () => ({ slept, woke, refreshed, cleared }) };
 }
 
 const absent = run({});
 assert(absent.ctas.every((button) => !button.replacement));
-assert.match(absent.nodes.betaAnswer.textContent, /already has testers/);
+assert.equal(absent.nodes.groupJoin.replacement, undefined);
+assert.equal(absent.nodes.playOptIn.replacement, undefined);
+assert.match(absent.nodes.betaAnswer.textContent, /release is not available yet/);
 assert.match(absent.nodes.betaStatus.textContent, /already has testers/);
+assert.match(absent.nodes.closingTitle.textContent, /enrollment is being prepared/);
+assert.match(absent.nodes.closingCopy.textContent, /When the Play closed-test release is available/);
+assert.equal(absent.nodes.groupJoin.disabled, true);
+assert.equal(absent.nodes.playOptIn.disabled, true);
 assert.equal(absent.nodes.body.style["--mobile-cta-reserve"], "88px");
 assert.equal(absent.nodes.mobileBar.attributes["aria-hidden"], "true");
 assert.equal(absent.nodes.mobileBar.attributes.inert, "");
@@ -196,21 +222,61 @@ absent.nodes.mobileBar.getBoundingClientRect = () => ({ height: 111 });
 absent.resize();
 assert.equal(absent.nodes.body.style["--mobile-cta-reserve"], "127px");
 
+const groupOnly = run({ betaGroupJoinUrl: "https://groups.google.com/g/the-remote-beta-testers" });
+assert(groupOnly.ctas.every((button) => !button.replacement));
+assert.equal(groupOnly.nodes.groupJoin.replacement, undefined);
+const playOnly = run({ betaOptInUrl: "https://play.google.com/apps/testing/com.theremote.app" });
+assert(playOnly.ctas.every((button) => !button.replacement));
+assert.equal(playOnly.nodes.playOptIn.replacement, undefined);
+const invalidGroup = run({ betaGroupJoinUrl: "https://evil.example/g/the-remote-beta-testers", betaOptInUrl: "https://play.google.com/apps/testing/com.theremote.app" });
+assert(invalidGroup.ctas.every((button) => !button.replacement));
+const wrongGroup = run({ betaGroupJoinUrl: "https://groups.google.com/g/another-testers-group", betaOptInUrl: "https://play.google.com/apps/testing/com.theremote.app" });
+assert(wrongGroup.ctas.every((button) => !button.replacement));
+const invalidPlay = run({ betaGroupJoinUrl: "https://groups.google.com/g/the-remote-beta-testers", betaOptInUrl: "https://play.google.com/apps/internaltest/123" });
+assert(invalidPlay.ctas.every((button) => !button.replacement));
+
 const supplied = run({
-  betaOptInUrl: "https://play.google.com/apps/testing/example",
-  betaCtaLabel: "Join the beta",
-  betaStatus: "Google Play beta access is open."
+  betaGroupJoinUrl: "https://groups.google.com/g/the-remote-beta-testers",
+  betaOptInUrl: "https://play.google.com/apps/testing/com.theremote.app",
+  betaCtaLabel: "Start beta enrollment",
+  betaStatus: "Join the tester Group with the same account you use on Google Play. Keep this page open; membership and Play access can take time to update."
 });
-assert(supplied.ctas.every((button) => button.replacement?.href === "https://play.google.com/apps/testing/example"));
+assert(supplied.ctas.every((button) => button.replacement?.href === "#beta-enrollment"));
 assert(supplied.ctas.every((button) => button.replacement?.attributes["data-beta-cta"] === ""));
-assert(supplied.ctas.every((button) => button.replacement?.children[0]?.textContent === "Join the beta"));
+assert(supplied.ctas.every((button) => button.replacement?.attributes["aria-controls"] === "beta-enrollment"));
+assert(supplied.ctas.every((button) => button.replacement?.children[0]?.textContent === "Start beta enrollment"));
 assert(supplied.ctas.every((button) => button.replacement?.children[1]?.attributes["aria-hidden"] === "true"));
-assert.match(supplied.nodes.betaAnswer.textContent, /Eligibility/);
-assert.match(supplied.nodes.betaStatusLabel.textContent, /is open/);
-assert.match(supplied.nodes.note.textContent, /official Google Play beta opt-in/);
+assert.equal(supplied.nodes.closingTitle.textContent, "Join the closed beta.");
+assert.equal(supplied.nodes.closingCopy.textContent, "Join the tester Group first, then return here to opt in on Google Play with the same account.");
+assert.equal(supplied.nodes.groupJoin.replacement?.href, "https://groups.google.com/g/the-remote-beta-testers");
+assert.equal(supplied.nodes.groupJoin.replacement?.target, "_blank");
+assert.equal(supplied.nodes.groupJoin.replacement?.rel, "noopener noreferrer");
+assert.match(supplied.nodes.groupJoin.replacement?.attributes["aria-label"], /opens in a new tab/);
+assert.match(supplied.nodes.groupJoin.replacement?.children[1]?.textContent, /Opens in a new tab/);
+assert.equal(supplied.nodes.groupJoin.replacement?.children[1]?.attributes["aria-hidden"], "true");
+assert.equal(supplied.nodes.playOptIn.replacement?.href, "https://play.google.com/apps/testing/com.theremote.app");
+assert.equal(supplied.nodes.playOptIn.replacement?.target, "_blank");
+assert.equal(supplied.nodes.playOptIn.replacement?.rel, "noopener noreferrer");
+assert.match(supplied.nodes.playOptIn.replacement?.attributes["aria-label"], /opens in a new tab/);
+assert.match(supplied.nodes.playOptIn.replacement?.children[1]?.textContent, /Opens in a new tab/);
+assert.match(supplied.nodes.betaAnswer.textContent, /Group membership alone does not enroll/);
+assert.match(supplied.nodes.betaStatusLabel.textContent, /same account/);
+assert.match(supplied.nodes.note.textContent, /keep this page open for Play opt-in/);
+supplied.ctas[1].replacement.events.click();
+assert.equal(supplied.nodes.betaEnrollment.attributes.open, "");
 supplied.setCtaVisible(supplied.ctas[1].replacement, false);
 const suppliedSticky = supplied.ctas[3].replacement;
 const suppliedClosing = supplied.ctas[2].replacement;
+supplied.document.activeElement = suppliedSticky;
+supplied.setGuideVisible(true);
+assert(!supplied.nodes.mobileBar.classList.contains("is-visible"));
+assert.equal(supplied.nodes.mobileBar.attributes["aria-hidden"], "true");
+assert.equal(supplied.nodes.mobileBar.attributes.inert, "");
+assert.equal(supplied.document.activeElement, supplied.nodes.betaSummary);
+supplied.setGuideVisible(false);
+assert(supplied.nodes.mobileBar.classList.contains("is-visible"));
+assert.equal(supplied.nodes.mobileBar.attributes["aria-hidden"], "false");
+assert.equal(supplied.nodes.mobileBar.attributes.inert, undefined);
 supplied.document.activeElement = suppliedSticky;
 supplied.setCtaVisible(suppliedClosing, true);
 assert.equal(supplied.document.activeElement, suppliedClosing);
@@ -258,3 +324,4 @@ const desktopClosing = desktopAnimated.triggers.find((trigger) => trigger.option
 assert.equal(desktopClosing.options.end(), "top 66%");
 assert(desktopAnimated.triggers.filter((trigger) => trigger.options.animation && trigger.options.trigger !== desktopAnimated.nodes.closing).every((trigger) => trigger.options.end() === "top 52%"));
 console.log("PASS: beta states, CTA reserve resizing, GSAP scroll emphasis, and reduced-motion shutdown.");
+

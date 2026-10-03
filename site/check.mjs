@@ -9,6 +9,13 @@ const html = read("index.html");
 const css = read("styles.css");
 const js = read("site.js");
 const config = read("config.js");
+const privacy = read("privacy/index.html");
+const betaGroupJoinUrl = config.match(/betaGroupJoinUrl:\s*"([^"]*)"/)?.[1] ?? "";
+const betaOptInUrl = config.match(/betaOptInUrl:\s*"([^"]*)"/)?.[1] ?? "";
+const validGroupJoinUrl = /^https:\/\/groups\.google\.com\/g\/the-remote-beta-testers\/?$/.test(betaGroupJoinUrl);
+const validClosedPlayOptInUrl = /^https:\/\/play\.google\.com\/apps\/testing\/com\.theremote\.app$/.test(betaOptInUrl);
+const linksUnset = betaGroupJoinUrl === "" && betaOptInUrl === "";
+const linksReady = validGroupJoinUrl && validClosedPlayOptInUrl;
 const build = read("build.mjs");
 const sceneChunkPath = path.join(root, "vendor/signal-dock/scene-enhancement.js");
 const sceneChunkBytes = existsSync(sceneChunkPath) ? readFileSync(sceneChunkPath) : Buffer.alloc(0);
@@ -23,17 +30,27 @@ requireText("Semantic main landmark and skip link", /<main\b[^>]*id="main"/.test
 requireText("Both top links target the document start", /<body\b(?=[^>]*\bid="top")/i.test(html) && (html.match(/href="#top"/g) || []).length >= 2);
 requireText("Primary promise and genuine YouTube proof", /<h1[^>]*>Skip the<br\s*\/?\s*>\s*<span>TV keyboard\./.test(html) && /assets\/remote-demo-ltr\.png/.test(html) && /lofi beat/.test(html));
 requireText("Real screenshot has an accurate accessible description", /alt="The Remote YouTube search field contains/.test(html) && /No TV search result is shown/.test(html));
-requireText("Disabled beta CTAs identify the pending official sign-up link", (html.match(/data-beta-cta disabled/g) || []).length >= 4 && (html.match(/data-beta-label>Google Play link coming soon<\/span>/g) || []).length >= 4 && /betaOptInUrl:\s*""/.test(config));
+const betaButtons = [...html.matchAll(/<button\b[^>]*data-beta-cta[^>]*>/g)].map(([button]) => button);
+const enrollmentButtons = [...html.matchAll(/<button\b[^>]*data-beta-(?:group-join|play-opt-in)[^>]*>/g)].map(([button]) => button);
+requireText("Enrollment URLs are both unset or a closed-test Group and Play link pair", linksUnset || linksReady);
+requireText("Enrollment controls remain disabled while both links are unset", linksReady || linksUnset && betaButtons.length >= 4 && enrollmentButtons.length === 2 && [...betaButtons, ...enrollmentButtons].every((button) => /\bdisabled\b/.test(button)));
+requireText("Internal-test URLs cannot activate public closed-beta enrollment", !/apps\/internaltest/.test(config + js));
 requireText("Mobile sticky CTA starts hidden and inert", /data-mobile-cta-bar[^>]*aria-hidden="true"[^>]*inert/.test(html) && /classList\.toggle\("is-visible", visible\)/.test(js) && /toggleAttribute\("inert", !visible\)/.test(js));
 requireText("Mobile sticky CTA avoids every visible inline signup CTA", /querySelectorAll\("\[data-beta-cta\]"\)/.test(js) && /filter\(\(cta\) => mobileCtaBar && !mobileCtaBar\.contains\(cta\)\)/.test(js) && /inlineCtas\.forEach\(\(cta\) => ctaVisibilityObserver\.observe\(cta\)\)/.test(js) && /inlineCtas\.find\(ctaIntersectsViewport\)/.test(js) && /rect\.bottom > 0 && rect\.top < window\.innerHeight/.test(js));
-requireText("Beta testers and pending public link are described accurately", /id="beta-status"[^>]*role="status"/.test(html) && /The Remote already has testers/.test(html) && /official Google Play beta sign-up link will be added/.test(html) && /No signup details are collected/.test(html) && !/betaOptInUrl:\s*["']https?:/i.test(config));
+requireText("Primary CTAs open the two-step enrollment guide", /validGroupUrl && validPlayUrl/.test(js) && /link\.href = "#beta-enrollment"/.test(js) && /id="beta-enrollment"/.test(html) && /aria-controls", "beta-enrollment"/.test(js));
+requireText("Group self-join leads to a same-account Play opt-in and install", /Step 1: join[\s\S]*Google Account you use on Google Play/.test(html) && /Anyone on the web can join; no owner approval is needed/.test(html) && /Keep this page open/.test(html) && /Step 2:[\s\S]*same account[\s\S]*Tap <strong>Join<\/strong> to opt in, then install/.test(html) && js.includes('["[data-beta-group-join]", groupUrl]') && js.includes('["[data-beta-play-opt-in]", playUrl]'));
+requireText("Both external beta links show a visible new-tab cue", /external-link-cue/.test(js) && /Opens in a new tab/.test(js));
+requireText("Beta status explains that enrollment is not open yet", /id="beta-status"[^>]*role="status"/.test(html) && /The Remote already has testers/.test(html) && /closed beta enrollment will open when the Play release is available/.test(html));
+requireText("The landing page explains email handling without capturing it", /Google processes your Group and Play activity/.test(html) && /Group owners and managers may see your email/.test(html) && /This site does not collect it/.test(html) && !/<input\b[^>]*type=["']email/i.test(html) && !/(?:fetch\s*\(|XMLHttpRequest)/.test(js));
+requireText("Detailed Group visibility, access, posting, and history settings are in the privacy policy", !/only owners can view the member list|cannot post by web or email|conversation history is off/i.test(html) && /anyone on the web who chooses to join/i.test(privacy) && /Only Group owners can view its member list and conversations/i.test(privacy) && /owners and managers can see members' email addresses/i.test(privacy) && /Members cannot post by web or email/i.test(privacy) && /Group conversation history is off/i.test(privacy));
+requireText("Privacy policy explains Group and Play handling", /Google Groups and Google Play/.test(privacy) && /owners and managers can see members' email addresses/.test(privacy) && /Joining the Group is step one/.test(privacy) && /does not collect or store your email address/.test(privacy));
 requireText("Walkthrough section, anchor, and player references are removed", !/(?:film-section|film-placeholder|filmArtwork|id="film"|href="#film"|data-beta-video|data-video-|videoSrc|videoPoster|videoCaptions|<video\b)/i.test(html + css + js + config));
 requireText("Three screenshot-led chapters match the approved viewer stories", (html.match(/<article class="story-chapter\b/g) || []).length === 3 && /Found it on your phone\?<br><span>Open it on your TV\./.test(html) && /Useful controls for<br><span>the app you[’']re using\./.test(html) && /Your TVs\.<br><span>Your shortcuts\./.test(html) && /id="inside"/.test(html));
 requireText("Each story uses native screenshots with their visible demo labels intact", /assets\/showcase\/youtube-share-review\.png/.test(html) && /assets\/showcase\/spotify-controls-manual-demo\.png/.test(html) && /assets\/showcase\/saved-tv-room-list-demo\.png/.test(html) && /local-demo header says no TV is connected/.test(html) && /actions marked Local demo/.test(html) && /local demo mode/.test(html));
 requireText("YouTube and Spotify profiles are described as manually selected", /youtube-manual-controls\.png/.test(html) && /YouTube · chosen by you/.test(html) && /Spotify · chosen by you/.test(html) && /Previous and Next actions marked Local demo/.test(html));
 requireText("Landing copy keeps the phone search proof and TV limitations clear", /A FREE PHONE REMOTE FOR ANDROID TV/.test(html) && /Use your phone keyboard to enter a YouTube search/.test(html) && /compatible Android TV and Google TV devices/.test(html) && !/pin up to three actions/i.test(html));
 requireText("Compatibility limits and privacy route are clear", /compatible Android TV and Google TV devices/.test(html) && /Android TV Remote Service v2 is required/.test(html) && /href="privacy\/"/.test(html));
-requireText("Native FAQ is available", (html.match(/<details>/g) || []).length >= 4 && /<summary>Which TVs/.test(html));
+requireText("Native FAQ is available", (html.match(/<details\b/g) || []).length >= 4 && /<summary>Which TVs/.test(html));
 requireText("Expanded FAQ uses a horizontal minus", /faq-list details\[open\] summary:after\{content:"-"\}/.test(css) && !/faq-list details\[open\] summary::after\s*\{\s*transform:\s*rotate\(45deg\)/.test(css));
 requireText("Responsive CSS includes required layout and safe-area support", /@media\s*\(max-width:\s*740px\)/.test(css) && /@media\s*\(max-width:\s*420px\)/.test(css) && /env\(safe-area-inset-bottom\)/.test(css) && /data-mobile-cta-bar/.test(html));
 requireText("Story screenshots retain their full native proportions on mobile and desktop", /\.story-phone-frame img\{display:block;width:100%;height:auto/.test(css) && /\.story-controls-stage/.test(css) && /@media\(max-width:740px\)[\s\S]*?\.story-controls-stage,.story-rooms-stage\{display:flex;flex-direction:column/.test(css));
@@ -69,3 +86,4 @@ if (failures.length) {
 } else {
   console.log("PASS: page structure, real app proof, contextual copy, honest beta status, responsive hooks, motion preferences, local libraries and licenses.");
 }
+

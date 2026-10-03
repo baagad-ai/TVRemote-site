@@ -3,38 +3,69 @@
 
   const config = window.remoteSiteConfig || {};
   const betaStatus = document.getElementById("beta-status");
-  const configuredUrl = typeof config.betaOptInUrl === "string" ? config.betaOptInUrl.trim() : "";
+  const betaEnrollment = document.getElementById("beta-enrollment");
+  const groupUrl = typeof config.betaGroupJoinUrl === "string" ? config.betaGroupJoinUrl.trim() : "";
+  const playUrl = typeof config.betaOptInUrl === "string" ? config.betaOptInUrl.trim() : "";
+  const validGroupUrl = /^https:\/\/groups\.google\.com\/g\/the-remote-beta-testers\/?$/.test(groupUrl);
+  const validPlayUrl = /^https:\/\/play\.google\.com\/apps\/testing\/com\.theremote\.app$/.test(playUrl);
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  if (configuredUrl) {
+  if (validGroupUrl && validPlayUrl) {
     document.querySelectorAll("[data-beta-cta]").forEach((button) => {
       const link = document.createElement("a");
       link.className = button.className;
-      link.href = configuredUrl;
       link.setAttribute("data-beta-cta", "");
       link.setAttribute("aria-describedby", "beta-status");
+      link.setAttribute("aria-controls", "beta-enrollment");
+      link.href = "#beta-enrollment";
 
       const label = document.createElement("span");
-      label.textContent = config.betaCtaLabel || "Join the beta";
+      label.textContent = config.betaCtaLabel || "Start beta enrollment";
       const arrow = document.createElement("span");
       arrow.className = "cta-arrow";
       arrow.setAttribute("aria-hidden", "true");
-      arrow.textContent = String.fromCharCode(8594);
+      arrow.textContent = String.fromCharCode(8595);
       link.append(label, arrow);
+      link.addEventListener("click", () => betaEnrollment?.setAttribute("open", ""));
       button.replaceWith(link);
     });
 
+    for (const [selector, href] of [["[data-beta-group-join]", groupUrl], ["[data-beta-play-opt-in]", playUrl]]) {
+      const button = document.querySelector(selector);
+      if (!button) continue;
+      const link = document.createElement("a");
+      link.className = button.className;
+      link.href = href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      const label = document.createElement("span");
+      label.textContent = button.textContent.trim();
+      const newTabCue = document.createElement("span");
+      newTabCue.className = "external-link-cue";
+      newTabCue.setAttribute("aria-hidden", "true");
+      newTabCue.textContent = "Opens in a new tab ↗";
+      link.append(label, newTabCue);
+      link.setAttribute("aria-label", `${label.textContent} (opens in a new tab)`);
+      button.replaceWith(link);
+    }
+
     if (betaStatus) {
       const statusLabel = betaStatus.querySelector?.("[data-beta-status-label]");
-      if (statusLabel) statusLabel.textContent = config.betaStatus || "The official Google Play beta opt-in is open.";
-      else betaStatus.textContent = config.betaStatus || "The official Google Play beta opt-in is open.";
+      const message = config.betaStatus || "Join the tester Group with the same account you use on Google Play. Keep this page open; membership and Play access can take time to update.";
+      if (statusLabel) statusLabel.textContent = message;
+      else betaStatus.textContent = message;
       betaStatus.classList.add("is-open");
     }
 
+    const closingTitle = document.querySelector("[data-beta-closing-title]");
+    if (closingTitle) closingTitle.textContent = "Join the closed beta.";
+    const closingCopy = document.querySelector("[data-beta-closing-copy]");
+    if (closingCopy) closingCopy.textContent = "Join the tester Group first, then return here to opt in on Google Play with the same account.";
+
     const betaAnswer = document.querySelector("[data-beta-answer]");
-    if (betaAnswer) betaAnswer.textContent = "Use the beta button to open the official Google Play opt-in. Eligibility and access details are shown there; this page does not collect signup details.";
+    if (betaAnswer) betaAnswer.textContent = "Join the tester Group with the same Google Account you use on Play, then return here to opt in; Group membership alone does not enroll you.";
     document.querySelectorAll(".mobile-cta-note").forEach((note) => {
-      note.textContent = "Opens the official Google Play beta opt-in.";
+      note.textContent = "Group opens in a new tab; keep this page open for Play opt-in.";
     });
   }
 
@@ -71,7 +102,8 @@
     };
     const syncCtaVisibility = () => {
       const visibleCta = inlineCtas.find(ctaIntersectsViewport);
-      setMobileCtaVisible(Boolean(visibleCta), visibleCta);
+      const guideInView = betaEnrollment?.open && ctaIntersectsViewport(betaEnrollment);
+      setMobileCtaVisible(Boolean(visibleCta) || Boolean(guideInView), visibleCta || (guideInView ? betaEnrollment.querySelector("summary") : null));
     };
     let ctaSyncFrame = 0;
     const scheduleCtaSync = () => {
@@ -82,6 +114,7 @@
       });
     };
 
+    betaEnrollment?.addEventListener("toggle", scheduleCtaSync);
     updateCtaReserve();
     syncCtaVisibility();
     if ("IntersectionObserver" in window) {
@@ -445,3 +478,4 @@
     });
   }
 })();
+
