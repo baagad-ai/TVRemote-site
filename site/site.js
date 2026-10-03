@@ -321,7 +321,11 @@
       clearProps: "transform,opacity,visibility"
     });
 
-    const sequenceStart = () => narrowMotion.matches ? "top 70%" : "top 78%";
+    const sequenceStart = () => "top bottom";
+    const sequenceEnd = (trigger) => trigger === document.querySelector(".closing-section")
+      ? narrowMotion.matches ? "top 43%" : "top 66%"
+      : narrowMotion.matches ? "top 43%" : "top 52%";
+    const clampProgress = (value) => Math.max(0, Math.min(1, value));
     const revealSequence = (trigger, steps) => {
       if (!trigger) return;
       const timeline = gsap.timeline({ paused: true });
@@ -333,83 +337,93 @@
         const duration = step.duration || 0.58;
         const stagger = step.stagger ?? 0.07;
         const position = cursor === 0 ? 0 : Math.max(0, cursor - 0.09);
-        const travel = Math.min(step.y ?? 8, 10);
-        timeline.fromTo(targets, {
-          y: travel,
-          scale: step.scale ?? 1,
-          rotation: step.rotation ?? 0,
-          immediateRender: false
-        }, {
-          y: 0,
-          scale: 1,
-          rotation: 0,
-          duration,
-          ease: step.ease || "power3.out",
-          stagger
-        }, position);
+        targets.forEach((target, index) => {
+          const rect = target.getBoundingClientRect();
+          const isVisible = rect.bottom > 0 && rect.top < window.innerHeight;
+          const pose = {
+            y: isVisible ? 0 : step.y ?? 24,
+            scale: isVisible ? 1 : step.scale ?? 1,
+            rotation: isVisible ? 0 : step.rotation ?? 0
+          };
+          gsap.set(target, pose);
+          timeline.fromTo(target, { ...pose, immediateRender: false }, {
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            duration,
+            ease: step.ease || "power3.out"
+          }, position + index * stagger);
+        });
         cursor = position + duration + Math.max(0, targets.length - 1) * stagger;
       });
+      const rect = trigger.getBoundingClientRect();
+      const triggerTop = rect.top + window.scrollY;
+      const startScroll = triggerTop - window.innerHeight;
+      const endScroll = triggerTop - window.innerHeight * (narrowMotion.matches ? 0.43 : 0.52);
+      const initialProgress = clampProgress((window.scrollY - startScroll) / Math.max(1, endScroll - startScroll));
+      timeline.progress(initialProgress, true);
       revealTimelines.add(timeline);
       ScrollTrigger.create({
         trigger,
+        animation: timeline,
         start: sequenceStart,
-        onEnter: () => timeline.play(0),
-        onLeaveBack: () => timeline.reverse()
+        end: () => sequenceEnd(trigger),
+        scrub: 0.45,
+        invalidateOnRefresh: true
       });
     };
 
     revealSequence(document.querySelector(".search-proof"), [
-      { selector: ".search-copy .eyebrow", y: 16, duration: 0.42 },
-      { selector: ".search-copy h2", y: 28, duration: 0.64 },
-      { selector: ".search-copy > p:not(.eyebrow)", y: 20, duration: 0.5, stagger: 0.09 },
-      { selector: ".search-shot", y: 34, scale: 0.97, duration: 0.76 },
-      { selector: ".search-shot figcaption", y: 12, duration: 0.38 }
+      { selector: ".search-copy .eyebrow", y: 20, duration: 0.38 },
+      { selector: ".search-copy h2", y: 44, duration: 0.56 },
+      { selector: ".search-copy > p:not(.eyebrow)", y: 30, duration: 0.42, stagger: 0.08 },
+      { selector: ".search-shot", y: 46, scale: 0.94, duration: 0.66 },
+      { selector: ".search-shot figcaption", y: 22, duration: 0.36 }
     ]);
 
     const benefitHeading = document.querySelector(".section-heading");
     revealSequence(benefitHeading, [
-      { selector: ".eyebrow", y: 16, duration: 0.42 },
-      { selector: "h2", y: 28, duration: 0.64 },
-      { selector: ":scope > p:last-child", y: 18, duration: 0.48 }
+      { selector: ".eyebrow", y: 20, duration: 0.38 },
+      { selector: "h2", y: 42, duration: 0.56 },
+      { selector: ":scope > p:last-child", y: 28, duration: 0.42 }
     ]);
     document.querySelectorAll(".benefit-card").forEach((card) => {
       revealSequence(card, [
-        { selector: ".card-label", y: 14, duration: 0.38 },
-        { selector: "h3", y: 23, duration: 0.56 },
-        { selector: "p:not(.card-label)", y: 18, duration: 0.48 },
-        { selector: ".profile-options, .pin-count, .comfort-words", y: 20, scale: 0.97, duration: 0.58 }
+        { selector: ".card-label", y: 18, duration: 0.34 },
+        { selector: "h3", y: 40, duration: 0.48 },
+        { selector: "p:not(.card-label)", y: 30, duration: 0.42 },
+        { selector: ".profile-options, .pin-count, .comfort-words", y: 40, scale: 0.95, duration: 0.54 }
       ]);
     });
 
     revealSequence(document.querySelector(".compatibility-section"), [
-      { selector: ".compatibility-heading .eyebrow", y: 16, duration: 0.42 },
-      { selector: ".compatibility-heading h2", y: 26, duration: 0.6 },
-      { selector: ".compatibility-copy p", y: 19, duration: 0.5, stagger: 0.1 },
-      { selector: ".compatibility-copy .text-link", y: 16, duration: 0.46 }
+      { selector: ".compatibility-heading .eyebrow", y: 20, duration: 0.38 },
+      { selector: ".compatibility-heading h2", y: 42, duration: 0.54 },
+      { selector: ".compatibility-copy p", y: 30, duration: 0.42, stagger: 0.08 },
+      { selector: ".compatibility-copy .text-link", y: 26, duration: 0.4 }
     ]);
 
     revealSequence(document.querySelector(".film-section"), [
-      { selector: ".film-copy .eyebrow", y: 16, duration: 0.42 },
-      { selector: ".film-copy h2", y: 26, duration: 0.6 },
-      { selector: ".film-copy > p:not(.eyebrow)", y: 18, duration: 0.48, stagger: 0.08 },
-      { selector: ".film-placeholder-art", y: 18, scale: 0.88, rotation: -8, duration: 0.62 },
-      { selector: ".film-state, .film-placeholder-copy, .film-caption", y: 16, duration: 0.5, stagger: 0.08 }
+      { selector: ".film-copy .eyebrow", y: 20, duration: 0.36 },
+      { selector: ".film-copy h2", y: 42, duration: 0.52 },
+      { selector: ".film-copy > p:not(.eyebrow)", y: 28, duration: 0.4, stagger: 0.08 },
+      { selector: ".film-state, .film-placeholder-copy, .film-caption", y: 24, duration: 0.44, stagger: 0.07 }
     ]);
 
     revealSequence(document.querySelector(".questions-heading"), [
-      { selector: ".eyebrow", y: 16, duration: 0.42 },
-      { selector: "h2", y: 26, duration: 0.6 }
+      { selector: ".eyebrow", y: 20, duration: 0.36 },
+      { selector: "h2", y: 40, duration: 0.52 }
     ]);
     document.querySelectorAll(".faq-list details").forEach((item) => {
-      revealSequence(item, [{ selector: "summary", y: 18, duration: 0.52 }]);
+      revealSequence(item, [{ selector: "summary", y: 34, duration: 0.44 }]);
     });
 
     revealSequence(document.querySelector(".closing-section"), [
-      { selector: ".closing-mark", y: 16, scale: 0.88, rotation: -8, duration: 0.54 },
-      { selector: ".closing-copy .eyebrow", y: 14, duration: 0.38 },
-      { selector: ".closing-copy h2", y: 24, duration: 0.58 },
-      { selector: ".closing-copy > p:last-child", y: 16, duration: 0.46 },
-      { selector: ".closing-cta", y: 20, scale: 0.98, duration: 0.58 }
+      { selector: ".closing-mark", y: 46, scale: 0.86, rotation: -8, duration: 0.48 },
+      { selector: ".closing-copy .eyebrow", y: 20, duration: 0.34 },
+      { selector: ".closing-copy h2", y: 44, duration: 0.52 },
+      { selector: ".closing-copy > p:last-child", y: 28, duration: 0.4 },
+      { selector: ".closing-cta", y: 38, scale: 0.95, duration: 0.52 }
     ]);
 
     const heroArtwork = document.querySelector(".scene-phone");
@@ -426,6 +440,19 @@
       gsap.fromTo(searchArtwork, { y: 0, scale: 1 }, {
         y: 16, scale: 0.985, ease: "none",
         scrollTrigger: { trigger: ".search-proof", start: "top 36%", end: "bottom top", scrub: 0.45, invalidateOnRefresh: true }
+      });
+    }
+
+    const filmArtwork = document.querySelector(".film-placeholder-art");
+    if (filmArtwork) {
+      motionTargets.add(filmArtwork);
+      const rect = filmArtwork.getBoundingClientRect();
+      const isVisible = rect.bottom > 0 && rect.top < window.innerHeight;
+      const pose = { y: isVisible ? 0 : 52, scale: isVisible ? 1 : 0.84, rotation: isVisible ? 0 : -8 };
+      gsap.set(filmArtwork, pose);
+      gsap.fromTo(filmArtwork, { ...pose, immediateRender: false }, {
+        y: 0, scale: 1, rotation: 0, ease: "none",
+        scrollTrigger: { trigger: ".film-placeholder", start: "top bottom", end: "top 42%", scrub: 0.45, invalidateOnRefresh: true }
       });
     }
 

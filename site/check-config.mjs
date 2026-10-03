@@ -11,7 +11,7 @@ class Element {
     this.tagName = "DIV";
     this.attributes = {}; this.events = {}; this.classes = new Set(); this.styles = {};
     this.display = "block";
-    this.rect = { height: 72, top: 100, bottom: 172, left: 20, right: 340 };
+    this.rect = { height: 72, top: 1000, bottom: 1072, left: 20, right: 340 };
     this.classList = {
       add: (name) => this.classes.add(name),
       remove: (name) => this.classes.delete(name),
@@ -53,7 +53,7 @@ class Element {
     return this.descendants.get(selector);
   }
 }
-function run(config, { reduce = false, motion = false, mobile = true } = {}) {
+function run(config, { reduce = false, motion = false, mobile = true, scrollY = 0, triggerTop = 1000 } = {}) {
   const ctas = Array.from({ length: 4 }, () => new Element("Beta access coming soon"));
   ctas.forEach((cta) => { cta.disabled = true; });
   const nodes = {
@@ -67,8 +67,12 @@ function run(config, { reduce = false, motion = false, mobile = true } = {}) {
     hero: new Element(), search: new Element(), heading: new Element(), compatibility: new Element(),
     film: new Element(), questionsHeading: new Element(), closing: new Element(), other: new Element(), faq: new Element(),
     heroTargets: Array.from({ length: 5 }, () => new Element()),
-    heroActions: [new Element(), new Element()], phone: new Element(), searchShot: new Element()
+    heroActions: [new Element(), new Element()], phone: new Element(), searchShot: new Element(),
+    filmArtwork: new Element()
   };
+  [nodes.search, nodes.heading, ...nodes.cards, nodes.compatibility, nodes.film, nodes.questionsHeading, nodes.faq, nodes.closing].forEach((node) => {
+    node.rect = { ...node.rect, top: triggerTop, bottom: triggerTop + node.rect.height };
+  });
   nodes.mobileBar.children = [nodes.mobileCta];
   nodes.headerCta.display = mobile ? "none" : "grid";
   nodes.heroCta.rect = { height: 58, top: 100, bottom: 158, left: 20, right: 340 };
@@ -84,7 +88,8 @@ function run(config, { reduce = false, motion = false, mobile = true } = {}) {
     ".search-proof": nodes.search, ".section-heading": nodes.heading,
     ".compatibility-section": nodes.compatibility, ".film-section": nodes.film,
     ".questions-heading": nodes.questionsHeading, ".closing-section": nodes.closing,
-    ".hero": nodes.hero, ".scene-phone": nodes.phone, ".search-shot-frame": nodes.searchShot
+    ".hero": nodes.hero, ".scene-phone": nodes.phone, ".search-shot-frame": nodes.searchShot,
+    ".film-placeholder-art": nodes.filmArtwork
   };
   const handlers = {};
   const triggers = [];
@@ -106,8 +111,8 @@ function run(config, { reduce = false, motion = false, mobile = true } = {}) {
   const gsap = {
     registerPlugin(plugin) { assert.equal(plugin, ScrollTrigger); },
     fromTo(...args) { gsapCalls.push(args); },
-    timeline() { const timeline = { steps: [], played: false, reversed: false, fromTo(...args) { this.steps.push(args); gsapCalls.push(args); return this; }, play() { this.played = true; this.reversed = false; return this; }, reverse() { this.reversed = true; return this; }, kill() { this.killed = true; } }; timelines.push(timeline); return timeline; },
-    set() {},
+    timeline() { const timeline = { steps: [], progressValue: 0, fromTo(...args) { this.steps.push(args); gsapCalls.push(args); return this; }, progress(value) { if (value === undefined) return this.progressValue; this.progressValue = value; return this; }, kill() { this.killed = true; } }; timelines.push(timeline); return timeline; },
+    set(...args) { gsapCalls.push(args); },
     ticker: { sleep() { slept += 1; }, wake() { woke += 1; } },
     globalTimeline: { clear() { cleared += 1; } }
   };
@@ -121,11 +126,12 @@ function run(config, { reduce = false, motion = false, mobile = true } = {}) {
       requestAnimationFrame(callback) { rafCallbacks.push(callback); return ++rafId; },
       innerWidth: 390,
       innerHeight: 844,
+      scrollY,
       ...(motion ? { gsap, ScrollTrigger } : {}),
       ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe() {} }
     },
     document: {
-      body: (nodes.body = { style: { setProperty(key, value) { this[key] = value; } } }),
+      body: (nodes.body = { style: { setProperty(key, value) { this[key] = value; }, removeProperty(key) { delete this[key]; } } }),
       hidden: false,
       getElementById: () => nodes.betaStatus,
       querySelector: (selector) => selectorMap[selector] || null,
@@ -224,21 +230,34 @@ const reduced = run({}, { reduce: true, motion: true });
 assert.equal(reduced.gsapCalls.length, 0);
 const animated = run({}, { motion: true });
 assert(animated.gsapCalls.length >= 1);
-const revealTriggers = animated.triggers.filter((trigger) => trigger.options.onEnter);
+const revealTriggers = animated.triggers.filter((trigger) => trigger.options.animation);
 assert(revealTriggers.length >= 10);
-revealTriggers.forEach((trigger) => trigger.options.onEnter());
 assert(animated.timelines.length >= 10);
-assert(animated.timelines.every((timeline) => timeline.played && timeline.steps.length > 0));
-revealTriggers.forEach((trigger) => trigger.options.onLeaveBack());
-assert(animated.timelines.every((timeline) => timeline.reversed));
-const closingReveal = animated.triggers.find((trigger) => trigger.options.trigger === animated.nodes.closing && trigger.options.onEnter);
-const closingTimeline = animated.timelines[animated.triggers.filter((trigger) => trigger.options.onEnter).indexOf(closingReveal)];
+assert(animated.timelines.every((timeline) => timeline.steps.length > 0));
+assert(revealTriggers.every((trigger) => trigger.options.animation && trigger.options.scrub === 0.45 && trigger.options.start() === "top bottom" && typeof trigger.options.end === "function"));
+assert(animated.timelines.every((timeline) => timeline.progressValue === 0));
+const closingReveal = animated.triggers.find((trigger) => trigger.options.trigger === animated.nodes.closing && trigger.options.animation);
+assert.equal(closingReveal.options.end(), "top 43%");
+const closingTimeline = closingReveal.options.animation;
 const closingCtaMotion = closingTimeline.steps.at(-1);
 assert.equal(closingCtaMotion[1].immediateRender, false);
-assert.equal(closingCtaMotion[1].y, 10);
+assert.equal(closingCtaMotion[1].y, 38);
 assert.equal(closingCtaMotion[2].y, 0);
 assert.equal("autoAlpha" in closingCtaMotion[1], false);
 assert.equal("autoAlpha" in closingCtaMotion[2], false);
+assert(animated.gsapCalls.some((call) => call[1]?.y === 44));
+assert(animated.gsapCalls.some((call) => call[1]?.y === 46));
+const sectionTimelinesOpaque = animated.timelines.every((timeline) => timeline.steps.every((step) => {
+  return !("autoAlpha" in (step[1] || {})) && !("autoAlpha" in (step[2] || {}));
+}));
+assert(sectionTimelinesOpaque);
+const filmArtworkMotion = animated.gsapCalls.find((call) => call[0] === animated.nodes.filmArtwork && call[2]?.scrollTrigger);
+assert.equal(filmArtworkMotion[1].y, 52);
+assert.equal(filmArtworkMotion[1].scale, 0.84);
+assert.equal(filmArtworkMotion[1].rotation, -8);
+assert.equal(filmArtworkMotion[2].ease, "none");
+assert.equal(filmArtworkMotion[2].scrollTrigger.trigger, ".film-placeholder");
+assert.equal(filmArtworkMotion[2].scrollTrigger.scrub, 0.45);
 assert(animated.triggers.length >= 13);
 animated.triggers.at(-1).options.onToggle({ isActive: true });
 assert(animated.nodes.cards[2].classList.contains("is-current"));
@@ -248,4 +267,10 @@ animated.media.events.change({ matches: true });
 assert.equal(animated.values().cleared, 1);
 assert(animated.triggers.every((trigger) => trigger.killed));
 assert(!animated.nodes.cards[2].classList.contains("is-current"));
+const restored = run({}, { motion: true, scrollY: 400, triggerTop: 600 });
+assert(restored.timelines.every((timeline) => timeline.progressValue > 0.5 && timeline.progressValue < 0.6));
+const desktopAnimated = run({}, { motion: true, mobile: false });
+const desktopClosing = desktopAnimated.triggers.find((trigger) => trigger.options.trigger === desktopAnimated.nodes.closing && trigger.options.animation);
+assert.equal(desktopClosing.options.end(), "top 66%");
+assert(desktopAnimated.triggers.filter((trigger) => trigger.options.animation && trigger.options.trigger !== desktopAnimated.nodes.closing).every((trigger) => trigger.options.end() === "top 52%"));
 console.log("PASS: beta/video states, CTA reserve resizing, GSAP scroll emphasis, and reduced-motion shutdown.");
