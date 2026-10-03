@@ -11,6 +11,7 @@
       const link = document.createElement("a");
       link.className = button.className;
       link.href = configuredUrl;
+      link.setAttribute("data-beta-cta", "");
       link.setAttribute("aria-describedby", "beta-status");
 
       const label = document.createElement("span");
@@ -61,11 +62,13 @@
   }
 
   const mobileCtaBar = document.querySelector("[data-mobile-cta-bar]");
-  const heroCta = document.querySelector(".hero-cta");
   const mobileCtaBreakpoint = window.matchMedia("(max-width: 740px)");
-  if (mobileCtaBar && heroCta && document.body) {
-    const heroCtaIntersectsViewport = () => {
-      const rect = heroCta.getBoundingClientRect();
+  const inlineCtas = Array.from(document.querySelectorAll("[data-beta-cta]"))
+    .filter((cta) => mobileCtaBar && !mobileCtaBar.contains(cta));
+  if (mobileCtaBar && inlineCtas.length && document.body) {
+    const ctaIntersectsViewport = (cta) => {
+      if (window.getComputedStyle(cta).display === "none") return false;
+      const rect = cta.getBoundingClientRect();
       return rect.bottom > 0 && rect.top < window.innerHeight && rect.right > 0 && rect.left < window.innerWidth;
     };
     const updateCtaReserve = () => {
@@ -76,28 +79,39 @@
       const reserve = Math.ceil(mobileCtaBar.getBoundingClientRect().height + 16);
       document.body.style.setProperty("--mobile-cta-reserve", reserve + "px");
     };
-    const setMobileCtaVisible = (heroVisible) => {
-      const visible = mobileCtaBreakpoint.matches && !heroVisible;
-      if (!visible && mobileCtaBar.contains(document.activeElement)) {
-        if (heroCta.matches(":disabled")) document.activeElement.blur();
-        else heroCta.focus({ preventScroll: true });
+    const setMobileCtaVisible = (inlineCtaInView, focusTarget) => {
+      const visible = mobileCtaBreakpoint.matches && !inlineCtaInView;
+      const focusedCta = document.activeElement && mobileCtaBar.contains(document.activeElement)
+        ? document.activeElement
+        : null;
+      if (!visible && focusedCta) {
+        if (focusTarget && !focusTarget.matches(":disabled")) focusTarget.focus({ preventScroll: true });
+        else focusedCta.blur();
       }
       mobileCtaBar.classList.toggle("is-visible", visible);
       mobileCtaBar.toggleAttribute("inert", !visible);
       mobileCtaBar.setAttribute("aria-hidden", String(!visible));
     };
-    const syncCtaVisibility = () => setMobileCtaVisible(heroCtaIntersectsViewport());
+    const syncCtaVisibility = () => {
+      const visibleCta = inlineCtas.find(ctaIntersectsViewport);
+      setMobileCtaVisible(Boolean(visibleCta), visibleCta);
+    };
+    let ctaSyncFrame = 0;
+    const scheduleCtaSync = () => {
+      if (ctaSyncFrame) return;
+      ctaSyncFrame = window.requestAnimationFrame(() => {
+        ctaSyncFrame = 0;
+        syncCtaVisibility();
+      });
+    };
 
     updateCtaReserve();
-    setMobileCtaVisible(true);
+    syncCtaVisibility();
     if ("IntersectionObserver" in window) {
-      const ctaVisibilityObserver = new IntersectionObserver(([entry]) => {
-        setMobileCtaVisible(entry.isIntersecting && entry.intersectionRatio > 0);
-      }, { threshold: 0 });
-      ctaVisibilityObserver.observe(heroCta);
-    } else {
-      window.addEventListener("scroll", syncCtaVisibility, { passive: true });
+      const ctaVisibilityObserver = new IntersectionObserver(scheduleCtaSync, { threshold: 0 });
+      inlineCtas.forEach((cta) => ctaVisibilityObserver.observe(cta));
     }
+    window.addEventListener("scroll", scheduleCtaSync, { passive: true });
     window.addEventListener("resize", () => {
       updateCtaReserve();
       syncCtaVisibility();
@@ -112,7 +126,7 @@
         syncCtaVisibility();
       });
       ctaObserver.observe(mobileCtaBar);
-      ctaObserver.observe(heroCta);
+      inlineCtas.forEach((cta) => ctaObserver.observe(cta));
     }
   }
 
@@ -290,23 +304,138 @@
   if (!motionPreference.matches && window.gsap && window.ScrollTrigger) {
     const gsap = window.gsap;
     const ScrollTrigger = window.ScrollTrigger;
+    const narrowMotion = window.matchMedia("(max-width: 740px)");
+    const motionTargets = new Set();
+    const revealTimelines = new Set();
     gsap.registerPlugin(ScrollTrigger);
-    gsap.fromTo(
-      [".hero-copy", ".hero-scene"],
-      { y: 12, opacity: 0.97 },
-      { y: 0, opacity: 1, duration: 0.55, ease: "power2.out", stagger: 0.06, clearProps: "transform,opacity" }
-    );
-
-    document.querySelectorAll(".search-proof, .benefit-card, .compatibility-section, .film-section, .questions-section, .closing-section").forEach((item) => {
-      ScrollTrigger.create({
-        trigger: item,
-        start: "top 88%",
-        once: true,
-        onEnter: () => gsap.fromTo(item, { y: 10, opacity: 0.97 }, {
-          y: 0, opacity: 1, duration: 0.42, ease: "power2.out", clearProps: "transform,opacity"
-        })
-      });
+    const heroTargets = Array.from(document.querySelectorAll(".hero-copy .eyebrow, .hero-copy h1, .hero-lede, .hero-facts, .availability"));
+    heroTargets.forEach((target) => motionTargets.add(target));
+    gsap.fromTo(heroTargets, { y: 20, autoAlpha: 0 }, {
+      y: 0, autoAlpha: 1, duration: 0.68, ease: "power3.out", stagger: 0.075,
+      clearProps: "transform,opacity,visibility"
     });
+    const heroActions = Array.from(document.querySelectorAll(".hero-actions > .hero-cta, .hero-actions > .text-link"));
+    heroActions.forEach((target) => motionTargets.add(target));
+    gsap.fromTo(heroActions, { y: 14, autoAlpha: 1 }, {
+      y: 0, autoAlpha: 1, duration: 0.58, ease: "power3.out", stagger: 0.08,
+      clearProps: "transform,opacity,visibility"
+    });
+
+    const sequenceStart = () => narrowMotion.matches ? "top 70%" : "top 78%";
+    const revealSequence = (trigger, steps) => {
+      if (!trigger) return;
+      let timeline = null;
+      const createTimeline = () => {
+        const sequence = gsap.timeline({ paused: true });
+        let cursor = 0;
+        steps.forEach((step) => {
+          const targets = Array.from(trigger.querySelectorAll(step.selector));
+          if (!targets.length) return;
+          targets.forEach((target) => motionTargets.add(target));
+          const duration = step.duration || 0.58;
+          const stagger = step.stagger ?? 0.07;
+          const position = cursor === 0 ? 0 : Math.max(0, cursor - 0.09);
+          const keepVisible = targets.every((target) => target.matches("a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])"));
+          sequence.fromTo(targets, {
+            y: step.y ?? 22,
+            autoAlpha: keepVisible ? 1 : 0,
+            scale: step.scale ?? 1,
+            rotation: step.rotation ?? 0
+          }, {
+            y: 0,
+            autoAlpha: 1,
+            scale: 1,
+            rotation: 0,
+            duration,
+            ease: step.ease || "power3.out",
+            stagger
+          }, position);
+          cursor = position + duration + Math.max(0, targets.length - 1) * stagger;
+        });
+        revealTimelines.add(sequence);
+        return sequence;
+      };
+      ScrollTrigger.create({
+        trigger,
+        start: sequenceStart,
+        onEnter: () => {
+          if (!timeline) timeline = createTimeline();
+          timeline.play(0);
+        },
+        onLeaveBack: () => timeline?.reverse()
+      });
+    };
+
+    revealSequence(document.querySelector(".search-proof"), [
+      { selector: ".search-copy .eyebrow", y: 16, duration: 0.42 },
+      { selector: ".search-copy h2", y: 28, duration: 0.64 },
+      { selector: ".search-copy > p:not(.eyebrow)", y: 20, duration: 0.5, stagger: 0.09 },
+      { selector: ".search-shot", y: 34, scale: 0.97, duration: 0.76 },
+      { selector: ".search-shot figcaption", y: 12, duration: 0.38 }
+    ]);
+
+    const benefitHeading = document.querySelector(".section-heading");
+    revealSequence(benefitHeading, [
+      { selector: ".eyebrow", y: 16, duration: 0.42 },
+      { selector: "h2", y: 28, duration: 0.64 },
+      { selector: ":scope > p:last-child", y: 18, duration: 0.48 }
+    ]);
+    document.querySelectorAll(".benefit-card").forEach((card) => {
+      revealSequence(card, [
+        { selector: ".card-label", y: 14, duration: 0.38 },
+        { selector: "h3", y: 23, duration: 0.56 },
+        { selector: "p:not(.card-label)", y: 18, duration: 0.48 },
+        { selector: ".profile-options, .pin-count, .comfort-words", y: 20, scale: 0.97, duration: 0.58 }
+      ]);
+    });
+
+    revealSequence(document.querySelector(".compatibility-section"), [
+      { selector: ".compatibility-heading .eyebrow", y: 16, duration: 0.42 },
+      { selector: ".compatibility-heading h2", y: 26, duration: 0.6 },
+      { selector: ".compatibility-copy p", y: 19, duration: 0.5, stagger: 0.1 },
+      { selector: ".compatibility-copy .text-link", y: 16, duration: 0.46 }
+    ]);
+
+    revealSequence(document.querySelector(".film-section"), [
+      { selector: ".film-copy .eyebrow", y: 16, duration: 0.42 },
+      { selector: ".film-copy h2", y: 26, duration: 0.6 },
+      { selector: ".film-copy > p:not(.eyebrow)", y: 18, duration: 0.48, stagger: 0.08 },
+      { selector: ".film-placeholder-art", y: 18, scale: 0.88, rotation: -8, duration: 0.62 },
+      { selector: ".film-state, .film-placeholder-copy, .film-caption", y: 16, duration: 0.5, stagger: 0.08 }
+    ]);
+
+    revealSequence(document.querySelector(".questions-heading"), [
+      { selector: ".eyebrow", y: 16, duration: 0.42 },
+      { selector: "h2", y: 26, duration: 0.6 }
+    ]);
+    document.querySelectorAll(".faq-list details").forEach((item) => {
+      revealSequence(item, [{ selector: "summary", y: 18, duration: 0.52 }]);
+    });
+
+    revealSequence(document.querySelector(".closing-section"), [
+      { selector: ".closing-mark", y: 16, scale: 0.88, rotation: -8, duration: 0.54 },
+      { selector: ".closing-copy .eyebrow", y: 14, duration: 0.38 },
+      { selector: ".closing-copy h2", y: 24, duration: 0.58 },
+      { selector: ".closing-copy > p:last-child", y: 16, duration: 0.46 },
+      { selector: ".closing-cta", y: 20, scale: 0.98, duration: 0.58 }
+    ]);
+
+    const heroArtwork = document.querySelector(".scene-phone");
+    if (heroArtwork) {
+      motionTargets.add(heroArtwork);
+      gsap.fromTo(heroArtwork, { y: 0, scale: 1 }, {
+        y: 18, scale: 0.985, ease: "none",
+        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.45, invalidateOnRefresh: true }
+      });
+    }
+    const searchArtwork = document.querySelector(".search-shot-frame");
+    if (searchArtwork) {
+      motionTargets.add(searchArtwork);
+      gsap.fromTo(searchArtwork, { y: 0, scale: 1 }, {
+        y: 16, scale: 0.985, ease: "none",
+        scrollTrigger: { trigger: ".search-proof", start: "top 36%", end: "bottom top", scrub: 0.45, invalidateOnRefresh: true }
+      });
+    }
 
     document.querySelectorAll(".benefit-card").forEach((card) => {
       ScrollTrigger.create({
@@ -328,7 +457,9 @@
     motionPreference.addEventListener("change", (event) => {
       if (!event.matches) return;
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      revealTimelines.forEach((timeline) => timeline.kill());
       gsap.globalTimeline.clear();
+      gsap.set(Array.from(motionTargets), { clearProps: "transform,opacity,visibility" });
       document.querySelectorAll(".benefit-card.is-current").forEach((card) => card.classList.remove("is-current"));
     });
   }
