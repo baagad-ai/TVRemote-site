@@ -7,7 +7,15 @@ This public repository contains The Remote beta landing page and privacy policy.
 
 The Remote is a free Android phone remote for compatible Android TV and Google TV devices. Compatibility and available controls vary by TV and its Android TV Remote Service version.
 
-Beta access remains unavailable from this page until the official Google Play opt-in is ready. The beta video stays a placeholder until its current cut is accepted for publication. The site has no signup form, account system, analytics, or developer-operated cloud relay.
+Google Play beta access is not open yet. This page does not collect signup details or use analytics. The app does not require an account or route remote commands through a developer-operated cloud relay.
+
+## Landing-page copy
+
+- Lead with a viewer task or benefit: search YouTube from a phone, identify a TV by room, or reach a pinned control.
+- Give each heading, label, and caption enough context to make the action or benefit clear. Avoid narrating how the page or its artwork was built.
+- Describe screenshots and illustrations accurately. Name what is visible, and say when a TV result or other outcome is not shown.
+- Limit claims to shipped features and compatible devices. Do not promise support for every TV or add invented results, testimonials, counts, or endorsements.
+- Keep beta copy honest. Leave the Google Play CTA disabled until the official opt-in URL is ready; this page does not collect signup details.
 
 ## Static build
 

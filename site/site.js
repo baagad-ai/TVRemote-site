@@ -26,39 +26,16 @@
 
     if (betaStatus) {
       const statusLabel = betaStatus.querySelector?.("[data-beta-status-label]");
-      if (statusLabel) statusLabel.textContent = config.betaStatus || "The official Play opt-in is ready.";
-      else betaStatus.textContent = config.betaStatus || "The official Play opt-in is ready.";
+      if (statusLabel) statusLabel.textContent = config.betaStatus || "The official Google Play beta opt-in is open.";
+      else betaStatus.textContent = config.betaStatus || "The official Google Play beta opt-in is open.";
       betaStatus.classList.add("is-open");
     }
 
     const betaAnswer = document.querySelector("[data-beta-answer]");
-    if (betaAnswer) betaAnswer.textContent = "Use the beta button to open the official Play opt-in. Eligibility and access details are shown there; no signup details are collected on this page.";
+    if (betaAnswer) betaAnswer.textContent = "Use the beta button to open the official Google Play opt-in. Eligibility and access details are shown there; this page does not collect signup details.";
     document.querySelectorAll(".mobile-cta-note").forEach((note) => {
-      note.textContent = "Opens the official Play beta opt-in.";
+      note.textContent = "Opens the official Google Play beta opt-in.";
     });
-  }
-
-  const video = document.querySelector("[data-beta-video]");
-  const videoPlaceholder = document.querySelector("[data-video-placeholder]");
-  const videoCaption = document.querySelector("[data-video-caption]");
-  const configuredVideo = typeof config.videoSrc === "string" ? config.videoSrc.trim() : "";
-  if (video && videoPlaceholder && configuredVideo) {
-    video.src = configuredVideo;
-    if (typeof config.videoPoster === "string" && config.videoPoster.trim()) video.poster = config.videoPoster.trim();
-    if (typeof config.videoCaptions === "string" && config.videoCaptions.trim()) {
-      const track = document.createElement("track");
-      track.kind = "captions";
-      track.label = "English captions";
-      track.srclang = "en";
-      track.src = config.videoCaptions.trim();
-      track.default = true;
-      video.append(track);
-    }
-    const videoIntro = document.querySelector("[data-video-intro]");
-    if (videoIntro) videoIntro.textContent = "See The Remote in use. Start the video when you are ready.";
-    video.hidden = false;
-    videoPlaceholder.hidden = true;
-    if (videoCaption) videoCaption.textContent = "The Remote beta walkthrough. Use the player controls to watch.";
   }
 
   const mobileCtaBar = document.querySelector("[data-mobile-cta-bar]");
@@ -403,13 +380,6 @@
       { selector: ".compatibility-copy .text-link", y: 26, duration: 0.4 }
     ]);
 
-    revealSequence(document.querySelector(".film-section"), [
-      { selector: ".film-copy .eyebrow", y: 20, duration: 0.36 },
-      { selector: ".film-copy h2", y: 42, duration: 0.52 },
-      { selector: ".film-copy > p:not(.eyebrow)", y: 28, duration: 0.4, stagger: 0.08 },
-      { selector: ".film-state, .film-placeholder-copy, .film-caption", y: 24, duration: 0.44, stagger: 0.07 }
-    ]);
-
     revealSequence(document.querySelector(".questions-heading"), [
       { selector: ".eyebrow", y: 20, duration: 0.36 },
       { selector: "h2", y: 40, duration: 0.52 }
@@ -440,19 +410,6 @@
       gsap.fromTo(searchArtwork, { y: 0, scale: 1 }, {
         y: 16, scale: 0.985, ease: "none",
         scrollTrigger: { trigger: ".search-proof", start: "top 36%", end: "bottom top", scrub: 0.45, invalidateOnRefresh: true }
-      });
-    }
-
-    const filmArtwork = document.querySelector(".film-placeholder-art");
-    if (filmArtwork) {
-      motionTargets.add(filmArtwork);
-      const rect = filmArtwork.getBoundingClientRect();
-      const isVisible = rect.bottom > 0 && rect.top < window.innerHeight;
-      const pose = { y: isVisible ? 0 : 52, scale: isVisible ? 1 : 0.84, rotation: isVisible ? 0 : -8 };
-      gsap.set(filmArtwork, pose);
-      gsap.fromTo(filmArtwork, { ...pose, immediateRender: false }, {
-        y: 0, scale: 1, rotation: 0, ease: "none",
-        scrollTrigger: { trigger: ".film-placeholder", start: "top bottom", end: "top 42%", scrub: 0.45, invalidateOnRefresh: true }
       });
     }
 

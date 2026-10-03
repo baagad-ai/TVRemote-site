@@ -54,42 +54,36 @@ class Element {
   }
 }
 function run(config, { reduce = false, motion = false, mobile = true, scrollY = 0, triggerTop = 1000 } = {}) {
-  const ctas = Array.from({ length: 4 }, () => new Element("Beta access coming soon"));
+  const ctas = Array.from({ length: 4 }, () => new Element("Join the beta"));
   ctas.forEach((cta) => { cta.disabled = true; });
   const nodes = {
-    betaStatus: new Element("The official Play opt-in will appear here."),
+    betaStatus: new Element("Google Play beta access is not open yet."),
+    betaStatusLabel: new Element("Google Play beta access is not open yet."),
     betaAnswer: new Element("Not yet from this page."),
-    note: new Element("The Play opt-in will be added here."),
-    video: new Element(), placeholder: new Element(), caption: new Element("Placeholder"),
-    intro: new Element("The beta film is being prepared."), mobileBar: new Element(),
+    note: new Element("Google Play beta access is not open yet."), mobileBar: new Element(),
     headerCta: ctas[0], heroCta: ctas[1], closingCta: ctas[2], mobileCta: ctas[3],
     cards: [new Element(), new Element(), new Element()],
     hero: new Element(), search: new Element(), heading: new Element(), compatibility: new Element(),
-    film: new Element(), questionsHeading: new Element(), closing: new Element(), other: new Element(), faq: new Element(),
+    questionsHeading: new Element(), closing: new Element(), other: new Element(), faq: new Element(),
     heroTargets: Array.from({ length: 5 }, () => new Element()),
-    heroActions: [new Element(), new Element()], phone: new Element(), searchShot: new Element(),
-    filmArtwork: new Element()
+    heroActions: [new Element(), new Element()], phone: new Element(), searchShot: new Element()
   };
-  [nodes.search, nodes.heading, ...nodes.cards, nodes.compatibility, nodes.film, nodes.questionsHeading, nodes.faq, nodes.closing].forEach((node) => {
+  [nodes.search, nodes.heading, ...nodes.cards, nodes.compatibility, nodes.questionsHeading, nodes.faq, nodes.closing].forEach((node) => {
     node.rect = { ...node.rect, top: triggerTop, bottom: triggerTop + node.rect.height };
   });
   nodes.mobileBar.children = [nodes.mobileCta];
   nodes.headerCta.display = mobile ? "none" : "grid";
   nodes.heroCta.rect = { height: 58, top: 100, bottom: 158, left: 20, right: 340 };
   nodes.closingCta.rect = { height: 58, top: 1300, bottom: 1358, left: 20, right: 340 };
-  nodes.video.hidden = true;
-  nodes.betaStatus.querySelector = (selector) => selector === "[data-beta-status-label]" ? new Element("The official Play opt-in will appear here.") : null;
+  nodes.betaStatus.querySelector = (selector) => selector === "[data-beta-status-label]" ? nodes.betaStatusLabel : null;
   const media = { matches: reduce, events: {}, addEventListener(key, fn) { this.events[key] = fn; } };
   const selectorMap = {
-    "[data-beta-answer]": nodes.betaAnswer, "[data-beta-video]": nodes.video,
-    "[data-video-placeholder]": nodes.placeholder, "[data-video-caption]": nodes.caption,
-    "[data-video-intro]": nodes.intro, "[data-mobile-cta-bar]": nodes.mobileBar,
+    "[data-beta-answer]": nodes.betaAnswer, "[data-mobile-cta-bar]": nodes.mobileBar,
     ".hero-cta": nodes.heroCta.replacement || nodes.heroCta,
     ".search-proof": nodes.search, ".section-heading": nodes.heading,
-    ".compatibility-section": nodes.compatibility, ".film-section": nodes.film,
+    ".compatibility-section": nodes.compatibility,
     ".questions-heading": nodes.questionsHeading, ".closing-section": nodes.closing,
-    ".hero": nodes.hero, ".scene-phone": nodes.phone, ".search-shot-frame": nodes.searchShot,
-    ".film-placeholder-art": nodes.filmArtwork
+    ".hero": nodes.hero, ".scene-phone": nodes.phone, ".search-shot-frame": nodes.searchShot
   };
   const handlers = {};
   const triggers = [];
@@ -177,10 +171,8 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
 
 const absent = run({});
 assert(absent.ctas.every((button) => !button.replacement));
-assert.equal(absent.nodes.video.hidden, true);
-assert.equal(absent.nodes.placeholder.hidden, false);
 assert.match(absent.nodes.betaAnswer.textContent, /Not yet/);
-assert.match(absent.nodes.intro.textContent, /prepared/);
+assert.match(absent.nodes.betaStatus.textContent, /not open yet/);
 assert.equal(absent.nodes.body.style["--mobile-cta-reserve"], "88px");
 assert.equal(absent.nodes.mobileBar.attributes["aria-hidden"], "true");
 assert.equal(absent.nodes.mobileBar.attributes.inert, "");
@@ -203,21 +195,15 @@ assert.equal(absent.nodes.body.style["--mobile-cta-reserve"], "127px");
 const supplied = run({
   betaOptInUrl: "https://play.google.com/apps/testing/example",
   betaCtaLabel: "Join the beta",
-  betaStatus: "Open the official opt-in",
-  videoSrc: "assets/test.mp4",
-  videoPoster: "assets/test.webp",
-  videoCaptions: "assets/test.vtt"
+  betaStatus: "Google Play beta access is open."
 });
 assert(supplied.ctas.every((button) => button.replacement?.href === "https://play.google.com/apps/testing/example"));
 assert(supplied.ctas.every((button) => button.replacement?.attributes["data-beta-cta"] === ""));
 assert(supplied.ctas.every((button) => button.replacement?.children[0]?.textContent === "Join the beta"));
 assert(supplied.ctas.every((button) => button.replacement?.children[1]?.attributes["aria-hidden"] === "true"));
 assert.match(supplied.nodes.betaAnswer.textContent, /Eligibility/);
-assert.equal(supplied.nodes.video.hidden, false);
-assert.equal(supplied.nodes.placeholder.hidden, true);
-assert.equal(supplied.nodes.video.children[0].src, "assets/test.vtt");
-assert.equal(supplied.nodes.video.children[0].kind, "captions");
-assert.equal(supplied.nodes.video.poster, "assets/test.webp");
+assert.match(supplied.nodes.betaStatusLabel.textContent, /is open/);
+assert.match(supplied.nodes.note.textContent, /official Google Play beta opt-in/);
 supplied.setCtaVisible(supplied.ctas[1].replacement, false);
 const suppliedSticky = supplied.ctas[3].replacement;
 const suppliedClosing = supplied.ctas[2].replacement;
@@ -231,8 +217,8 @@ assert.equal(reduced.gsapCalls.length, 0);
 const animated = run({}, { motion: true });
 assert(animated.gsapCalls.length >= 1);
 const revealTriggers = animated.triggers.filter((trigger) => trigger.options.animation);
-assert(revealTriggers.length >= 10);
-assert(animated.timelines.length >= 10);
+assert(revealTriggers.length >= 9);
+assert(animated.timelines.length >= 9);
 assert(animated.timelines.every((timeline) => timeline.steps.length > 0));
 assert(revealTriggers.every((trigger) => trigger.options.animation && trigger.options.scrub === 0.45 && trigger.options.start() === "top bottom" && typeof trigger.options.end === "function"));
 assert(animated.timelines.every((timeline) => timeline.progressValue === 0));
@@ -251,14 +237,7 @@ const sectionTimelinesOpaque = animated.timelines.every((timeline) => timeline.s
   return !("autoAlpha" in (step[1] || {})) && !("autoAlpha" in (step[2] || {}));
 }));
 assert(sectionTimelinesOpaque);
-const filmArtworkMotion = animated.gsapCalls.find((call) => call[0] === animated.nodes.filmArtwork && call[2]?.scrollTrigger);
-assert.equal(filmArtworkMotion[1].y, 52);
-assert.equal(filmArtworkMotion[1].scale, 0.84);
-assert.equal(filmArtworkMotion[1].rotation, -8);
-assert.equal(filmArtworkMotion[2].ease, "none");
-assert.equal(filmArtworkMotion[2].scrollTrigger.trigger, ".film-placeholder");
-assert.equal(filmArtworkMotion[2].scrollTrigger.scrub, 0.45);
-assert(animated.triggers.length >= 13);
+assert(animated.triggers.length >= 12);
 animated.triggers.at(-1).options.onToggle({ isActive: true });
 assert(animated.nodes.cards[2].classList.contains("is-current"));
 animated.setHidden(true); animated.handlers["document:visibilitychange"](); assert.equal(animated.values().slept, 1); animated.setHidden(false); animated.handlers["document:visibilitychange"](); assert.equal(animated.values().woke, 1); assert.equal(animated.values().refreshed, 1);
@@ -273,4 +252,4 @@ const desktopAnimated = run({}, { motion: true, mobile: false });
 const desktopClosing = desktopAnimated.triggers.find((trigger) => trigger.options.trigger === desktopAnimated.nodes.closing && trigger.options.animation);
 assert.equal(desktopClosing.options.end(), "top 66%");
 assert(desktopAnimated.triggers.filter((trigger) => trigger.options.animation && trigger.options.trigger !== desktopAnimated.nodes.closing).every((trigger) => trigger.options.end() === "top 52%"));
-console.log("PASS: beta/video states, CTA reserve resizing, GSAP scroll emphasis, and reduced-motion shutdown.");
+console.log("PASS: beta states, CTA reserve resizing, GSAP scroll emphasis, and reduced-motion shutdown.");
