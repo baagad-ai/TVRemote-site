@@ -501,3 +501,30 @@ body{min-width:0}
 @media(max-width:280px){:root{--gutter:12px}.site-header{gap:8px}.brand-name{font-size:15px}.scene-poster{height:180px;min-height:0;aspect-ratio:auto}.scene-mark-wrap{width:102px}.scene-wordmark{bottom:29px;font-size:18px}.scene-poster-index{top:18px;left:18px;font-size:6px}.scene-edition{right:18px;bottom:15px;font-size:6px}.hero-actions{min-width:0}.availability span{overflow-wrap:anywhere}.mobile-cta{min-width:0}.mobile-cta-note{font-size:9px}}
 
 @media(max-width:740px){.beta-cta>span:first-child{min-width:0;overflow-wrap:anywhere;text-wrap:balance}}
+
+/* Supplied Signal Dock composition and visibility-driven mobile CTA. */
+.hero-scene{aspect-ratio:4/3;isolation:isolate}
+.hero-scene{margin-bottom:23px}
+.scene-poster{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0;overflow:hidden;aspect-ratio:auto;border:0;border-radius:0;background:transparent;transition:opacity .22s ease}
+.scene-poster img{display:block;width:100%;height:100%;object-fit:contain}
+.scene-canvas{position:absolute;z-index:1;inset:0;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .22s ease}
+.scene-phone{position:absolute;z-index:2;top:6%;left:14%;width:29%;aspect-ratio:1080/2340;overflow:hidden;border:1px solid rgb(246 247 251 / 20%);border-radius:clamp(12px,2vw,20px);background:#0D0F12;box-shadow:0 18px 40px rgb(0 0 0 / 42%)}
+.scene-phone img{display:block;width:100%;height:100%;object-fit:cover}
+.hero-scene figcaption{position:absolute;right:2px;bottom:-22px;left:2px;margin:0}
+.hero-scene.scene-ready .scene-canvas{opacity:1}
+.hero-scene.scene-ready .scene-poster{opacity:0}
+.mobile-cta-bar{visibility:visible;opacity:1;transform:none;transition:opacity .18s ease,transform .18s ease,visibility 0s linear .18s}
+.js .mobile-cta-bar{visibility:hidden;opacity:0;transform:translateY(12px);pointer-events:none}
+.js .mobile-cta-bar.is-visible{visibility:visible;opacity:1;transform:translateY(0);pointer-events:auto;transition-delay:0s}
+.no-js .mobile-cta-bar,.no-js .hero-cta{display:none!important}
+@media(max-width:740px){
+  .hero-scene{aspect-ratio:1;min-height:0}
+  .scene-poster{min-height:0;height:100%;aspect-ratio:auto}
+  .scene-phone{top:8%;left:8%;width:39%;border-radius:clamp(12px,4vw,18px)}
+  .js .mobile-cta-bar{display:grid}
+  .js body{padding-bottom:var(--mobile-cta-reserve,116px)}
+  .no-js .header-cta{display:inline-flex!important}
+  .no-js body{padding-bottom:0}
+}
+@media(min-width:741px){.mobile-cta-bar{display:none!important}}
+@media(prefers-reduced-motion:reduce){.js .mobile-cta-bar{transition:none!important;transform:none!important}}

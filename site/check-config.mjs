@@ -9,6 +9,7 @@ class Element {
   constructor(text = "") {
     this.textContent = text; this.className = ""; this.hidden = false; this.children = [];
     this.attributes = {}; this.events = {}; this.classes = new Set(); this.styles = {};
+    this.rect = { height: 72, top: 100, bottom: 172, left: 20, right: 340 };
     this.classList = {
       add: (name) => this.classes.add(name),
       remove: (name) => this.classes.delete(name),
@@ -19,16 +20,22 @@ class Element {
         return enabled;
       }
     };
-    this.style = { setProperty: (key, value) => { this.styles[key] = value; } };
+    this.style = { setProperty: (key, value) => { this.styles[key] = value; }, removeProperty: (key) => { delete this.styles[key]; } };
   }
   setAttribute(key, value) { this.attributes[key] = value; }
+  removeAttribute(key) { delete this.attributes[key]; }
+  toggleAttribute(key, force) { if (force) this.attributes[key] = ""; else delete this.attributes[key]; }
+  matches(selector) { return selector === ":disabled" && this.disabled === true; }
+  contains(node) { return node === this || this.children.includes(node); }
+  focus() { this.focused = true; }
+  blur() { this.focused = false; }
   replaceWith(node) { this.replacement = node; }
   append(...nodes) { this.children.push(...nodes); }
   addEventListener(key, fn) { this.events[key] = fn; }
   querySelector() { return null; }
-  getBoundingClientRect() { return { height: 72 }; }
+  getBoundingClientRect() { return this.rect; }
 }
-function run(config, { reduce = false, motion = false } = {}) {
+function run(config, { reduce = false, motion = false, mobile = true } = {}) {
   const ctas = Array.from({ length: 4 }, () => new Element("Beta access coming soon"));
   const nodes = {
     betaStatus: new Element("The official Play opt-in will appear here."),
@@ -36,6 +43,7 @@ function run(config, { reduce = false, motion = false } = {}) {
     note: new Element("The Play opt-in will be added here."),
     video: new Element(), placeholder: new Element(), caption: new Element("Placeholder"),
     intro: new Element("The beta film is being prepared."), mobileBar: new Element(),
+    heroCta: new Element("Beta access coming soon"),
     cards: [new Element(), new Element(), new Element()],
     hero: new Element(), other: new Element(), faq: new Element()
   };
@@ -45,12 +53,23 @@ function run(config, { reduce = false, motion = false } = {}) {
   const selectorMap = {
     "[data-beta-answer]": nodes.betaAnswer, "[data-beta-video]": nodes.video,
     "[data-video-placeholder]": nodes.placeholder, "[data-video-caption]": nodes.caption,
-    "[data-video-intro]": nodes.intro, "[data-mobile-cta-bar]": nodes.mobileBar
+    "[data-video-intro]": nodes.intro, "[data-mobile-cta-bar]": nodes.mobileBar,
+    ".hero-cta": nodes.heroCta
   };
   const handlers = {};
   const triggers = [];
   const gsapCalls = [];
+  const observers = [];
   let resizeCallback = null, slept = 0, woke = 0, refreshed = 0, cleared = 0;
+  const motionMedia = { matches: reduce, events: {}, addEventListener(key, fn) { this.events[key] = fn; } };
+  const mobileMedia = { matches: mobile, events: {}, addEventListener(key, fn) { this.events[key] = fn; } };
+  class MockIntersectionObserver {
+    constructor(callback) { this.callback = callback; this.targets = []; observers.push(this); }
+    observe(target) {
+      this.targets.push(target);
+      if (target === nodes.heroCta) this.callback([{ isIntersecting: true, intersectionRatio: 1 }]);
+    }
+  }
   const ScrollTrigger = {
     create(options) { const item = { options, isActive: false, killed: false, kill() { this.killed = true; } }; triggers.push(item); return item; },
     getAll() { return triggers; }, refresh() { refreshed += 1; }
@@ -64,9 +83,12 @@ function run(config, { reduce = false, motion = false } = {}) {
   const context = {
     window: {
       remoteSiteConfig: config,
-      matchMedia: () => media,
+      matchMedia: (query) => query.includes("max-width") ? mobileMedia : motionMedia,
       getComputedStyle: () => ({ display: "grid" }),
       addEventListener(key, fn) { handlers["window:" + key] = fn; },
+      IntersectionObserver: MockIntersectionObserver,
+      innerWidth: 390,
+      innerHeight: 844,
       ...(motion ? { gsap, ScrollTrigger } : {}),
       ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe() {} }
     },
@@ -86,10 +108,13 @@ function run(config, { reduce = false, motion = false } = {}) {
       createElement: () => new Element(),
       addEventListener(key, fn) { handlers["document:" + key] = fn; }
     },
-    ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe() {} }
+    ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe() {} },
+    IntersectionObserver: MockIntersectionObserver
   };
   vm.runInNewContext(script, context);
-  return { ctas, nodes, media, handlers, triggers, gsapCalls, resize: () => resizeCallback?.(), setHidden: (value) => { context.document.hidden = value; }, values: () => ({ slept, woke, refreshed, cleared }) };
+  return { ctas, nodes, media: motionMedia, mobileMedia, handlers, triggers, gsapCalls, observers,
+    setHeroVisible: (visible) => observers.find((observer) => observer.targets.includes(nodes.heroCta))?.callback([{ isIntersecting: visible, intersectionRatio: visible ? 1 : 0 }]),
+    resize: () => resizeCallback?.(), setHidden: (value) => { context.document.hidden = value; }, values: () => ({ slept, woke, refreshed, cleared }) };
 }
 
 const absent = run({});
@@ -98,10 +123,20 @@ assert.equal(absent.nodes.video.hidden, true);
 assert.equal(absent.nodes.placeholder.hidden, false);
 assert.match(absent.nodes.betaAnswer.textContent, /Not yet/);
 assert.match(absent.nodes.intro.textContent, /prepared/);
-assert.equal(absent.nodes.body.style["--mobile-cta-reserve"], "96px");
+assert.equal(absent.nodes.body.style["--mobile-cta-reserve"], "88px");
+assert.equal(absent.nodes.mobileBar.attributes["aria-hidden"], "true");
+assert.equal(absent.nodes.mobileBar.attributes.inert, "");
+assert(!absent.nodes.mobileBar.classList.contains("is-visible"));
+absent.setHeroVisible(false);
+assert(absent.nodes.mobileBar.classList.contains("is-visible"));
+assert.equal(absent.nodes.mobileBar.attributes["aria-hidden"], "false");
+assert.equal(absent.nodes.mobileBar.attributes.inert, undefined);
+absent.setHeroVisible(true);
+assert(!absent.nodes.mobileBar.classList.contains("is-visible"));
+assert.equal(absent.nodes.mobileBar.attributes.inert, "");
 absent.nodes.mobileBar.getBoundingClientRect = () => ({ height: 111 });
 absent.resize();
-assert.equal(absent.nodes.body.style["--mobile-cta-reserve"], "135px");
+assert.equal(absent.nodes.body.style["--mobile-cta-reserve"], "127px");
 
 const supplied = run({
   betaOptInUrl: "https://play.google.com/apps/testing/example",

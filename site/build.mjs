@@ -34,6 +34,13 @@ function version(reference, fromFile) {
   const query = local.query.replace(/(?:^|&)v=[^&]*/g, "").replace(/^&|&$/g, "");
   return local.pathname + (query ? "?" + query + "&" : "?") + "v=" + digest + local.hash;
 }
+function versionSrcset(sourceSet, fromFile) {
+  return sourceSet.split(",").map((candidate) => {
+    const match = candidate.trim().match(/^(\S+)(?:\s+(.+))?$/);
+    if (!match) return candidate.trim();
+    return version(match[1], fromFile) + (match[2] ? " " + match[2] : "");
+  }).join(", ");
+}
 let assetCount = 0;
 const cssFiles = files.filter((file) => file.endsWith(".css"));
 const moduleFiles = files.filter((file) => /\.(?:m?js)$/i.test(file));
@@ -64,11 +71,18 @@ for (const file of moduleFiles) {
 }
 for (const file of htmlFiles) {
   let html = fs.readFileSync(file, "utf8");
-  html = html.replace(/<[^>]+>/g, (tag) => tag.replace(/\b(href|src|poster|content)=(["'])(.*?)\2/gi, (whole, name, quote, ref) => {
-    const result = version(ref, file);
-    if (result !== ref) assetCount += 1;
-    return name + "=" + quote + result + quote;
-  }));
+  html = html.replace(/<[^>]+>/g, (tag) => {
+    tag = tag.replace(/\b(href|src|poster|content)=(["'])(.*?)\2/gi, (whole, name, quote, ref) => {
+      const result = version(ref, file);
+      if (result !== ref) assetCount += 1;
+      return name + "=" + quote + result + quote;
+    });
+    return tag.replace(/\bsrcset=(["'])(.*?)\1/gi, (whole, quote, sourceSet) => {
+      const result = versionSrcset(sourceSet, file);
+      if (result !== sourceSet) assetCount += 1;
+      return "srcset=" + quote + result + quote;
+    });
+  });
   fs.writeFileSync(file, html);
 }
 
@@ -89,6 +103,12 @@ for (const file of htmlFiles) {
   const text = fs.readFileSync(file, "utf8");
   for (const tag of text.matchAll(/<[^>]+>/g)) {
     for (const match of tag[0].matchAll(/\b(href|src|poster|content)=(["'])(.*?)\2/gi)) verify(match[3], file, path.relative(root, file));
+    for (const match of tag[0].matchAll(/\bsrcset=(["'])(.*?)\1/gi)) {
+      for (const candidate of match[2].split(",")) {
+        const reference = candidate.trim().match(/^(\S+)/)?.[1];
+        if (reference) verify(reference, file, path.relative(root, file));
+      }
+    }
   }
 }
 console.log("Hashed and verified " + assetCount + " local stylesheet, module, font, image, and media references in " + root);

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -16,6 +16,7 @@
     <link rel="icon" href="assets/focus-key.svg" type="image/svg+xml">
     <link rel="preload" href="assets/work-sans-variable.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="assets/outfit-variable.ttf" as="font" type="font/ttf" crossorigin>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body id="top">
@@ -62,15 +63,15 @@
         </div>
 
         <figure class="hero-scene" data-focus-scene aria-labelledby="scene-caption">
-          <div class="scene-poster" data-scene-poster>
-            <span class="scene-poster-index" aria-hidden="true">THE REMOTE / ANDROID</span>
-            <div class="scene-mark-wrap">
-              <img class="scene-mark" src="assets/focus-key.svg" alt="">
-            </div>
-            <p class="scene-wordmark">One key.<br><span>Your TV.</span></p>
+          <picture class="scene-poster" data-scene-poster aria-hidden="true">
+            <source media="(max-width: 740px)" type="image/webp" srcset="assets/signal-dock/focus-key-mobile.webp">
+            <img src="assets/signal-dock/focus-key-desktop.webp" alt="" width="1200" height="900" decoding="async">
+          </picture>
+          <canvas class="scene-canvas" data-scene-canvas aria-hidden="true"></canvas>
+          <div class="scene-phone" aria-hidden="true">
+            <img src="assets/remote-demo-ltr.png" alt="" width="1080" height="2340" decoding="async">
           </div>
-          <canvas class="scene-canvas" data-scene-canvas aria-hidden="true" hidden></canvas>
-          <figcaption id="scene-caption">A static poster of The Remote focus-key mark.</figcaption>
+          <figcaption id="scene-caption">An illustrative focus-key and TV scene, with the current app screen layered in HTML.</figcaption>
         </figure>
       </section>
 
@@ -219,7 +220,7 @@
       <a href="#top" class="back-top">Back to top <span aria-hidden="true">↑</span></a>
     </footer>
 
-    <div class="mobile-cta-bar" data-mobile-cta-bar>
+    <div class="mobile-cta-bar" data-mobile-cta-bar aria-hidden="true" inert>
       <button class="beta-cta mobile-cta" type="button" data-beta-cta disabled aria-describedby="beta-status">
         <span data-beta-label>Beta access coming soon</span><span class="cta-arrow" aria-hidden="true">&rarr;</span>
       </button>
