@@ -54,7 +54,7 @@ class Element {
   }
 }
 function run(config, { reduce = false, motion = false, mobile = true, scrollY = 0, triggerTop = 1000 } = {}) {
-  const ctas = Array.from({ length: 4 }, () => new Element("Join the beta"));
+  const ctas = Array.from({ length: 4 }, () => new Element("Beta access coming soon"));
   ctas.forEach((cta) => { cta.disabled = true; });
   const nodes = {
     betaStatus: new Element("Google Play beta access is not open yet."),
