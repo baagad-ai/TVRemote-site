@@ -1,0 +1,294 @@
+{
+  "version": 1,
+  "coordinate_system": "GLB +Y up, front faces +Z. Blender source +Z up, front -Y. Convert position (x,y,z) -> (x,z,-y).",
+  "canvas_limit": 1,
+  "dpr": [
+    1,
+    1.5
+  ],
+  "frameloop": "demand",
+  "offscreen": "Pause rendering; use poster",
+  "screen_texture": {
+    "flipY": false,
+    "colorSpace": "SRGBColorSpace",
+    "material": "unlit/basic; preserve full native frame",
+    "phone_aspect": 0.46153846153846156
+  },
+  "reduced_motion": "Static poster, no pointer/scroll motion; DOM controls and facts remain usable",
+  "scenes": {
+    "hero": {
+      "model": "models/remote-hero.glb",
+      "camera": {
+        "position": [
+          3.299999952316284,
+          -14.5,
+          6.099999904632568
+        ],
+        "rotation_euler": [
+          1.3050187826156616,
+          1.1917293818441976e-08,
+          0.21953313052654266
+        ],
+        "orthographic_scale": 7.849999904632568,
+        "gltf_position": [
+          3.299999952316284,
+          6.099999904632568,
+          14.5
+        ],
+        "gltf_target": [
+          0.02,
+          2,
+          -0.2
+        ],
+        "framing": "Orthographic horizontal span is orthographic_scale. Derive vertical span from the render aspect ratio."
+      },
+      "size": [
+        1600,
+        1248
+      ],
+      "screen_quads_normalized": {
+        "PhoneScreen": [
+          [
+            0.1587712,
+            0.8421966
+          ],
+          [
+            0.3741009,
+            0.8491429
+          ],
+          [
+            0.3500813,
+            0.2471717
+          ],
+          [
+            0.1347515,
+            0.2402256
+          ]
+        ],
+        "TVScreen": [
+          [
+            0.3067963,
+            0.6377334
+          ],
+          [
+            0.9281487,
+            0.6921716
+          ],
+          [
+            0.9281487,
+            0.2454202
+          ],
+          [
+            0.3067963,
+            0.1909819
+          ]
+        ]
+      },
+      "nodes": {
+        "phone": "HeroPhone",
+        "television": "HeroTV",
+        "focus_brackets": "FocusRail",
+        "phone_screen": "PhoneScreen",
+        "tv_screen": "TVScreen"
+      },
+      "interaction": {
+        "pointer": "Rotate an outer wrapper by no more than \u00b10.05 radians; preserve all native screen texture content",
+        "tap": "Accessible DOM mode buttons select use-case scene; the composition is illustrative",
+        "scroll": "Transition to the next use-case; no phone or TV success state is implied"
+      }
+    },
+    "handoff": {
+      "model": "models/remote-handoff.glb",
+      "camera": {
+        "position": [
+          5.0,
+          -12.0,
+          7.300000190734863
+        ],
+        "rotation_euler": [
+          1.170555830001831,
+          1.6201433084006567e-08,
+          0.3947911560535431
+        ],
+        "orthographic_scale": 7.650000095367432,
+        "gltf_position": [
+          5.0,
+          7.300000190734863,
+          12.0
+        ],
+        "gltf_target": [
+          0,
+          1.8,
+          0
+        ],
+        "framing": "Orthographic horizontal span is orthographic_scale. Derive vertical span from the render aspect ratio."
+      },
+      "size": [
+        1200,
+        936
+      ],
+      "screen_quads_normalized": {
+        "ReviewPhoneScreen": [
+          [
+            0.1676581,
+            0.6055265
+          ],
+          [
+            0.2989629,
+            0.6291382
+          ],
+          [
+            0.2679217,
+            0.2419765
+          ],
+          [
+            0.1366168,
+            0.2183648
+          ]
+        ],
+        "DestinationTVScreen": [
+          [
+            0.547298,
+            0.5513232
+          ],
+          [
+            0.9333758,
+            0.6480293
+          ],
+          [
+            0.9333758,
+            0.361182
+          ],
+          [
+            0.547298,
+            0.2644759
+          ]
+        ]
+      },
+      "nodes": {
+        "phone": "ReviewPhone",
+        "review_card": "ReviewCard",
+        "route": "HandoffPath",
+        "packet": "HandoffPacket",
+        "television": "DestinationTV",
+        "phone_screen": "ReviewPhoneScreen",
+        "tv_screen": "DestinationTVScreen"
+      },
+      "interaction": {
+        "tap": "A clearly labeled Preview handoff button animates packet over the broken route once; no automatic playback or success screen",
+        "packet_path_gltf": "x=-1.7+3.3*t; y=0.45+0.74*(2*t-1)^2; z=-(0.07+0.37*t), t\u2208[0,1]",
+        "duration_ms": 850,
+        "reduced_motion": "Change static selection text without moving the packet"
+      }
+    },
+    "rooms": {
+      "model": "models/remote-rooms.glb",
+      "camera": {
+        "position": [
+          6.5,
+          -9.800000190734863,
+          9.5
+        ],
+        "rotation_euler": [
+          0.9312719702720642,
+          -1.6910437494743746e-08,
+          0.5996842980384827
+        ],
+        "orthographic_scale": 7.300000190734863,
+        "gltf_position": [
+          6.5,
+          9.5,
+          9.800000190734863
+        ],
+        "gltf_target": [
+          -0.2,
+          0.67,
+          0
+        ],
+        "framing": "Orthographic horizontal span is orthographic_scale. Derive vertical span from the render aspect ratio."
+      },
+      "size": [
+        1200,
+        936
+      ],
+      "screen_quads_normalized": {},
+      "nodes": {
+        "living": "RoomLiving",
+        "bedroom": "RoomBedroom",
+        "selection": "RoomSelection"
+      },
+      "interaction": {
+        "tap": "Living room / Bedroom DOM buttons translate the selection perimeter",
+        "selection_positions_gltf": {
+          "living": [
+            -1.8,
+            0.18,
+            0
+          ],
+          "bedroom": [
+            1.45,
+            0.18,
+            0
+          ]
+        },
+        "duration_ms": 450,
+        "keyboard": "Tab to radio controls, arrows change choice, selected state reported in DOM"
+      }
+    },
+    "focus": {
+      "model": "models/remote-focus.glb",
+      "camera": {
+        "position": [
+          5.400000095367432,
+          -9.699999809265137,
+          7.400000095367432
+        ],
+        "rotation_euler": [
+          1.0753124952316284,
+          2.0379182785745797e-09,
+          0.507973313331604
+        ],
+        "orthographic_scale": 5.949999809265137,
+        "gltf_position": [
+          5.400000095367432,
+          7.400000095367432,
+          9.699999809265137
+        ],
+        "gltf_target": [
+          0,
+          1.4,
+          0
+        ],
+        "framing": "Orthographic horizontal span is orthographic_scale. Derive vertical span from the render aspect ratio."
+      },
+      "size": [
+        1200,
+        936
+      ],
+      "screen_quads_normalized": {},
+      "nodes": {
+        "housing": "FocusHousing",
+        "up": "FocusUp",
+        "right": "FocusRight",
+        "down": "FocusDown",
+        "left": "FocusLeft",
+        "center": "FocusCenter"
+      },
+      "interaction": {
+        "tap": "Press an accessible directional or center DOM control to animate its matching key once",
+        "key_press_local_delta_gltf": [
+          0,
+          0,
+          -0.025
+        ],
+        "duration_ms": 140,
+        "note": "Capture each node\u2019s rest position once and restore it after each press. Do not accumulate offsets."
+      }
+    }
+  },
+  "lighting": {
+    "recommendation": "Procedural RoomEnvironment with PMREMGenerator.fromScene, neutral sRGB output, no external HDRI needed",
+    "docs": "https://threejs.org/docs/pages/RoomEnvironment.html",
+    "note": "Metallic shells will look underlit without an environment; verify poster-to-WebGL visual parity. Reuse and dispose shared PMREM."
+  }
+}

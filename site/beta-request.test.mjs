@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
 
-const source = fs.readFileSync(new URL("beta-request.js", import.meta.url), "utf8");
+const source = fs.readFileSync(new URL("beta-request.js", import.meta.url), "utf8").replace("export function", "function") + "\nwindow.cleanupBeta = mountBetaRequest(document, window.remoteSiteConfig);";
 const markerKey = "the-remote:beta-request-state";
 function load({ ready = true, fetcher = async () => Response.json({ ok: true }), synchronousToken = false, renderError = false, config = {}, storage = new Map(), storageBlocked = false } = {}) {
   let document;
@@ -12,7 +12,7 @@ function load({ ready = true, fetcher = async () => Response.json({ ok: true }),
     return { textContent: text, hidden: false, disabled: false, attributes: {}, handlers: {},
       classList: { toggle(name, on) { if (on) classes.add(name); else classes.delete(name); }, contains: (name) => classes.has(name) },
       setAttribute(key, value) { this.attributes[key] = value; }, removeAttribute(key) { delete this.attributes[key]; },
-      addEventListener(name, fn) { this.handlers[name] = fn; }, focus() { document.activeElement = this; this.focused = true; }
+      addEventListener(name, fn) { this.handlers[name] = fn; }, removeEventListener(name, fn) { if (this.handlers[name] === fn) delete this.handlers[name]; }, focus() { document.activeElement = this; this.focused = true; }
     };
   }
   const fieldset = node(), submit = node(), submitLabel = node("Request beta access"), status = node(), target = node();
@@ -41,7 +41,7 @@ function load({ ready = true, fetcher = async () => Response.json({ ok: true }),
     remove(id) { removed.push(id); } };
   const context = { window: { remoteSiteConfig: { betaRequestUrl: "https://worker.account.workers.dev/beta-requests", turnstileSiteKey: "0x4AAAAAAAAAAAAAAAAAAAAAAAA", ...config },
       sessionStorage: { getItem(key) { if (storageBlocked) throw Error("blocked"); return storage.get(key) || null; }, setItem(key, value) { if (storageBlocked) throw Error("blocked"); storage.set(key, value); }, removeItem(key) { if (storageBlocked) throw Error("blocked"); storage.delete(key); } },
-      addEventListener(name, fn) { handlers[name] = fn; } },
+      addEventListener(name, fn) { handlers[name] = fn; }, removeEventListener(name, fn) { if (handlers[name] === fn) delete handlers[name]; } },
     document, fetch: async (...args) => { requests.push(args); return fetcher(...args); }, AbortController, Object,
     setTimeout(callback) { const id = ++timerId; timers.set(id, callback); return id; }, clearTimeout(id) { timers.delete(id); }
   };
@@ -84,7 +84,7 @@ test("double taps and Enter submit once while saving, then replace the form with
   assert.equal(options.method, "POST"); assert.equal(options.credentials, "omit"); assert.equal(options.redirect, "error");
   assert.deepEqual(JSON.parse(options.body), { email: "Tester@Example.com", consent: true, website: "", turnstileToken: "test-token" });
   resolve(Response.json({ ok: true })); await pending;
-  assert.equal(page.form.hidden, true); assert.equal(page.panel.hidden, false); assert.match(page.heading.textContent, /on the list/);
+  assert.equal(page.form.hidden, true); assert.equal(page.panel.hidden, false); assert.match(page.heading.textContent, /Request received/);
   assert.equal(page.resultEmail.textContent, "Tester@Example.com"); assert.equal(page.document.activeElement, page.heading);
   assert.equal(page.fieldset.disabled, true); assert.equal(page.form.attributes["aria-busy"], "false");
   assert.match(page.status.textContent, /does not enroll/); assert.equal(page.storage.get(markerKey), "confirmed");
@@ -109,11 +109,11 @@ test("success survives late callbacks and page return; only explicit reset reope
 test("only this page's own normalized confirmed email gets exact repeat feedback", async () => {
   const page = load({ fetcher: async () => Response.json({ ok: true, status: "already_registered" }) });
   page.initialize(); page.verified(); await page.send();
-  assert.match(page.heading.textContent, /on the list/); assert(!/already/.test(page.heading.textContent));
+  assert.match(page.heading.textContent, /Request received/); assert(!/already/.test(page.heading.textContent));
   page.reset(); page.fill("  TESTER@example.COM "); page.verified(); await page.send();
-  assert.match(page.heading.textContent, /already submitted/); assert.equal(page.requests.length, 2);
+  assert.match(page.heading.textContent, /already sent/); assert.equal(page.requests.length, 2);
   assert.equal(page.resultEmail.textContent, "TESTER@example.COM");
-  page.reset(); page.fill("unknown@example.com"); page.verified(); await page.send(); assert.match(page.heading.textContent, /on the list/);
+  page.reset(); page.fill("unknown@example.com"); page.verified(); await page.send(); assert.match(page.heading.textContent, /Request received/);
 });
 
 test("reload restores only a non-email confirmation, without loading capture or verification", async () => {
@@ -232,10 +232,25 @@ test("result is outside the form, reset is a real button, and live status remain
   const css = fs.readFileSync(new URL("styles.css", import.meta.url), "utf8");
   const form = html.slice(html.indexOf("<form data-beta-request-form"), html.indexOf("</form>", html.indexOf("<form data-beta-request-form")));
   assert(!form.includes("data-request-result")); assert(!form.includes("data-request-status"));
-  assert.match(html, /<section[^>]*data-request-result hidden aria-labelledby="beta-result-title"/);
-  assert.match(html, /data-result-heading tabindex="-1"/); assert.match(html, /type="button" data-register-another/);
-  assert.match(html, /data-request-status role="status" aria-live="polite"/); assert.match(html, /<noscript>/);
+  assert.match(html, /<section(?=[^>]*data-request-result)(?=[^>]*hidden)(?=[^>]*aria-labelledby="request-result-heading")/);
+  assert.match(html, /<h3(?=[^>]*data-result-heading)(?=[^>]*tabindex="-1")/); assert.match(html, /<button(?=[^>]*type="button")(?=[^>]*data-register-another)/);
+  assert.match(html, /<p(?=[^>]*data-request-status)(?=[^>]*role="status")(?=[^>]*aria-live="polite")/); assert.match(html, /<noscript>/);
   assert.match(css, /\[hidden\].*display:\s*none\s*!important/);
-  assert.match(css, /\.beta-result-email strong\{[^}]*overflow-wrap:anywhere/);
-  assert.match(css, /\.beta-result h3:focus/); assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /\.request-result strong\{[^}]*overflow-wrap:anywhere/);
+  assert.match(css, /\[tabindex\]:focus-visible/); assert.match(css, /prefers-reduced-motion:\s*reduce/);
+});
+
+
+test("unmount removes handlers, aborts saving, invalidates callbacks and releases only its own global", async () => {
+  let resolve;
+  const page = load({ fetcher: () => new Promise(done => { resolve = done; }) });
+  page.initialize(); page.verified(); const pending = page.send();
+  page.context.window.cleanupBeta();
+  assert.equal(page.requests[0][1].signal.aborted, true);
+  assert.equal(page.form.handlers.submit, undefined);
+  assert.equal(page.context.window.remoteBetaTurnstileReady, undefined);
+  page.verified(0); assert.equal(page.submit.disabled, true);
+  resolve(Response.json({ ok: true })); await pending;
+  assert.equal(page.panel.hidden, true); assert.equal(page.storage.get(markerKey), "unconfirmed");
+  assert.equal(page.timers.size, 0);
 });

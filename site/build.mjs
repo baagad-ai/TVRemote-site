@@ -55,7 +55,15 @@ for (const file of cssFiles) {
   });
   fs.writeFileSync(file, css);
 }
-for (const file of moduleFiles) {
+const versionedModules = new Set();
+function versionModule(file) {
+  if (versionedModules.has(file)) return;
+  versionedModules.add(file);
+  const original = fs.readFileSync(file, 'utf8');
+  for (const match of original.matchAll(/\b(?:from\s*|import\s*(?:\(\s*)?)(["'])([^"']+)\1/g)) {
+    const dependency = localPath(match[2], file);
+    if (dependency && moduleFiles.includes(dependency.resolved)) versionModule(dependency.resolved);
+  }
   let script = fs.readFileSync(file, "utf8");
   script = script.replace(/\bfrom\s*(["'])([^"']+)\1/g, (whole, quote, ref) => {
     const result = version(ref, file);
@@ -69,8 +77,14 @@ for (const file of moduleFiles) {
   });
   fs.writeFileSync(file, script);
 }
+moduleFiles.forEach(versionModule);
+function outsideReactRoot(html) {
+  const start = html.indexOf('<div id="root">'), end = html.lastIndexOf('</div><script ');
+  return start < 0 || end < start ? { html, markup: '' } : { html: html.slice(0, start) + '__REACT_ROOT__' + html.slice(end + 6), markup: html.slice(start, end + 6) };
+}
 for (const file of htmlFiles) {
-  let html = fs.readFileSync(file, "utf8");
+  const document = outsideReactRoot(fs.readFileSync(file, "utf8"));
+  let html = document.html;
   html = html.replace(/<[^>]+>/g, (tag) => {
     tag = tag.replace(/\b(href|src|poster|content)=(["'])(.*?)\2/gi, (whole, name, quote, ref) => {
       const result = version(ref, file);
@@ -83,7 +97,7 @@ for (const file of htmlFiles) {
       return "srcset=" + quote + result + quote;
     });
   });
-  fs.writeFileSync(file, html);
+  fs.writeFileSync(file, document.markup ? html.replace('__REACT_ROOT__', document.markup) : html);
 }
 
 function verify(reference, fromFile, source) {
@@ -100,7 +114,7 @@ for (const file of moduleFiles) {
   for (const match of text.matchAll(/\bimport\s*(?:\(\s*)?(["'])([^"']+)\1/g)) verify(match[2], file, path.relative(root, file));
 }
 for (const file of htmlFiles) {
-  const text = fs.readFileSync(file, "utf8");
+  const text = outsideReactRoot(fs.readFileSync(file, "utf8")).html;
   for (const tag of text.matchAll(/<[^>]+>/g)) {
     for (const match of tag[0].matchAll(/\b(href|src|poster|content)=(["'])(.*?)\2/gi)) verify(match[3], file, path.relative(root, file));
     for (const match of tag[0].matchAll(/\bsrcset=(["'])(.*?)\1/gi)) {

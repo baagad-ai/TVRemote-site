@@ -11,3 +11,7 @@ This maintainer record describes the five unaltered native app captures used by 
 | `assets/showcase/tv-details-edit-demo.png` | `05-tv-details-disconnected-sample.png` | The name-and-room form for a sample TV is shown with the keyboard dismissed. No field was changed or saved. |
 
 The player-controls capture was taken after natural in-app scrolling; its file has not been modified. The website's small native-detail insets use CSS positioning over the same original PNGs. They do not add a second, synthesized UI state.
+
+## Earlier keyboard capture
+
+`assets/remote-demo-ltr.png` was introduced in published commit `6a4569fe50800204eee71ed60a71fa5402ed0180` as the reviewed demo screen with explicit local-demo context. Its older UI visibly includes a sample Connected label. This redesign preserves its exact bytes, labels it a native sample screen, and makes no claim that its displayed TV was actually paired or that any search played on a TV. Its capture date and source-device details are not independently established by this repository.

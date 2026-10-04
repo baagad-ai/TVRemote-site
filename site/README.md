@@ -17,29 +17,12 @@ The email-only beta request form uses the existing Cloudflare Worker, private D1
 - Limit claims to shipped features and compatible devices. Do not promise support for every TV or add invented results, testimonials, counts, or endorsements.
 - Keep beta copy honest: a request is not enrollment. A developer reviews each request and manually invites approved Google Play accounts; testers must accept the Play invitation before installing.
 
-## Static build
+## Build and publication
 
-The source is in `site/`. The GitHub Pages workflow stages an explicit file allowlist, then runs `node site/build.mjs _site`. The build adds and verifies SHA-256 query versions for local stylesheets, scripts and module imports, fonts, images, and media in the staged output. Public page and privacy URLs remain stable.
+React prerenders the landing page, privacy policy, guide index and six articles to readable HTML. site/src/ contains the UI and article metadata; site/content/guides/ holds matching article bodies. Generated HTML, CSS and runtime chunks are committed with their sources. Default motion includes sourced React Bits and Magic UI components plus original GLBs. Reduced motion, failed assets and JavaScript-disabled browsing retain static artwork and readable content.
 
-The site is static HTML, CSS, and JavaScript; it has no framework or runtime package installation. GSAP and ScrollTrigger 3.15.0 are self-hosted for reduced-motion-aware entrances and scroll-linked benefit emphasis. The Three.js 0.186.1 distribution and its license are in `site/vendor/three/`; the hero retains a complete static poster, and no WebGL scene is started until its scene module is available.
+npm ci --ignore-scripts --no-audit --no-fund installs exact locked dependencies. Node 24 is used in both workflow jobs.
 
-Third-party notices:
+npm run build regenerates the nine pages and runtime. Run node site/check.mjs, node site/check-config.mjs and npm test before publication. node site/stage.mjs _site stages only the public allowlist; node site/build.mjs _site versions head assets, fonts and module imports while preserving the React root for hydration. Old vanilla source and vendor files are retained for history but excluded from the deployed artifact.
 
-- GSAP and ScrollTrigger: `site/vendor/gsap/LICENSE-NOTICE.txt` and upstream license headers.
-- Three.js: `site/vendor/three/LICENSE`.
-- Work Sans and Outfit: `site/assets/licenses/`.
-
-## Checks
-
-Run the dependency-free checks from the repository root:
-
-```sh
-node --check site/site.js
-node --check site/config.js
-node --check site/build.mjs
-node site/check.mjs
-node site/check-config.mjs
-node --test site/beta-request.test.mjs worker/test/*.test.mjs
-```
-
-GitHub Actions runs these checks before deploying the public Pages artifact. No deployment tokens or secrets are stored in this repository.
+See [SOURCE-PROVENANCE.md](SOURCE-PROVENANCE.md) for source pins, adaptations, full notices and original asset provenance, and [QA.md](QA.md) for verification and limitations. No emails, credentials, private research notes or authenticated exports belong in the public artifact.

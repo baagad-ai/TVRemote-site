@@ -1,18 +1,19 @@
-(() => {
+export function mountBetaRequest(root, config) {
   "use strict";
-  const form = document.querySelector("[data-beta-request-form]");
-  const status = document.querySelector("[data-request-status]");
+  const form = root.querySelector("[data-beta-request-form]");
+  const status = root.querySelector("[data-request-status]");
   if (!form || form.getAttribute("data-beta-ready") !== "true") {
     if (status) status.textContent = "Requests are unavailable right now. No email has been submitted.";
     return;
   }
-  const config = window.remoteSiteConfig;
+  const listeners = [];
+  const on = (target, event, callback) => { target.addEventListener(event, callback); listeners.push(() => target.removeEventListener(event, callback)); };
   const fieldset = form.querySelector("fieldset");
   const submit = form.querySelector("[type=submit]");
   const submitLabel = submit.querySelector("span");
   const verificationStatus = form.querySelector("[data-verification-status]");
   const retryVerification = form.querySelector("[data-verification-retry]");
-  const panel = document.querySelector("[data-request-result]");
+  const panel = root.querySelector("[data-request-result]");
   const heading = panel.querySelector("[data-result-heading]");
   const summary = panel.querySelector("[data-result-summary]");
   const emailRow = panel.querySelector("[data-result-email-row]");
@@ -21,6 +22,7 @@
   const confirmedEmails = new Set(); // Only this page's own confirmed submissions, never an email lookup.
   const markerKey = "the-remote:beta-request-state";
   let state = "editing", token = "", widget = null, challengeGeneration = 0, requestGeneration = 0;
+  let requestTimeout = null, disposed = false;
   let pending = null, loadingScript = null, scriptTimeout = null, pageActive = true;
   const message = (text, kind = "") => { status.textContent = text; status.setAttribute("data-state", kind); status.classList.toggle("visually-hidden", kind === "success" || !text); };
   const marker = (value) => {
@@ -37,14 +39,14 @@
   };
   const showResult = (email = "", repeated = false, focus = false) => {
     state = "complete"; disposeChallenge(); fieldset.disabled = true; form.hidden = true; panel.hidden = false;
-    heading.textContent = repeated ? "You’ve already submitted this email." : email ? "Your request is on the list." : "Your previous request was received.";
-    summary.textContent = repeated ? "Your request has already been received for private review. You don’t need to submit it again." : "Your request has been received for private review.";
+    heading.textContent = repeated ? "You already sent this request." : email ? "Request received." : "Your previous request was received.";
+    summary.textContent = repeated ? "This page already confirmed your request. You can leave it here." : "We'll review your request privately.";
     submittedEmail.textContent = email; emailRow.hidden = !email;
-    message(repeated ? "You’ve already submitted this email. A request does not enroll you in the Google Play beta." : "Request received. A request does not enroll you in the Google Play beta.", "success");
+    message(repeated ? "You already sent this request. A request does not enroll you in the Google Play beta." : "Request received. A request does not enroll you in the Google Play beta.", "success");
     if (focus) heading.focus();
   };
   const mountChallenge = () => {
-    if (state !== "editing" || !pageActive) return;
+    if (disposed || state !== "editing" || !pageActive) return;
     disposeChallenge();
     const generation = challengeGeneration;
     const current = () => generation === challengeGeneration && state === "editing" && pageActive;
@@ -78,7 +80,7 @@
     }
   };
   const startVerification = () => {
-    if (state !== "editing" || !pageActive) return;
+    if (disposed || state !== "editing" || !pageActive) return;
     if (window.turnstile) { mountChallenge(); return; }
     if (loadingScript) return;
     verificationStatus.textContent = "Loading verification…"; retryVerification.hidden = true;
@@ -89,21 +91,23 @@
     script.onerror = () => {
       if (loadingScript !== script) return;
       clearTimeout(scriptTimeout); scriptTimeout = null; loadingScript = null; script.remove();
-      if (state !== "editing" || !pageActive) return;
+      if (disposed || state !== "editing" || !pageActive) return;
       verificationStatus.textContent = "Verification could not load. Choose Retry verification to try again.";
       retryVerification.hidden = false;
     };
     scriptTimeout = setTimeout(script.onerror, 15000);
     document.head.append(script);
   };
-  window.remoteBetaTurnstileReady = () => {
+  const ready = () => {
+    if (disposed) return;
     clearTimeout(scriptTimeout); scriptTimeout = null; loadingScript = null;
     if (widget === null) mountChallenge();
   };
-  retryVerification.addEventListener("click", () => {
+  window.remoteBetaTurnstileReady = ready;
+  on(retryVerification, "click", () => {
     if (state === "editing") startVerification();
   });
-  another.addEventListener("click", () => {
+  on(another, "click", () => {
     if (state !== "complete") return;
     requestGeneration++; marker(""); form.reset(); submittedEmail.textContent = "";
     form.elements.email.value = ""; form.elements.consent.checked = false; form.elements.website.value = "";
@@ -111,8 +115,8 @@
     state = "editing"; panel.hidden = true; form.hidden = false; fieldset.disabled = false;
     message(""); startVerification(); form.elements.email.focus();
   });
-  form.elements.email.addEventListener("input", () => form.elements.email.removeAttribute("aria-invalid"));
-  form.addEventListener("submit", async (event) => {
+  on(form.elements.email, "input", () => form.elements.email.removeAttribute("aria-invalid"));
+  on(form, "submit", async (event) => {
     event.preventDefault();
     if (state !== "editing" || !pageActive || !form.reportValidity()) return;
     if (!token) { verificationStatus.textContent = "Complete verification before sending your request."; return; }
@@ -123,7 +127,7 @@
     fieldset.disabled = true; submit.disabled = true; retryVerification.disabled = true;
     submitLabel.textContent = "Saving…"; form.setAttribute("aria-busy", "true");
     message("Saving your request…", "pending");
-    const timeout = setTimeout(() => controller.abort(), 15000);
+    const timeout = requestTimeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(config.betaRequestUrl.trim(), {
         method: "POST", mode: "cors", credentials: "omit", cache: "no-store", redirect: "error",
@@ -140,7 +144,7 @@
       } else {
         const errors = {
           invalid_email: "Check your Google Play account email and try again.",
-          invalid_request: "Check the consent checkbox and your details, then try again.",
+          invalid_request: "Tick the consent checkbox, check your email, and try again.",
           invalid_body: "Your request could not be read. Please try again.",
           verification_required: "Complete fresh verification and retry.",
           verification_failed: "Verification expired or failed. Complete fresh verification and retry.",
@@ -154,7 +158,7 @@
     } catch {
       if (generation === requestGeneration && pageActive) message("We could not confirm your request was saved. Check your connection and retry with the same email.", "error");
     } finally {
-      clearTimeout(timeout);
+      clearTimeout(timeout); requestTimeout = null;
       if (generation === requestGeneration) {
         pending = null; form.setAttribute("aria-busy", "false"); retryVerification.disabled = false;
         submitLabel.textContent = "Request beta access";
@@ -162,7 +166,7 @@
       }
     }
   });
-  window.addEventListener("pagehide", () => {
+  on(window, "pagehide", () => {
     pageActive = false; requestGeneration++; pending?.abort(); pending = null;
     if (state === "submitting") message("We could not confirm your request was saved. Retry with the same email after returning.", "error");
     disposeChallenge();
@@ -171,7 +175,7 @@
     form.setAttribute("aria-busy", "false"); submitLabel.textContent = "Request beta access"; retryVerification.disabled = false;
     if (state !== "complete") { state = "suspended"; fieldset.disabled = true; }
   });
-  window.addEventListener("pageshow", (event) => {
+  on(window, "pageshow", (event) => {
     if (!event.persisted) return;
     pageActive = true;
     if (state === "suspended") { state = "editing"; fieldset.disabled = false; startVerification(); }
@@ -183,4 +187,12 @@
     else message("");
     startVerification();
   }
-})();
+  return () => {
+    disposed = true; pageActive = false; requestGeneration++; pending?.abort(); pending = null;
+    disposeChallenge(); clearTimeout(scriptTimeout); clearTimeout(requestTimeout);
+    if (loadingScript) { loadingScript.onerror = null; loadingScript.remove(); loadingScript = null; }
+    listeners.forEach(remove => remove());
+    if (window.remoteBetaTurnstileReady === ready) delete window.remoteBetaTurnstileReady;
+    fieldset.disabled = true; submit.disabled = true; form.setAttribute("aria-busy", "false");
+  };
+}
