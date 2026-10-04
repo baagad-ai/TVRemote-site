@@ -1,0 +1,162 @@
+{
+  "version": 1,
+  "model": "room-destinations.glb",
+  "bytes": 333600,
+  "coordinate_system": "+Y up; screen front +Z",
+  "camera": {
+    "projection": "orthographic",
+    "position": [
+      2,
+      4.2,
+      12.8
+    ],
+    "target": [
+      0,
+      1.35,
+      0.28
+    ],
+    "horizontal_span": 8.25,
+    "aspect_ratio": 1.5,
+    "left": -4.125,
+    "right": 4.125,
+    "top": 2.75,
+    "bottom": -2.75
+  },
+  "destinations": {
+    "living": "DestinationLiving",
+    "bedroom": "DestinationBedroom"
+  },
+  "selection": {
+    "living": "SelectionLiving",
+    "bedroom": "SelectionBedroom"
+  },
+  "screens": {
+    "living": "LivingScreen",
+    "bedroom": "BedroomScreen"
+  },
+  "initial_state": "living",
+  "initialize_before_reveal": "Both selection nodes exist in the GLB. Set living.visible=true and bedroom.visible=false before adding or revealing the model. The defaultVisible extra is a hint, not enforced glTF visibility.",
+  "state_change": "Keep both Destination groups visible. Show only the Selection group corresponding to the same HTML room/tab state. Switch the matching poster with that state.",
+  "poster": {
+    "living": {
+      "desktop": "room-destinations-living-1440.webp",
+      "mobile": "room-destinations-living-720.webp"
+    },
+    "bedroom": {
+      "desktop": "room-destinations-bedroom-1440.webp",
+      "mobile": "room-destinations-bedroom-720.webp"
+    }
+  },
+  "poster_dimensions": {
+    "desktop": [
+      1440,
+      960
+    ],
+    "mobile": [
+      720,
+      480
+    ]
+  },
+  "poster_fit": "contain; preserve 3:2; do not crop",
+  "phone_evidence": "Outside GLB, intact native HTML capture at 260-320px wide and original aspect ratio",
+  "performance": {
+    "canvas_limit": 1,
+    "dpr": [
+      1,
+      1.5
+    ],
+    "render_when": "on demand; pause offscreen and at rest",
+    "external_textures": 0
+  },
+  "motion": {
+    "duration_ms": [
+      180,
+      240
+    ],
+    "purpose": "chosen destination changes, not idle tilt",
+    "reduced_motion": "Matching static selected-state poster plus functioning ordinary DOM room controls"
+  },
+  "lighting": "Neutral soft procedural environment, restrained contact shadows; no colored global tint",
+  "screen_quads_normalized": {
+    "LivingScreen": [
+      [
+        0.09508635848760605,
+        0.5432571470737457
+      ],
+      [
+        0.4601546823978424,
+        0.5624419152736664
+      ],
+      [
+        0.4601546823978424,
+        0.25810426473617554
+      ],
+      [
+        0.09508635848760605,
+        0.23891949653625488
+      ]
+    ],
+    "BedroomScreen": [
+      [
+        0.6395224928855896,
+        0.5481877028942108
+      ],
+      [
+        0.8430032134056091,
+        0.5588808357715607
+      ],
+      [
+        0.8430032134056091,
+        0.3892500400543213
+      ],
+      [
+        0.6395224928855896,
+        0.37855690717697144
+      ]
+    ]
+  },
+  "optional_close_views": {
+    "living": {
+      "poster": "room-living-mobile.webp",
+      "position": [
+        -1.6,
+        3.25,
+        10.5
+      ],
+      "target": [
+        -1.94,
+        1.3,
+        -0.2
+      ],
+      "horizontal_span": 4.08,
+      "vertical_span": 3.9828571428571427,
+      "size": [
+        840,
+        820
+      ],
+      "visible_destination": "DestinationLiving",
+      "hide_other_destination": true
+    },
+    "bedroom": {
+      "poster": "room-bedroom-mobile.webp",
+      "position": [
+        2.1,
+        3.45,
+        10.8
+      ],
+      "target": [
+        1.95,
+        1.33,
+        0.45
+      ],
+      "horizontal_span": 3.606521739130435,
+      "vertical_span": 3.95,
+      "size": [
+        840,
+        920
+      ],
+      "visible_destination": "DestinationBedroom",
+      "hide_other_destination": true
+    }
+  }
+}

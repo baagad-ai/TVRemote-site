@@ -1,6 +1,8 @@
 # Source provenance
 
-The redesigned site uses React components adapted from upstream source, rather than visual approximations. Retrieved 4 October 2026. Full third-party notices ship in `licenses/`; font notices remain in `assets/licenses/`.
+The site uses React components adapted from upstream source. Retrieved 4 October 2026. Full third-party notices ship in `licenses/`; font notices remain in `assets/licenses/`.
+
+The current One Page Love revision uses SplitText for its single headline entrance and original application code for the continuous phone story. LightRays, ScrollStack, Animated Beam and Border Beam belong to the earlier version and are not part of the current landing choreography. Their source provenance remains below for the retained historical files. The current reference observations and adaptation boundaries are recorded in [ONE-PAGE-LOVE-STORY.md](ONE-PAGE-LOVE-STORY.md).
 
 ## React Bits
 
@@ -21,7 +23,15 @@ MIT-licensed registry components, with the full upstream notice retained:
 
 Their geometry, SVG gradients and CSS offset-path motion are preserved; dependencies are scoped locally. Animations play a finite pass and stop when inactive or reduced motion is requested. Aceternity ContainerScroll was excluded because public redistribution was not established.
 
-## Original 3D scenes
+## Original TV destination family
+
+The current room chapter uses The Remote TV Destinations Family, an original cloud-authored Blender kit. Imported ZIP SHA-256: `062ed5800074025b1d8d2a322366e188b9f8aaf967d6240a9dc770ddc6376537`. The embedded GLB is 333,600 bytes and 8,964 triangles; its SHA-256 is `b6b2b20871af5f8b155c50d69ce20a5acf2a5a45e13f78b17da28e58e4ac7ddc`.
+
+Only the model, authored posters and normalized application contract ship. The exact cameras and named destination/selection groups come from `assets/3d/room-destinations-contract.json`. Desktop shows the paired overview; mobile uses the matching selected-destination close camera. The static poster uses the same room state. Screen faces stay blank; native app proof remains in intact HTML images.
+
+The demand-rendered Three.js runtime uses a neutral procedural environment, restrained shadows, and one GPU lease. Offscreen, reduced-motion, Save-Data, page-hide, aborted initialization and context-loss paths release the context immediately. No-JavaScript and failure paths retain their matching posters and ordered proof. Blender source, texture authoring files and private QA remain outside the public artifact. Earlier assets remain in repository history and source storage; the publication allowlist excludes them.
+
+## Earlier original 3D scenes
 
 The Remote Focus Series kit supplies four original embedded GLBs and nine transparent WebP posters. The imported kit SHA-256 is `e52517f5d2636bc1b5b267307f77661fe7fab3ce470fcb5626dde998184b0c7b`. `assets/3d/runtime-contract.json` records cameras, node names, screen UVs, poster screen quads and interaction limits. Blender source and private QA notes are retained outside the public artifact.
 

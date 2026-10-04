@@ -1,7 +1,5 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { mountBetaRequest } from '../beta-request.js';
-import { BorderBeam } from './components/BorderBeam';
-import { useEnvironment, useVisible } from './environment';
 export const validConfig = config => /^https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev\/beta-requests$/.test(config?.betaRequestUrl?.trim() || '') && /^0x4[A-Za-z0-9_-]{15,100}$/.test(config?.turnstileSiteKey?.trim() || '');
 const Capture = memo(function Capture({ config }) {
   const ref = useRef(null), ready = validConfig(config);
@@ -34,11 +32,9 @@ const Capture = memo(function Capture({ config }) {
   </div>;
 });
 export default function Beta({ config }) {
-  const { motion } = useEnvironment(), [ref, visible] = useVisible(), [focused, setFocused] = useState(false);
   return <section className="beta-section page-width" id="beta-enrollment" aria-labelledby="beta-title">
     <div className="beta-intro"><p className="eyebrow">Try it early</p><h2 id="beta-title" tabIndex={-1}>Your next remote<br />could be your phone.</h2><p>The Remote is free. Request beta access with your Google Play email.</p><div className="beta-steps"><p><b>01</b> Send your request.</p><p><b>02</b> We review it privately.</p><p><b>03</b> If approved, accept your Play invitation.</p></div><p id="enrollment-note" className="fine-print">A request doesn't enroll you or send an automatic invite. Invitations are sent manually through Google Play. Accept the invitation before installing. The public Play sign-up link is still pending.</p></div>
-    <div ref={ref} className="beta-panel" onFocusCapture={() => setFocused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}>
-      <BorderBeam active={motion && visible && !focused} size={140} duration={7} colorFrom="#d0f582" colorTo="#758742" initialOffset={20} borderWidth={1} />
+    <div className="beta-panel">
       <Capture config={config} />
     </div>
   </section>;

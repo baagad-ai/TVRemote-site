@@ -10,6 +10,7 @@ const files = ['index.html', 'privacy/index.html', 'guides/index.html', 'styles.
 for (const folder of ['runtime', 'licenses', 'assets/3d', 'assets/showcase', 'assets/licenses']) {
   for (const entry of await fs.readdir(path.join(root, folder), { withFileTypes: true })) {
     if (!entry.isFile()) throw Error('Unexpected nested public asset');
+    if (folder === 'assets/3d' && !/^room-(?:destinations(?:-(?:living|bedroom)-(?:1440|720)\.webp|-contract\.json|\.glb)|(?:living|bedroom)-mobile\.webp)$/.test(entry.name)) continue;
     if (!/\.(js|json|glb|webp|png|txt|md)$/i.test(entry.name)) throw Error('Unexpected public asset type');
     files.push(folder + '/' + entry.name);
   }

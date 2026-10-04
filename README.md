@@ -25,20 +25,16 @@ The native PNGs in `site/assets/showcase/` are unaltered captures from the app's
 
 The source is in `site/`. The GitHub Pages workflow stages an explicit file allowlist, then runs `node site/build.mjs _site`. The build adds and verifies SHA-256 query versions for local stylesheets, scripts and module imports, fonts, images, and media in the staged output. Public page and privacy URLs remain stable.
 
-The site is static HTML, CSS, and JavaScript; it has no framework or runtime package installation. GSAP and ScrollTrigger 3.15.0 are self-hosted for reduced-motion-aware entrances and reversible, scroll-linked story movement. The Three.js 0.186.1 distribution and its license are in `site/vendor/three/`; the hero retains a complete static poster, and no WebGL scene is started until its scene module is available.
+The site prerenders nine public React pages. Run `npm ci --ignore-scripts` and `npm run build` to generate their HTML and bundled runtime. GSAP supplies a single reduced-motion-aware headline entrance. Native app evidence stays in full-resolution HTML images; one lazily loaded Three.js destination scene uses exact authored cameras, matched poster fallbacks and a single GPU lease. The original app PNGs are preserved.
 
-Third-party notices:
-
-- GSAP and ScrollTrigger: `site/vendor/gsap/LICENSE-NOTICE.txt` and upstream license headers.
-- Three.js: `site/vendor/three/LICENSE`.
-- Work Sans and Outfit: `site/assets/licenses/`.
+Third-party notices are retained in `site/licenses/` and `site/assets/licenses/`. See [source provenance](site/SOURCE-PROVENANCE.md), [reference adaptation](site/ONE-PAGE-LOVE-STORY.md) and [verification](site/QA.md).
 
 ## Checks
 
-Run the dependency-free checks from the repository root:
+After installing the pinned dependencies, run the checks from the repository root:
 
 ```sh
-node --check site/site.js
+npm run build
 node --check site/config.js
 node --check site/build.mjs
 node site/check.mjs

@@ -37,15 +37,17 @@ for(const file of ['remote-demo-ltr.png','showcase/youtube-share-review.png','sh
  const bytes=fs.readFileSync(path.join(root,'assets',file));
  assert.equal(bytes.readUInt32BE(16),1080);assert.equal(bytes.readUInt32BE(20),2340);
 }
-const contract=JSON.parse(read('assets/3d/runtime-contract.json'));
-for(const name of ['hero','handoff','rooms','focus']){
- const bytes=fs.readFileSync(path.join(root,'assets/3d/remote-'+name+'.glb'));
- assert(bytes.length<1_100_000);assert.equal(bytes.readUInt32LE(0),0x46546c67);
+const contract=JSON.parse(read('assets/3d/room-destinations-contract.json'));
+{
+ const bytes=fs.readFileSync(path.join(root,'assets/3d',contract.model));
+ assert(bytes.length<700_000);assert.equal(bytes.readUInt32LE(0),0x46546c67);
  const data=JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString('utf8'));
  assert(![...(data.buffers||[]),...(data.images||[])].some(x=>x.uri&&!x.uri.startsWith('data:')));
  const names=new Set(data.nodes.map(x=>x.name));
- for(const value of Object.values(contract.scenes[name].nodes))assert(names.has(value),name+': '+value);
- const triangles=data.meshes.flatMap(x=>x.primitives).reduce((n,p)=>n+(data.accessors[p.indices].count/3),0);assert(triangles<35000);
+ for(const value of [...Object.values(contract.destinations),...Object.values(contract.selection),...Object.values(contract.screens)])assert(names.has(value),value+' is required');
+ const triangles=data.meshes.flatMap(x=>x.primitives).reduce((n,p)=>n+(data.accessors[p.indices].count/3),0);assert(triangles<12000);
+ assert.equal(contract.camera.aspect_ratio,1.5);assert.equal(contract.poster_fit,'contain; preserve 3:2; do not crop');
+ for(const state of Object.values(contract.poster))for(const file of Object.values(state))assert(fs.existsSync(path.join(root,'assets/3d',file)),file+' fallback missing');
 }
 const sizes=fs.readdirSync(path.join(root,'runtime')).map(name=>({name,gzip:gzipSync(fs.readFileSync(path.join(root,'runtime',name)),{level:9}).length}));
 assert(sizes.find(x=>x.name==='app.js').gzip<240000,'Initial runtime budget');

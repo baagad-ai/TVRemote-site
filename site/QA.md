@@ -1,26 +1,36 @@
-# Redesign verification
+# One Page Love revision verification
 
-Reviewed on 4 October 2026 in Brave on Windows, using isolated browser profiles with the browser sandbox enabled. All API responses and verification callbacks in browser QA were fixtures. No production signup POSTs or tester invitations were sent.
+Reviewed on 4 October 2026 in sandboxed Brave on Windows, with isolated browser profiles. Signup and verification responses were local fixtures. No production requests, invitations or TV commands were sent. Earlier redesign review counts do not belong to this revision.
 
-## Full-page review cycles
+## Completed review/fix/retest cycles: 2
 
-1. Built and captured the complete page at 320, 390, 768 and 1280 pixels. Review found the decorative border beam expanding the document horizontally. Constrained its paint containment, then rebuilt and retested all sections; only a one-pixel tablet hero overflow remained.
-2. Reviewed the second captures, removed the tablet hero overhang, rebuilt and retested the entire page. All 44 cases passed without page errors, missing files or horizontal overflow.
-3. Independent visual review of the third captures identified competing primary CTAs, the mobile dock covering screenshot content, unclear legacy screenshot provenance, and absent touch dragging. Made the header CTA secondary, suppressed the dock through screenshot sections, labeled the native sample screen and documented its limits, added horizontal touch movement, then rebuilt and retested the entire page. All 44 cases passed. The share copy describes phone-side review and does not require a TV approval dialog.
+1. The first complete asset-integrated page passed 42 functional cases, then actual pixel review found washed-out graphite/oak and mobile destination objects that were too small. Calibrated neutral lighting, added restrained shadows, and used the kit's exact selected-destination mobile cameras. Rebuilt and retested the complete page: 42 cases passed, with larger selected TVs and improved material contrast.
+2. Independent review of that page found an initialization cancellation gap and an enlarged split word overflowing at narrow widths. Wired effect-owned cancellation to release pending initialization immediately; constrained and wrapped generated headline words. Also settled QA captures after transitions and combined redundant captions. The final complete page again passed 42 cases. Twelve independent lifecycle/accessibility regressions passed. Independent forward/reverse and keyboard review found no remaining material blocker. Parent pixel review accepted the resulting story, readability and distinct motion; its final form-state evidence question and misleading selector arrows were then addressed with a focused controlled-response retest.
 
-A fifth full-page run after the independent flow review's JavaScript-disabled control fix also passed all 44 cases. It is a verification rerun, not an additional full visual critique cycle.
+Three preliminary layout passes identified mobile ordering, immediate access and proof labeling/choreography issues. They are not complete refinement cycles. Reference screenshots and unit tests are not counted as visual cycles.
 
 ## Final gates
 
-- 35 frontend and Worker tests passed, including save-before-success, concurrent deduplication, uniform membership responses, daily capacity, challenge validation, failure cleanup, private export and overwrite protection.
-- Nine static routes passed single-H1, title/description/canonical, link, screenshot dimensions, embedded GLB contract, notice and sitemap checks. Article Markdown bodies match their metadata exactly.
-- The staged public allowlist contains 48 files. Its 50 versioned stylesheet, module, font and image references passed build verification. Brave ran the same interaction/lifecycle checks against these hashed files without hydration errors.
-- 200% text enlargement passed without horizontal document overflow at all four widths. All nine pages remained readable without JavaScript; preview controls and signup capture stayed disabled until their runtime was ready.
-- Scene controls worked with keyboard and touch. Native Brave touch gestures changed the artwork horizontally and preserved vertical page scrolling. Repeated scene/rays handoffs never exceeded one live WebGL context. Reduced motion and persisted page-hide events released the context and restored ordinary text; page return restored effects.
-- Failed GLB requests retained the complete poster and native-screen overlay. Expected 503 console entries came from explicitly injected failure fixtures.
-- Signup uncertain-save responses preserved inputs, required fresh verification, and showed a persistent error. Confirmed responses focused the terminal result, suppressed repeat capture and the sticky CTA, and reopened only on explicit reset.
-- All six original native PNGs remain byte-identical to the published baseline. Four GLBs total 998,008 bytes; each is below 35,000 triangles. The initial app bundle is approximately 202 KB gzip, with the lazy Three.js chunk approximately 159 KB gzip; both are below the checked 240 KB ceiling.
+- All nine prerendered routes, metadata, canonical links, local references, public configuration and six article bodies passed their checks.
+- All 35 form/Worker tests passed, including persistence-before-success, concurrent deduplication, verification validation, uniform responses, failure cleanup, private export and overwrite protection.
+- Complete Brave checks passed at 320, 390, 768 and 1280 pixels, including room states, share annotations, native control selection and fixture signup confirmation. No browser errors, missing files or horizontal overflow.
+- Independent scroll review confirmed chapters 0 → 1 → 2 → 1 → 0, correct phone states, settled keyboard-operated highlights, and matching room selection. No-JavaScript proof remained ordered and signup stayed disabled. Reduced motion allocated no GPU context.
+- Delayed GLB cancellation releases the GPU immediately on offscreen, reduced-motion, Save-Data and page-hide changes. Stale responses never remount a canvas. Resume preserves the chosen room. Context loss and injected GLB failure restore the matching poster. The observed maximum live GPU count is one.
+- 200% text passed at all four widths. Mobile no-JavaScript enlargement also passed.
+- Native screen width is 258 CSS pixels at a 390-pixel viewport and 306 on desktop. All six PNGs are byte-identical to the d1cc64d baseline; no capture was cropped or repainted.
+- The original embedded model is 333,600 bytes and 8,964 triangles, with validated named nodes, no external texture resources and intact screen UVs. Initial runtime is about 141 KB gzip; lazy Three.js runtime is about 160 KB gzip.
+- The explicit public allowlist contains 42 files. Authoring/source files, old artwork, private QA, Worker code and exports are excluded. Versioned staging verifies local stylesheet, module, font and image references.
+
+## Review evidence
+
+Local scratch evidence includes complete-1/2/3 and final-4 viewport captures and reports, independent flow-opl-final-* captures, a twelve-case destination-regression replay, and full-motion-1280.webm/full-motion-390.webm. Each recording covers thirteen meaningful page states, including both rooms, share highlights, native controls, the decision sections, and reverse travel to the correct hero. Tall full-page captures require DPR1 and loaded images; detailed proof uses DPR2 viewport captures. Scratch evidence and recorder scripts are not public site files.
+
+## Final form-state clarification
+
+The DPR1 overview and motion captures deliberately abort external requests, including the Cloudflare verification script. Their disabled submit and "Verification could not load" message are the expected safe failure state, not evidence of a deployed challenge failure. The complete layout fixtures instead supply a verification callback and mock Worker response. A final dedicated Brave replay passed all 18 cases at 390 and 1280 pixels. It captures blocked script, verification error, expired token, verified-ready, pending persistence, confirmed success, server persistence failure, rate limiting and failed-request recovery. It asserts zero POSTs before verification and no success before an explicit successful persistence response. All endpoints in that replay are controlled local fixtures; production safeguards remain unchanged.
+
+In-place room and native-control selectors now show a check for the selected option and a circle for alternatives. They no longer imply navigation.
 
 ## Practical limits
 
-Real Google Play enrollment, actual TV command execution and playback were not tested by this website QA. The complete live Pages → Turnstile → Worker → D1 path with a genuine browser submission remains unverified. The backend configuration and data were not changed during the redesign. Screenshot fixtures and illustrated previews must not be treated as proof of a connected TV or playback.
+Real Google Play enrollment, TV command execution and playback are not website QA. A genuine public Pages → Turnstile → Worker → D1 submission remains unverified. Backend configuration and data are unchanged. App previews and illustrated room selections do not establish a real TV connection or playback result.
