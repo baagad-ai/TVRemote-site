@@ -13,7 +13,8 @@ function reply(status, payload, cors = false, extra = {}) {
   } });
 }
 function failure(status, code, cors = true) {
-  return reply(status, { ok: false, code }, cors, status === 429 ? { "Retry-After": "60" } : {});
+  const retryAfter = code === "daily_capacity" ? Math.ceil((86400000 - Date.now() % 86400000) / 1000) : 60;
+  return reply(status, { ok: false, code }, cors, status === 429 ? { "Retry-After": String(retryAfter) } : {});
 }
 async function readJson(request) {
   const reader = request.body?.getReader();
@@ -83,8 +84,12 @@ export default {
         .bind(email, cutoff, DAILY_LIMIT).run();
       if (result.success !== true) return failure(503, "temporarily_unavailable");
       if (result.meta?.changes !== 1) {
+        // At capacity every address gets the same outcome, before membership is inspected.
+        const capacity = await env.DB.prepare("SELECT COUNT(*) AS count FROM beta_requests WHERE created_at >= ?").bind(cutoff).first();
+        if (!Number.isSafeInteger(capacity?.count) || capacity.count < 0) return failure(503, "temporarily_unavailable");
+        if (capacity.count >= DAILY_LIMIT) return failure(429, "daily_capacity");
         const exists = await env.DB.prepare("SELECT 1 AS present FROM beta_requests WHERE email = ?").bind(email).first();
-        if (!exists?.present) return failure(429, "daily_capacity");
+        if (!exists?.present) return failure(503, "temporarily_unavailable");
       }
       return reply(200, saved, true);
     } catch { return failure(503, "temporarily_unavailable"); }

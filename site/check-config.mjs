@@ -102,6 +102,7 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
   const timelines = [];
   const gsapCalls = [];
   const observers = [];
+  const resizedNodes = [];
   let resizeCallback = null, slept = 0, woke = 0, refreshed = 0, cleared = 0, rafId = 0;
   const rafCallbacks = [];
   const motionMedia = { matches: reduce, events: {}, addEventListener(key, fn) { this.events[key] = fn; } };
@@ -134,7 +135,7 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
       innerHeight: 844,
       scrollY,
       ...(motion ? { gsap, ScrollTrigger } : {}),
-      ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe() {} }
+      ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe(node) { resizedNodes.push(node); } }
     },
     document: {
       body: (nodes.body = { style: { setProperty(key, value) { this[key] = value; }, removeProperty(key) { delete this[key]; } } }),
@@ -156,7 +157,7 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
       createElement: () => new Element(),
       addEventListener(key, fn) { handlers["document:" + key] = fn; }
     },
-    ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe() {} },
+    ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe(node) { resizedNodes.push(node); } },
     IntersectionObserver: MockIntersectionObserver
   };
   const tracked = [...ctas, ...nodes.heroActions, nodes.betaSummary];
@@ -184,7 +185,7 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
     nodes.betaEnrollment.events.toggle?.();
     flushFrames();
   };
-  return { ctas, nodes, document: context.document, media: motionMedia, mobileMedia, handlers, triggers, timelines, gsapCalls, observers,
+  return { ctas, nodes, document: context.document, media: motionMedia, mobileMedia, handlers, triggers, timelines, gsapCalls, observers, resizedNodes,
     setCtaVisible, setGuideVisible,
     resize: () => resizeCallback?.(), setHidden: (value) => { context.document.hidden = value; }, values: () => ({ slept, woke, refreshed, cleared }) };
 }
@@ -210,6 +211,7 @@ for (const config of [{ betaRequestUrl: endpoint }, { turnstileSiteKey: sitekey 
   assert(run(config).ctas.every((button) => !button.replacement));
 }
 const supplied = run({ betaRequestUrl: endpoint, turnstileSiteKey: sitekey });
+assert(supplied.resizedNodes.includes(supplied.nodes.betaEnrollment));
 assert(supplied.ctas.every((button) => button.replacement?.href === "#beta-enrollment"));
 assert(supplied.ctas.every((button) => button.replacement?.attributes["aria-controls"] === "beta-enrollment"));
 assert(supplied.ctas.every((button) => button.replacement?.children[0]?.textContent === "Request beta access"));

@@ -50,7 +50,8 @@ test("success awaits persistence and a failed write never succeeds", async (t) =
   finish({ success: false });
   assert.equal((await response).status, 503);
 });
-test("atomic daily cap limits new storage but permits existing addresses", async (t) => {
+test("atomic daily cap gives existing and new addresses the same capacity response", async (t) => {
+  const now = Date.now(); t.mock.method(Date, "now", () => now);
   verification(t); const bindings = env(); t.after(() => bindings.DB.sqlite.close());
   const insert = bindings.DB.sqlite.prepare("INSERT INTO beta_requests(email,created_at) VALUES (?, unixepoch())");
   for (let i = 0; i < 199; i++) insert.run(`seed${i}@example.com`);
@@ -58,7 +59,14 @@ test("atomic daily cap limits new storage but permits existing addresses", async
   assert.equal(responses.filter((r) => r.status === 200).length, 1);
   assert.equal(responses.filter((r) => r.status === 429).length, 9);
   assert.equal(bindings.DB.sqlite.prepare("SELECT count(*) AS count FROM beta_requests").get().count, 200);
-  assert.equal((await worker.fetch(request({ email: "seed0@example.com" }), bindings)).status, 200);
+  const timestamp = bindings.DB.sqlite.prepare("SELECT created_at FROM beta_requests WHERE email = ?").get("seed0@example.com").created_at;
+  const stored = await worker.fetch(request({ email: "seed0@example.com" }), bindings);
+  const absent = await worker.fetch(request({ email: "absent@example.com" }), bindings);
+  assert.equal(stored.status, 429); assert.equal(absent.status, 429);
+  assert.equal(await stored.text(), await absent.text());
+  assert.equal(stored.headers.get("Retry-After"), absent.headers.get("Retry-After"));
+  assert.equal(bindings.DB.sqlite.prepare("SELECT created_at FROM beta_requests WHERE email = ?").get("seed0@example.com").created_at, timestamp);
+  assert.equal(bindings.DB.sqlite.prepare("SELECT count(*) AS count FROM beta_requests").get().count, 200);
 });
 test("forged, expired, wrong hostname and wrong action tokens never write", async (t) => {
   const bindings = env(); t.after(() => bindings.DB.sqlite.close());
@@ -111,4 +119,44 @@ test("verification redirects are not followed and never save a request", async (
   const response = await worker.fetch(request(), bindings);
   assert.equal(response.status, 503);
   assert.equal(bindings.DB.sqlite.prepare("SELECT count(*) AS count FROM beta_requests").get().count, 0);
+});
+
+
+test("under-cap duplicate success preserves the first timestamp and reveals no membership", async (t) => {
+  verification(t); const bindings = env(); t.after(() => bindings.DB.sqlite.close());
+  bindings.DB.sqlite.prepare("INSERT INTO beta_requests(email, created_at) VALUES (?, ?)").run("tester@example.com", 1234567890);
+  const duplicate = await worker.fetch(request({ email: " TESTER@EXAMPLE.COM " }), bindings);
+  const fresh = await worker.fetch(request({ email: "new@example.com" }), bindings);
+  assert.equal(duplicate.status, 200); assert.equal(fresh.status, 200);
+  assert.equal(await duplicate.text(), await fresh.text());
+  assert.equal(bindings.DB.sqlite.prepare("SELECT created_at FROM beta_requests WHERE email = ?").get("tester@example.com").created_at, 1234567890);
+  assert.equal(bindings.DB.sqlite.prepare("SELECT count(*) AS count FROM beta_requests").get().count, 2);
+});
+
+test("daily capacity retry timing resets at midnight UTC, while IP throttling stays one minute", async (t) => {
+  verification(t); const bindings = env(); t.after(() => bindings.DB.sqlite.close());
+  const start = Math.floor(Date.now() / 86400000) * 86400000;
+  const now = t.mock.method(Date, "now", () => start + 43200000);
+  const insert = bindings.DB.sqlite.prepare("INSERT INTO beta_requests(email, created_at) VALUES (?, ?)");
+  for (let i = 0; i < 200; i++) insert.run("seed" + i + "@example.com", start / 1000);
+  const noon = await worker.fetch(request(), bindings);
+  assert.equal(noon.status, 429); assert.equal(noon.headers.get("Retry-After"), "43200");
+  now.mock.mockImplementation(() => start + 86399999);
+  const midnight = await worker.fetch(request(), bindings);
+  assert.equal(midnight.headers.get("Retry-After"), "1");
+  bindings.BETA_RATE_LIMITER.limit = async () => ({ success: false });
+  const throttled = await worker.fetch(request(), bindings);
+  assert.equal(throttled.status, 429); assert.equal(throttled.headers.get("Retry-After"), "60");
+});
+
+test("a zero-change write without a verified existing row or trustworthy capacity never succeeds", async (t) => {
+  verification(t); const bindings = env(); const original = bindings.DB; t.after(() => original.sqlite.close());
+  for (const count of [0, undefined, "0", -1]) {
+    bindings.DB = { prepare(sql) { return { bind() { return {
+      async run() { return { success: true, meta: { changes: 0 } }; },
+      async first() { return sql.includes("COUNT") ? { count } : null; }
+    }; } }; } };
+    const response = await worker.fetch(request(), bindings);
+    assert.equal(response.status, 503); assert.deepEqual(await response.json(), { ok: false, code: "temporarily_unavailable" });
+  }
 });

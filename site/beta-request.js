@@ -1,70 +1,186 @@
 (() => {
   "use strict";
   const form = document.querySelector("[data-beta-request-form]");
-  if (!form || form.getAttribute("data-beta-ready") !== "true") return;
+  const status = document.querySelector("[data-request-status]");
+  if (!form || form.getAttribute("data-beta-ready") !== "true") {
+    if (status) status.textContent = "Requests are unavailable right now. No email has been submitted.";
+    return;
+  }
   const config = window.remoteSiteConfig;
   const fieldset = form.querySelector("fieldset");
   const submit = form.querySelector("[type=submit]");
-  const status = form.querySelector("[data-request-status]");
-  let token = "", widget = null, busy = false, saved = false;
-  const message = (text) => { status.textContent = text; };
-  const clearToken = (text) => { token = ""; submit.disabled = true; if (text && !busy && !saved) message(text); };
-  window.remoteBetaTurnstileReady = () => {
+  const submitLabel = submit.querySelector("span");
+  const verificationStatus = form.querySelector("[data-verification-status]");
+  const retryVerification = form.querySelector("[data-verification-retry]");
+  const panel = document.querySelector("[data-request-result]");
+  const heading = panel.querySelector("[data-result-heading]");
+  const summary = panel.querySelector("[data-result-summary]");
+  const emailRow = panel.querySelector("[data-result-email-row]");
+  const submittedEmail = panel.querySelector("[data-result-email]");
+  const another = panel.querySelector("[data-register-another]");
+  const confirmedEmails = new Set(); // Only this page's own confirmed submissions, never an email lookup.
+  const markerKey = "the-remote:beta-request-state";
+  let state = "editing", token = "", widget = null, challengeGeneration = 0, requestGeneration = 0;
+  let pending = null, loadingScript = null, scriptTimeout = null, pageActive = true;
+  const message = (text, kind = "") => { status.textContent = text; status.setAttribute("data-state", kind); status.classList.toggle("visually-hidden", kind === "success" || !text); };
+  const marker = (value) => {
     try {
-      fieldset.disabled = false;
-      submit.disabled = true;
-      message("Enter the email you use on Google Play and complete verification.");
-      widget = window.turnstile.render(form.querySelector("[data-turnstile]"), {
-        sitekey: config.turnstileSiteKey.trim(), action: "beta_request", theme: "dark", size: "flexible",
-        callback: (value) => { token = value; submit.disabled = busy || saved; if (!busy && !saved) message("Verification complete. You can send your request."); },
-        "expired-callback": () => clearToken("Verification expired. Complete it again before submitting."),
-        "error-callback": () => { clearToken("Verification could not load. Reload this page to try again."); return true; }
-      });
-    } catch { fieldset.disabled = true; clearToken("Verification is unavailable. Reload this page to try again."); }
+      if (value === undefined) return window.sessionStorage.getItem(markerKey);
+      if (value) window.sessionStorage.setItem(markerKey, value);
+      else window.sessionStorage.removeItem(markerKey);
+    } catch { /* Storage restrictions leave the in-page/bfcache confirmation intact. */ }
   };
-  const script = document.createElement("script");
-  script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=remoteBetaTurnstileReady";
-  script.async = true;
-  script.onerror = () => clearToken("Verification could not load. Reload this page to try again.");
-  document.head.append(script);
+  const disposeChallenge = () => {
+    challengeGeneration++; token = ""; submit.disabled = true;
+    const previous = widget; widget = null;
+    if (previous !== null) { try { window.turnstile.remove(previous); } catch { /* Old callbacks are still invalidated. */ } }
+  };
+  const showResult = (email = "", repeated = false, focus = false) => {
+    state = "complete"; disposeChallenge(); fieldset.disabled = true; form.hidden = true; panel.hidden = false;
+    heading.textContent = repeated ? "You’ve already submitted this email." : email ? "Your request is on the list." : "Your previous request was received.";
+    summary.textContent = repeated ? "Your request has already been received for private review. You don’t need to submit it again." : "Your request has been received for private review.";
+    submittedEmail.textContent = email; emailRow.hidden = !email;
+    message(repeated ? "You’ve already submitted this email. A request does not enroll you in the Google Play beta." : "Request received. A request does not enroll you in the Google Play beta.", "success");
+    if (focus) heading.focus();
+  };
+  const mountChallenge = () => {
+    if (state !== "editing" || !pageActive) return;
+    disposeChallenge();
+    const generation = challengeGeneration;
+    const current = () => generation === challengeGeneration && state === "editing" && pageActive;
+    verificationStatus.textContent = "Complete verification before sending your request.";
+    retryVerification.hidden = true;
+    try {
+      const rendered = window.turnstile.render(form.querySelector("[data-turnstile]"), {
+        sitekey: config.turnstileSiteKey.trim(), action: "beta_request", theme: "dark", size: "flexible",
+        callback: (value) => {
+          if (!current()) return;
+          token = typeof value === "string" ? value : ""; submit.disabled = !token;
+          verificationStatus.textContent = token ? "Verification complete." : "Complete verification before sending your request.";
+        },
+        "expired-callback": () => {
+          if (!current()) return;
+          token = ""; submit.disabled = true; retryVerification.hidden = false;
+          verificationStatus.textContent = "Verification expired. Choose Retry verification to continue.";
+        },
+        "error-callback": () => {
+          if (!current()) return true;
+          token = ""; submit.disabled = true; retryVerification.hidden = false;
+          verificationStatus.textContent = "Verification could not finish. Choose Retry verification to continue.";
+          return true;
+        }
+      });
+      if (current()) widget = rendered;
+      else { try { window.turnstile.remove(rendered); } catch { /* Generation checks protect the current view. */ } }
+    } catch {
+      disposeChallenge(); retryVerification.hidden = false; submit.disabled = true;
+      verificationStatus.textContent = "Verification is unavailable. Choose Retry verification to try again.";
+    }
+  };
+  const startVerification = () => {
+    if (state !== "editing" || !pageActive) return;
+    if (window.turnstile) { mountChallenge(); return; }
+    if (loadingScript) return;
+    verificationStatus.textContent = "Loading verification…"; retryVerification.hidden = true;
+    const script = document.createElement("script");
+    loadingScript = script;
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=remoteBetaTurnstileReady";
+    script.async = true;
+    script.onerror = () => {
+      if (loadingScript !== script) return;
+      clearTimeout(scriptTimeout); scriptTimeout = null; loadingScript = null; script.remove();
+      if (state !== "editing" || !pageActive) return;
+      verificationStatus.textContent = "Verification could not load. Choose Retry verification to try again.";
+      retryVerification.hidden = false;
+    };
+    scriptTimeout = setTimeout(script.onerror, 15000);
+    document.head.append(script);
+  };
+  window.remoteBetaTurnstileReady = () => {
+    clearTimeout(scriptTimeout); scriptTimeout = null; loadingScript = null;
+    if (widget === null) mountChallenge();
+  };
+  retryVerification.addEventListener("click", () => {
+    if (state === "editing") startVerification();
+  });
+  another.addEventListener("click", () => {
+    if (state !== "complete") return;
+    requestGeneration++; marker(""); form.reset(); submittedEmail.textContent = "";
+    form.elements.email.value = ""; form.elements.consent.checked = false; form.elements.website.value = "";
+    form.elements.email.removeAttribute("aria-invalid");
+    state = "editing"; panel.hidden = true; form.hidden = false; fieldset.disabled = false;
+    message(""); startVerification(); form.elements.email.focus();
+  });
+  form.elements.email.addEventListener("input", () => form.elements.email.removeAttribute("aria-invalid"));
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (busy || saved) return;
-    if (!form.reportValidity()) return;
-    if (!token) { message("Complete verification before sending your request."); return; }
+    if (state !== "editing" || !pageActive || !form.reportValidity()) return;
+    if (!token) { verificationStatus.textContent = "Complete verification before sending your request."; return; }
     const email = form.elements.email.value.trim();
-    const consent = form.elements.consent.checked;
-    const website = form.elements.website.value;
-    busy = true; fieldset.disabled = true; submit.disabled = true;
-    form.setAttribute("aria-busy", "true");
-    message("Saving your request…");
+    const consent = form.elements.consent.checked, website = form.elements.website.value, challenge = token;
+    const generation = ++requestGeneration, controller = new AbortController();
+    pending = controller; state = "submitting"; token = ""; marker("unconfirmed");
+    fieldset.disabled = true; submit.disabled = true; retryVerification.disabled = true;
+    submitLabel.textContent = "Saving…"; form.setAttribute("aria-busy", "true");
+    message("Saving your request…", "pending");
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(config.betaRequestUrl.trim(), {
         method: "POST", mode: "cors", credentials: "omit", cache: "no-store", redirect: "error",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, consent, website, turnstileToken: token }),
-        signal: AbortSignal.timeout(15000)
+        body: JSON.stringify({ email, consent, website, turnstileToken: challenge }), signal: controller.signal
       });
       const payload = await response.json();
+      if (generation !== requestGeneration || !pageActive) return;
       if (response.status === 200 && payload?.ok === true) {
-        saved = true;
-        form.reset();
-        message("Your request is saved for private review. This does not enroll you in the Google Play beta. If approved, we will invite your account to the test manually through Google Play; you must accept the invitation before installing.");
+        const focus = form.contains(document.activeElement) || document.activeElement === document.body;
+        const normalized = email.toLowerCase(), repeated = confirmedEmails.has(normalized);
+        confirmedEmails.add(normalized); marker("confirmed"); form.reset();
+        showResult(email, repeated, focus);
       } else {
         const errors = {
           invalid_email: "Check your Google Play account email and try again.",
-          verification_required: "Complete verification again and retry.",
-          verification_failed: "Verification expired or failed. Complete it again and retry.",
-          too_many_requests: "Too many attempts. Wait a minute, then complete verification and try again.",
-          daily_capacity: "Requests have reached today's capacity. Please try again tomorrow."
+          invalid_request: "Check the consent checkbox and your details, then try again.",
+          invalid_body: "Your request could not be read. Please try again.",
+          verification_required: "Complete fresh verification and retry.",
+          verification_failed: "Verification expired or failed. Complete fresh verification and retry.",
+          too_many_requests: "Too many attempts. Wait at least a minute, then complete fresh verification and retry.",
+          daily_capacity: "The daily request limit has been reached. Retry after midnight UTC with the same email.",
+          temporarily_unavailable: "We could not confirm your request was saved. Please retry with the same email."
         };
-        message((Object.hasOwn(errors, payload?.code) ? errors[payload.code] : null) || "We could not confirm your request was saved. Please retry with the same email.");
+        message((Object.hasOwn(errors, payload?.code) ? errors[payload.code] : null) || "We could not confirm your request was saved. Please retry with the same email.", "error");
+        if (payload?.code === "invalid_email") form.elements.email.setAttribute("aria-invalid", "true");
       }
-    } catch { message("We could not confirm your request was saved. Check your connection and retry with the same email."); }
-    finally {
-      busy = false; token = ""; fieldset.disabled = saved; submit.disabled = true;
-      form.setAttribute("aria-busy", "false");
-      if (widget !== null && !saved) { try { window.turnstile.reset(widget); } catch { /* Retry after reload if verification is unavailable. */ } }
+    } catch {
+      if (generation === requestGeneration && pageActive) message("We could not confirm your request was saved. Check your connection and retry with the same email.", "error");
+    } finally {
+      clearTimeout(timeout);
+      if (generation === requestGeneration) {
+        pending = null; form.setAttribute("aria-busy", "false"); retryVerification.disabled = false;
+        submitLabel.textContent = "Request beta access";
+        if (state !== "complete") { state = "editing"; fieldset.disabled = false; startVerification(); }
+      }
     }
   });
+  window.addEventListener("pagehide", () => {
+    pageActive = false; requestGeneration++; pending?.abort(); pending = null;
+    if (state === "submitting") message("We could not confirm your request was saved. Retry with the same email after returning.", "error");
+    disposeChallenge();
+    clearTimeout(scriptTimeout); scriptTimeout = null;
+    if (loadingScript) { loadingScript.remove(); loadingScript = null; }
+    form.setAttribute("aria-busy", "false"); submitLabel.textContent = "Request beta access"; retryVerification.disabled = false;
+    if (state !== "complete") { state = "suspended"; fieldset.disabled = true; }
+  });
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+    pageActive = true;
+    if (state === "suspended") { state = "editing"; fieldset.disabled = false; startVerification(); }
+  });
+  if (marker() === "confirmed") showResult();
+  else {
+    fieldset.disabled = false;
+    if (marker() === "unconfirmed") message("An earlier attempt was not confirmed. Retry with the same email after verification.", "error");
+    else message("");
+    startVerification();
+  }
 })();

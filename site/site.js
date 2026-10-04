@@ -112,6 +112,7 @@
         syncCtaVisibility();
       });
       ctaObserver.observe(mobileCtaBar);
+      if (betaEnrollment) ctaObserver.observe(betaEnrollment);
       inlineCtas.forEach((cta) => ctaObserver.observe(cta));
     }
   }

@@ -545,7 +545,26 @@ body{min-width:0}
 [data-beta-request-form] legend{font-weight:650;padding:0 0 16px}
 [data-beta-request-form] input[type=email]{width:100%;min-height:48px;border:1px solid #65707c;border-radius:10px;background:#161b22;color:#f6f7fb;padding:12px;font:inherit}
 [data-beta-request-form] input:disabled{opacity:.55}
-[data-beta-request-form] [data-request-status]{min-height:3em}
 .beta-consent{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.6}
 .beta-consent input{margin-top:5px;accent-color:#d5ff75;flex:none}
 .beta-honeypot{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+
+/* Beta request states reuse the site's lime accent and visible keyboard focus. */
+[data-beta-request-form] [type=submit]:disabled{opacity:.65;cursor:not-allowed}
+[data-beta-request-form] [data-verification-status]{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+[data-beta-request-form] input[aria-invalid=true]{border-color:#F4C98B}
+.beta-retry{min-height:44px;padding:10px 15px;border:1px solid var(--line);border-radius:10px;background:var(--raised);color:var(--paper);font:inherit;cursor:pointer}
+#beta-enrollment [data-request-status]{max-width:none;margin:18px 0;overflow-wrap:anywhere;font-size:14px}
+#beta-enrollment [data-request-status][data-state=error]{padding:14px 16px;border:1px solid rgb(244 201 139 / 40%);border-radius:12px;background:rgb(244 201 139 / 6%);color:#F4C98B}
+.beta-result{display:grid;justify-items:start;gap:16px;min-width:0;margin:22px 0;padding:clamp(20px,4vw,30px);border:1px solid rgb(213 255 117 / 32%);border-radius:20px;background:radial-gradient(ellipse at top left,rgb(213 255 117 / 7%),transparent 72%),#151A20}
+.beta-result-icon{display:grid;place-items:center;width:52px;height:52px;border:1px solid rgb(213 255 117 / 34%);border-radius:50%;background:rgb(213 255 117 / 9%);color:var(--lime)}
+.beta-result p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}
+.beta-result .eyebrow{color:var(--lime);font-size:11px;letter-spacing:.14em}
+.beta-result h3{max-width:100%;margin:0;font:550 clamp(27px,3.2vw,38px)/1.12 "Outfit","Work Sans",sans-serif;letter-spacing:-.03em;overflow-wrap:anywhere;scroll-margin-top:124px}
+.beta-result h3:focus{outline:2px solid var(--lime);outline-offset:6px;border-radius:3px}
+.beta-result .beta-result-email{width:100%;min-width:0;padding:14px 0;border-block:1px solid var(--line)}
+.beta-result-email span{display:block;color:var(--muted);font-size:12px}
+.beta-result-email strong{display:block;max-width:100%;margin-top:4px;color:var(--paper);font-size:16px;font-weight:600;overflow-wrap:anywhere}
+.beta-result .beta-result-next{font-size:13px}
+.beta-result .beta-cta{max-width:100%;min-height:48px;white-space:normal}
+@media(max-width:420px){.beta-result{gap:14px}.beta-result .beta-cta{justify-content:center;width:100%;text-align:center}}

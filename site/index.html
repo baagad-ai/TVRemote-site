@@ -185,19 +185,30 @@
           <details id="beta-enrollment" open>
             <summary>How do I request beta access?</summary>
             <p data-beta-answer>Use your Google Play account email to request access. Requests are reviewed privately. A request alone does not enroll you. If approved, the developer will manually invite your account to the closed test through Google Play. You must accept the Play invitation before installing.</p>
-            <form data-beta-request-form aria-busy="false">
+            <form data-beta-request-form aria-busy="false" aria-describedby="beta-submit-status">
               <fieldset disabled>
                 <legend>Request access to The Remote beta</legend>
                 <label for="beta-email">Google Play account email</label>
-                <input id="beta-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="beta-email-help">
+                <input id="beta-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="beta-email-help beta-submit-status">
                 <p id="beta-email-help">Use the Google Account email you use on Google Play.</p>
                 <div class="beta-honeypot" aria-hidden="true"><label for="beta-website">Leave this empty</label><input id="beta-website" name="website" type="text" tabindex="-1" autocomplete="off" maxlength="100"></div>
                 <label class="beta-consent"><input name="consent" type="checkbox" required> <span>I agree to have my email stored privately to review my beta access request.</span></label>
                 <div data-turnstile></div>
+                <p data-verification-status role="status" aria-live="polite" aria-atomic="true">Verification is required before sending.</p>
                 <button class="beta-cta enrollment-step" type="submit" disabled><span>Request beta access</span></button>
               </fieldset>
-              <p data-request-status role="status" aria-live="polite" aria-atomic="true">Complete the form and verification to request access. No email has been submitted.</p>
+              <button class="beta-retry" type="button" data-verification-retry hidden>Retry verification</button>
             </form>
+            <section class="beta-result" data-request-result hidden aria-labelledby="beta-result-title">
+              <div class="beta-result-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <p class="eyebrow">REQUEST RECEIVED</p>
+              <h3 id="beta-result-title" data-result-heading tabindex="-1">Your request is on the list.</h3>
+              <p data-result-summary>Your request has been received for private review.</p>
+              <p class="beta-result-email" data-result-email-row><span>Google Play account</span><strong data-result-email></strong></p>
+              <p class="beta-result-next">A request does not enroll you in the Google Play beta. If approved, the developer will invite your account manually through Google Play. You must accept the invitation before installing.</p>
+              <button class="beta-cta" type="button" data-register-another><span>Register another email</span></button>
+            </section>
+            <p id="beta-submit-status" data-request-status role="status" aria-live="polite" aria-atomic="true">JavaScript and verification are required. No email has been submitted.</p>
             <noscript><p>JavaScript and verification are required to submit a beta access request.</p></noscript>
             <p>Your email is stored privately for review and is not published. Approved accounts are invited manually through Google Play; you must accept the invitation to join the test. <a href="privacy/">Read the privacy policy.</a></p>
           </details>
