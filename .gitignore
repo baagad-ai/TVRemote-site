@@ -1,1 +1,8 @@
 /node_modules/
+
+/worker/node_modules/
+/worker/.wrangler/
+/worker/.dev.vars*
+.env*
+*.csv
+/_site/

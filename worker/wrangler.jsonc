@@ -1,0 +1,21 @@
+{
+  "name": "the-remote-beta-requests",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-10-03",
+  "workers_dev": true,
+  "preview_urls": false,
+  "limits": { "cpu_ms": 10 },
+  "observability": { "enabled": false },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "the-remote-beta-requests",
+    "database_id": "361c5549-6046-4d2c-8a34-23bdcce72db0",
+    "migrations_dir": "migrations"
+  }],
+  "ratelimits": [{
+    "name": "BETA_RATE_LIMITER",
+    "namespace_id": "784327001",
+    "simple": { "limit": 5, "period": 60 }
+  }],
+  "account_id": "2440e9580c409d807ce488bf2e598c97"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "the-remote-beta-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "export": "node export.mjs"
+  },
+  "devDependencies": { "wrangler": "4.147.0" }
+}

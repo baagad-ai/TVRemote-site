@@ -4,13 +4,14 @@
   const config = window.remoteSiteConfig || {};
   const betaStatus = document.getElementById("beta-status");
   const betaEnrollment = document.getElementById("beta-enrollment");
-  const groupUrl = typeof config.betaGroupJoinUrl === "string" ? config.betaGroupJoinUrl.trim() : "";
-  const playUrl = typeof config.betaOptInUrl === "string" ? config.betaOptInUrl.trim() : "";
-  const validGroupUrl = /^https:\/\/groups\.google\.com\/g\/the-remote-beta-testers\/?$/.test(groupUrl);
-  const validPlayUrl = /^https:\/\/play\.google\.com\/apps\/testing\/com\.theremote\.app$/.test(playUrl);
+  const requestUrl = typeof config.betaRequestUrl === "string" ? config.betaRequestUrl.trim() : "";
+  const siteKey = typeof config.turnstileSiteKey === "string" ? config.turnstileSiteKey.trim() : "";
+  const validRequestUrl = /^https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev\/beta-requests$/.test(requestUrl);
+  const validSiteKey = /^0x4[A-Za-z0-9_-]{15,100}$/.test(siteKey);
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  if (validGroupUrl && validPlayUrl) {
+  if (validRequestUrl && validSiteKey) {
+    document.querySelector("[data-beta-request-form]")?.setAttribute("data-beta-ready", "true");
     document.querySelectorAll("[data-beta-cta]").forEach((button) => {
       const link = document.createElement("a");
       link.className = button.className;
@@ -18,9 +19,8 @@
       link.setAttribute("aria-describedby", "beta-status");
       link.setAttribute("aria-controls", "beta-enrollment");
       link.href = "#beta-enrollment";
-
       const label = document.createElement("span");
-      label.textContent = config.betaCtaLabel || "Start beta enrollment";
+      label.textContent = "Request beta access";
       const arrow = document.createElement("span");
       arrow.className = "cta-arrow";
       arrow.setAttribute("aria-hidden", "true");
@@ -29,43 +29,19 @@
       link.addEventListener("click", () => betaEnrollment?.setAttribute("open", ""));
       button.replaceWith(link);
     });
-
-    for (const [selector, href] of [["[data-beta-group-join]", groupUrl], ["[data-beta-play-opt-in]", playUrl]]) {
-      const button = document.querySelector(selector);
-      if (!button) continue;
-      const link = document.createElement("a");
-      link.className = button.className;
-      link.href = href;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      const label = document.createElement("span");
-      label.textContent = button.textContent.trim();
-      const newTabCue = document.createElement("span");
-      newTabCue.className = "external-link-cue";
-      newTabCue.setAttribute("aria-hidden", "true");
-      newTabCue.textContent = "Opens in a new tab ↗";
-      link.append(label, newTabCue);
-      link.setAttribute("aria-label", `${label.textContent} (opens in a new tab)`);
-      button.replaceWith(link);
-    }
-
-    if (betaStatus) {
-      const statusLabel = betaStatus.querySelector?.("[data-beta-status-label]");
-      const message = config.betaStatus || "Join the tester Group with the same account you use on Google Play. Keep this page open; membership and Play access can take time to update.";
-      if (statusLabel) statusLabel.textContent = message;
-      else betaStatus.textContent = message;
-      betaStatus.classList.add("is-open");
-    }
-
+    const statusLabel = betaStatus?.querySelector?.("[data-beta-status-label]");
+    const message = "The Remote already has testers. Requests are reviewed privately; approved accounts are invited manually. The official Google Play beta sign-up link will be added when ready.";
+    if (statusLabel) statusLabel.textContent = message;
+    else if (betaStatus) betaStatus.textContent = message;
+    betaStatus?.classList.add("is-open");
     const closingTitle = document.querySelector("[data-beta-closing-title]");
-    if (closingTitle) closingTitle.textContent = "Join the closed beta.";
+    if (closingTitle) closingTitle.textContent = "Request beta access.";
     const closingCopy = document.querySelector("[data-beta-closing-copy]");
-    if (closingCopy) closingCopy.textContent = "Join the tester Group first, then return here to opt in on Google Play with the same account.";
-
+    if (closingCopy) closingCopy.textContent = "Use your Google Play account email. Your request is saved for private review. A request alone does not enroll you. If approved, we will manually invite your Google Play account to the test; you must accept the invitation before installing.";
     const betaAnswer = document.querySelector("[data-beta-answer]");
-    if (betaAnswer) betaAnswer.textContent = "Join the tester Group with the same Google Account you use on Play, then return here to opt in; Group membership alone does not enroll you.";
+    if (betaAnswer) betaAnswer.textContent = "Enter your Google Play account email below to request access. Requests are reviewed privately. A request alone does not enroll you. If approved, we will manually invite your Google Play account to the test; you must accept the invitation before installing.";
     document.querySelectorAll(".mobile-cta-note").forEach((note) => {
-      note.textContent = "Group opens in a new tab; keep this page open for Play opt-in.";
+      note.textContent = "Requests are reviewed privately; approved accounts are invited manually. The official Google Play beta sign-up link will be added when ready.";
     });
   }
 

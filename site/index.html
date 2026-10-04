@@ -35,7 +35,7 @@
         <a href="privacy/">Privacy</a>
       </nav>
       <button class="beta-cta header-cta" type="button" data-beta-cta disabled aria-describedby="beta-status">
-        <span data-beta-label>Closed beta enrollment soon</span><span class="cta-arrow" aria-hidden="true">&rarr;</span>
+        <span data-beta-label>Request beta access</span><span class="cta-arrow" aria-hidden="true">&rarr;</span>
       </button>
     </header>
 
@@ -52,13 +52,13 @@
           </ul>
           <div class="hero-actions">
             <button class="beta-cta hero-cta" type="button" data-beta-cta disabled aria-describedby="beta-status">
-              <span data-beta-label>Closed beta enrollment soon</span><span class="cta-arrow" aria-hidden="true">&rarr;</span>
+              <span data-beta-label>Request beta access</span><span class="cta-arrow" aria-hidden="true">&rarr;</span>
             </button>
             <a class="text-link" href="#search-proof">See YouTube search <span aria-hidden="true">&darr;</span></a>
           </div>
           <p class="availability" id="beta-status" role="status">
             <span class="availability-dot" aria-hidden="true"></span>
-            <span data-beta-status-label>The Remote already has testers. Public closed beta enrollment will open when the Play release is available.</span>
+            <span data-beta-status-label>The Remote already has testers. Requests are reviewed privately; approved accounts are invited manually. The official Google Play beta sign-up link will be added when ready.</span>
           </p>
         </div>
 
@@ -183,15 +183,23 @@
             <p>The search goes to the TV you selected over your local network. YouTube may process a YouTube search link under its privacy policy. The Remote does not keep a search history.</p>
           </details>
           <details id="beta-enrollment" open>
-            <summary>How do I join the closed beta?</summary>
-            <p data-beta-answer>The closed-test release is not available yet. When it is, start with the tester Group, then opt in on Google Play with the same account.</p>
-            <p>Step 1: join The Remote Beta Testers Group with the Google Account you use on Google Play. Anyone on the web can join; no owner approval is needed.</p>
-            <button class="beta-cta enrollment-step" type="button" data-beta-group-join disabled><span>Join the tester Group</span></button>
-            <p>Keep this page open. After your Group membership is active, return here for step 2.</p>
-            <p>Step 2: open the Google Play opt-in page with the same account. Tap <strong>Join</strong> to opt in, then install The Remote.</p>
-            <button class="beta-cta enrollment-step" type="button" data-beta-play-opt-in disabled><span>Open Google Play opt-in</span></button>
-            <p>If Google Play says the app is unavailable, check that you are using the same account and that Group membership is active, then try again. Membership and Play access can take time to update.</p>
-            <p>Google processes your Group and Play activity; Group owners and managers may see your email. This site does not collect it. <a href="privacy/">Read the privacy policy.</a></p>
+            <summary>How do I request beta access?</summary>
+            <p data-beta-answer>Use your Google Play account email to request access. Requests are reviewed privately. A request alone does not enroll you. If approved, the developer will manually invite your account to the closed test through Google Play. You must accept the Play invitation before installing.</p>
+            <form data-beta-request-form aria-busy="false">
+              <fieldset disabled>
+                <legend>Request access to The Remote beta</legend>
+                <label for="beta-email">Google Play account email</label>
+                <input id="beta-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="beta-email-help">
+                <p id="beta-email-help">Use the Google Account email you use on Google Play.</p>
+                <div class="beta-honeypot" aria-hidden="true"><label for="beta-website">Leave this empty</label><input id="beta-website" name="website" type="text" tabindex="-1" autocomplete="off" maxlength="100"></div>
+                <label class="beta-consent"><input name="consent" type="checkbox" required> <span>I agree to have my email stored privately to review my beta access request.</span></label>
+                <div data-turnstile></div>
+                <button class="beta-cta enrollment-step" type="submit" disabled><span>Request beta access</span></button>
+              </fieldset>
+              <p data-request-status role="status" aria-live="polite" aria-atomic="true">Complete the form and verification to request access. No email has been submitted.</p>
+            </form>
+            <noscript><p>JavaScript and verification are required to submit a beta access request.</p></noscript>
+            <p>Your email is stored privately for review and is not published. Approved accounts are invited manually through Google Play; you must accept the invitation to join the test. <a href="privacy/">Read the privacy policy.</a></p>
           </details>
         </div>
       </section>
@@ -200,11 +208,11 @@
         <div class="closing-mark" aria-hidden="true"><img src="assets/focus-key.svg" alt=""></div>
         <div class="closing-copy">
           <p class="eyebrow">THE REMOTE / GOOGLE PLAY BETA</p>
-          <h2 id="closing-title" data-beta-closing-title>Closed beta enrollment is being prepared.</h2>
-          <p data-beta-closing-copy>The Remote already has testers. When the Play closed-test release is available, join the tester Group first, then return here to opt in.</p>
+          <h2 id="closing-title" data-beta-closing-title>Request beta access with your Google Play account email.</h2>
+          <p data-beta-closing-copy>A request alone does not enroll you. Requests are reviewed privately. If approved, the developer will manually invite your Google Play account to the closed test; you must accept the invitation before installing.</p>
         </div>
         <button class="beta-cta closing-cta" type="button" data-beta-cta disabled aria-describedby="beta-status">
-          <span data-beta-label>Closed beta enrollment soon</span><span class="cta-arrow" aria-hidden="true">&rarr;</span>
+          <span data-beta-label>Request beta access</span><span class="cta-arrow" aria-hidden="true">&rarr;</span>
         </button>
       </section>
     </main>
@@ -218,12 +226,12 @@
 
     <div class="mobile-cta-bar" data-mobile-cta-bar aria-hidden="true" inert>
       <button class="beta-cta mobile-cta" type="button" data-beta-cta disabled aria-describedby="beta-status">
-        <span data-beta-label>Closed beta enrollment soon</span><span class="cta-arrow" aria-hidden="true">&rarr;</span>
+        <span data-beta-label>Request beta access</span><span class="cta-arrow" aria-hidden="true">&rarr;</span>
       </button>
-      <span class="mobile-cta-note">Public closed beta enrollment is being prepared.</span>
+      <span class="mobile-cta-note">Requests are reviewed privately; approved accounts are invited manually. The official Google Play beta sign-up link will be added when ready.</span>
     </div>
 
-<script defer src="config.js"></script> <script defer src="vendor/gsap/gsap-3.15.0.min.js"></script> <script defer src="vendor/gsap/ScrollTrigger-3.15.0.min.js"></script> <script defer src="site.js"></script>
+<script defer src="config.js"></script> <script defer src="vendor/gsap/gsap-3.15.0.min.js"></script> <script defer src="vendor/gsap/ScrollTrigger-3.15.0.min.js"></script> <script defer src="site.js"></script> <script defer src="beta-request.js"></script>
   </body>
 </html>
 

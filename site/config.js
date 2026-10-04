@@ -1,8 +1,5 @@
-/* Set both links only after the closed-test release is active and verified. */
+/* Public identifiers for the verified Cloudflare request service. */
 window.remoteSiteConfig = Object.freeze({
-  betaGroupJoinUrl: "",
-  betaOptInUrl: "",
-  betaCtaLabel: "Start beta enrollment",
-  betaStatus: "Join the tester Group with the same account you use on Google Play. Keep this page open; membership and Play access can take time to update."
+  betaRequestUrl: "https://the-remote-beta-requests.baagad-ai.workers.dev/beta-requests",
+  turnstileSiteKey: "0x4AAAAAAFNQLbByCk934BgF"
 });
-
