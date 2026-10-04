@@ -103,7 +103,7 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
   const gsapCalls = [];
   const observers = [];
   const resizedNodes = [];
-  let resizeCallback = null, slept = 0, woke = 0, refreshed = 0, cleared = 0, rafId = 0;
+  let resizeCallback = null, slept = 0, woke = 0, refreshed = 0, cleared = 0, reverted = 0, rafId = 0;
   const rafCallbacks = [];
   const motionMedia = { matches: reduce, events: {}, addEventListener(key, fn) { this.events[key] = fn; } };
   const mobileMedia = { matches: mobile, events: {}, addEventListener(key, fn) { this.events[key] = fn; } };
@@ -113,15 +113,23 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
   }
   const ScrollTrigger = {
     create(options) { const item = { options, isActive: false, killed: false, kill() { this.killed = true; } }; triggers.push(item); return item; },
-    getAll() { return triggers; }, refresh() { refreshed += 1; }
+    getAll() { return [...triggers, unrelatedTrigger]; }, refresh() { refreshed += 1; }
   };
+  const unrelatedTrigger = { killed: false };
+  const unrelatedTween = { killed: false };
   const gsap = {
+    context(callback) {
+      const startTrigger = triggers.length, startTimeline = timelines.length;
+      callback();
+      const ownedTriggers = triggers.slice(startTrigger), ownedTimelines = timelines.slice(startTimeline);
+      return { revert() { reverted++; ownedTriggers.forEach((trigger) => trigger.kill()); ownedTimelines.forEach((timeline) => timeline.kill()); } };
+    },
     registerPlugin(plugin) { assert.equal(plugin, ScrollTrigger); },
     fromTo(...args) { gsapCalls.push(args); },
     timeline() { const timeline = { steps: [], progressValue: 0, fromTo(...args) { this.steps.push(args); gsapCalls.push(args); return this; }, progress(value) { if (value === undefined) return this.progressValue; this.progressValue = value; return this; }, kill() { this.killed = true; } }; timelines.push(timeline); return timeline; },
     set(...args) { gsapCalls.push(args); },
     ticker: { sleep() { slept += 1; }, wake() { woke += 1; } },
-    globalTimeline: { clear() { cleared += 1; } }
+    globalTimeline: { clear() { cleared += 1; unrelatedTween.killed = true; } }
   };
   const context = {
     window: {
@@ -155,7 +163,8 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
       },
       activeElement: null,
       createElement: () => new Element(),
-      addEventListener(key, fn) { handlers["document:" + key] = fn; }
+      addEventListener(key, fn) { handlers["document:" + key] = fn; },
+      removeEventListener(key, fn) { if (handlers["document:" + key] === fn) delete handlers["document:" + key]; }
     },
     ResizeObserver: class { constructor(fn) { resizeCallback = fn; } observe(node) { resizedNodes.push(node); } },
     IntersectionObserver: MockIntersectionObserver
@@ -185,9 +194,9 @@ function run(config, { reduce = false, motion = false, mobile = true, scrollY = 
     nodes.betaEnrollment.events.toggle?.();
     flushFrames();
   };
-  return { ctas, nodes, document: context.document, media: motionMedia, mobileMedia, handlers, triggers, timelines, gsapCalls, observers, resizedNodes,
+  return { ctas, nodes, document: context.document, media: motionMedia, mobileMedia, handlers, triggers, timelines, gsapCalls, observers, resizedNodes, unrelatedTrigger, unrelatedTween,
     setCtaVisible, setGuideVisible,
-    resize: () => resizeCallback?.(), setHidden: (value) => { context.document.hidden = value; }, values: () => ({ slept, woke, refreshed, cleared }) };
+    resize: () => resizeCallback?.(), setHidden: (value) => { context.document.hidden = value; }, values: () => ({ slept, woke, refreshed, cleared, reverted }) };
 }
 
 const absent = run({});
@@ -256,7 +265,7 @@ assert.equal("autoAlpha" in closingCtaMotion[1], false);
 assert.equal("autoAlpha" in closingCtaMotion[2], false);
 assert(animated.gsapCalls.some((call) => call[1]?.y === 68));
 assert(animated.gsapCalls.some((call) => call[1]?.y === 46));
-assert(animated.gsapCalls.some((call) => call[1]?.y === 38 && call[2]?.y === -50));
+assert(animated.gsapCalls.some((call) => call[1]?.y === 18 && call[2]?.y === -18));
 const sectionTimelinesOpaque = animated.timelines.every((timeline) => timeline.steps.every((step) => {
   return !("autoAlpha" in (step[1] || {})) && !("autoAlpha" in (step[2] || {}));
 }));
@@ -267,7 +276,24 @@ assert(animated.nodes.storyChapters[2].classList.contains("is-current"));
 animated.setHidden(true); animated.handlers["document:visibilitychange"](); assert.equal(animated.values().slept, 1); animated.setHidden(false); animated.handlers["document:visibilitychange"](); assert.equal(animated.values().woke, 1); assert.equal(animated.values().refreshed, 1);
 animated.media.matches = true;
 animated.media.events.change({ matches: true });
-assert.equal(animated.values().cleared, 1);
+assert.equal(animated.values().cleared, 0);
+assert.equal(animated.values().reverted, 1);
+const restoration = animated.gsapCalls.at(-1);
+assert.equal(restoration[1].clearProps, "transform,opacity,visibility");
+assert(restoration[0].includes(animated.nodes.storyStages[0]));
+assert(!restoration[0].includes(animated.nodes.betaEnrollment));
+assert.equal(animated.unrelatedTrigger.killed, false);
+assert.equal(animated.unrelatedTween.killed, false);
+assert.equal(animated.handlers["document:visibilitychange"], undefined);
+const hiddenReduced = run({}, { motion: true });
+hiddenReduced.setHidden(true); hiddenReduced.handlers["document:visibilitychange"]();
+assert.equal(hiddenReduced.values().slept, 1);
+hiddenReduced.media.events.change({ matches: true });
+assert.equal(hiddenReduced.values().woke, 1);
+hiddenReduced.setHidden(false); hiddenReduced.handlers["document:visibilitychange"]?.();
+assert.equal(hiddenReduced.values().reverted, 1);
+assert.equal(hiddenReduced.unrelatedTrigger.killed, false);
+assert.equal(hiddenReduced.unrelatedTween.killed, false);
 assert(animated.triggers.every((trigger) => trigger.killed));
 assert(!animated.nodes.storyChapters[2].classList.contains("is-current"));
 const restored = run({}, { motion: true, scrollY: 400, triggerTop: 600 });

@@ -292,9 +292,9 @@
     const gsap = window.gsap;
     const ScrollTrigger = window.ScrollTrigger;
     const narrowMotion = window.matchMedia("(max-width: 740px)");
-    const motionTargets = new Set();
-    const revealTimelines = new Set();
     gsap.registerPlugin(ScrollTrigger);
+    const motionTargets = new Set();
+    const motionContext = gsap.context(() => {
     const heroTargets = Array.from(document.querySelectorAll(".hero-copy .eyebrow, .hero-copy h1, .hero-lede, .hero-facts, .availability"));
     heroTargets.forEach((target) => motionTargets.add(target));
     gsap.fromTo(heroTargets, { y: 20, autoAlpha: 0 }, {
@@ -349,7 +349,6 @@
       const endScroll = triggerTop - window.innerHeight * (narrowMotion.matches ? 0.43 : 0.52);
       const initialProgress = clampProgress((window.scrollY - startScroll) / Math.max(1, endScroll - startScroll));
       timeline.progress(initialProgress, true);
-      revealTimelines.add(timeline);
       ScrollTrigger.create({
         trigger,
         animation: timeline,
@@ -374,8 +373,8 @@
         { selector: ".story-copy .eyebrow", y: 28, duration: 0.4 },
         { selector: ".story-copy h2", y: 68, duration: 0.68 },
         { selector: ".story-copy > p", y: 46, duration: 0.54, stagger: 0.1 },
-        { selector: ".story-main-shot", y: 76, scale: 0.93, duration: 0.84 },
-        { selector: ".story-detail", y: 62, scale: 0.94, duration: 0.72 }
+        { selector: ".story-main-shot", y: 40, scale: 0.98, duration: 0.62 },
+        { selector: ".story-detail", y: 30, scale: 0.985, duration: 0.56 }
       ]);
     });
 
@@ -422,8 +421,8 @@
     const storyStages = document.querySelectorAll(".story-stage");
     storyStages.forEach((stage) => {
       motionTargets.add(stage);
-      gsap.fromTo(stage, { y: 38 }, {
-        y: -50, ease: "none",
+      gsap.fromTo(stage, { y: 18 }, {
+        y: -18, ease: "none",
         scrollTrigger: { trigger: stage.closest(".story-chapter"), start: "top bottom", end: "bottom top", scrub: 0.45, invalidateOnRefresh: true }
       });
     });
@@ -437,20 +436,24 @@
       });
     });
 
-    document.addEventListener("visibilitychange", () => {
+    });
+
+    const handleVisibilityChange = () => {
       if (document.hidden) gsap.ticker.sleep();
       else {
         gsap.ticker.wake();
         ScrollTrigger.refresh();
       }
-    });
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     motionPreference.addEventListener("change", (event) => {
       if (!event.matches) return;
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-      revealTimelines.forEach((timeline) => timeline.kill());
-      gsap.globalTimeline.clear();
+      motionContext.revert();
+      // Scrubbed timelines can retain their initial poses after context reversion.
       gsap.set(Array.from(motionTargets), { clearProps: "transform,opacity,visibility" });
+      if (document.hidden) gsap.ticker.wake(); // Balance the landing listener's sleep before removing it.
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.querySelectorAll(".story-chapter.is-current").forEach((chapter) => chapter.classList.remove("is-current"));
     });
   }
