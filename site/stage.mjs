@@ -24,6 +24,9 @@ console.log(`Staged ${files.length} public files. Worker, source, tests, strateg
 // The accepted comparison tree is copied into the same Pages artifact as production.
 const previewPrefix = "previews/centered-story-20261006";
 const previewFiles = [
+  "nightline.css",
+  "nightline.js",
+  "beta-request.js",
   "assets/3d/room-bedroom-mobile.webp",
   "assets/3d/room-destinations-bedroom-1440.webp",
   "assets/3d/room-destinations-bedroom-720.webp",
