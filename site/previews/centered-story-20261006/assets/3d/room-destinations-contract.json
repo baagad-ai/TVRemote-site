@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "model": "room-destinations.glb",
+  "bytes": 462104,
+  "coordinate_system": "+Y up; screen front +Z",
+  "camera": {
+    "projection": "orthographic",
+    "position": [
+      2,
+      4.2,
+      12.8
+    ],
+    "target": [
+      0,
+      1.35,
+      0.28
+    ],
+    "horizontal_span": 9.4,
+    "aspect_ratio": 1.5,
+    "left": -4.7,
+    "right": 4.7,
+    "top": 3.1333333333333333,
+    "bottom": -3.1333333333333333
+  },
+  "destinations": {
+    "living": "DestinationLiving",
+    "bedroom": "DestinationBedroom"
+  },
+  "selection": {
+    "living": "SelectionLiving",
+    "bedroom": "SelectionBedroom"
+  },
+  "screens": {
+    "living": "LivingScreen",
+    "bedroom": "BedroomScreen"
+  },
+  "initial_state": "living",
+  "initialize_before_reveal": "Both selection nodes exist in the GLB. Set living.visible=true and bedroom.visible=false before adding or revealing the model. The defaultVisible extra is a hint, not enforced glTF visibility.",
+  "state_change": "Keep both Destination groups visible. Show only the Selection group corresponding to the same HTML room/tab state. Switch the matching poster with that state.",
+  "poster": {
+    "living": {
+      "desktop": "room-destinations-living-1440.webp",
+      "mobile": "room-destinations-living-720.webp"
+    },
+    "bedroom": {
+      "desktop": "room-destinations-bedroom-1440.webp",
+      "mobile": "room-destinations-bedroom-720.webp"
+    }
+  },
+  "poster_dimensions": {
+    "desktop": [
+      1440,
+      960
+    ],
+    "mobile": [
+      720,
+      480
+    ]
+  },
+  "poster_fit": "contain; preserve 3:2; do not crop",
+  "phone_evidence": "Outside GLB, intact native HTML capture at 260-320px wide and original aspect ratio",
+  "performance": {
+    "canvas_limit": 1,
+    "dpr": [
+      1,
+      1.5
+    ],
+    "render_when": "on demand; pause offscreen and at rest",
+    "external_textures": 0
+  },
+  "motion": {
+    "duration_ms": [
+      180,
+      240
+    ],
+    "purpose": "chosen destination changes, not idle tilt",
+    "reduced_motion": "Matching static selected-state poster plus functioning ordinary DOM room controls"
+  },
+  "lighting": "Neutral soft procedural environment, restrained contact shadows; no colored global tint",
+  "optional_close_views": {
+    "living": {
+      "poster": "room-living-mobile.webp",
+      "position": [
+        -1.6,
+        3.25,
+        10.5
+      ],
+      "target": [
+        -1.94,
+        1.25,
+        0.45
+      ],
+      "horizontal_span": 4.8,
+      "vertical_span": 4.6,
+      "size": [
+        720,
+        720
+      ],
+      "visible_destination": "DestinationLiving",
+      "hide_other_destination": true
+    },
+    "bedroom": {
+      "poster": "room-bedroom-mobile.webp",
+      "position": [
+        2.1,
+        3.45,
+        10.8
+      ],
+      "target": [
+        1.95,
+        1.2,
+        0.6
+      ],
+      "horizontal_span": 4.0,
+      "vertical_span": 4.4,
+      "size": [
+        720,
+        720
+      ],
+      "visible_destination": "DestinationBedroom",
+      "hide_other_destination": true
+    }
+  }
+}
