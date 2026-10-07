@@ -3,8 +3,12 @@
   "private": true,
   "scripts": {
     "build": "node site/build-react.mjs",
+    "build:production": "node site/build-react.mjs --production",
+    "build:pages": "node site/build-pages.mjs",
+    "build:pages:production": "node site/build-pages.mjs --production",
+    "build:github-transition": "node site/build-github-transition.mjs",
     "build:scene": "node site/build-react.mjs",
-    "test": "node --test site/beta-request.test.mjs worker/test/*.test.mjs"
+    "test": "node --test --test-isolation=none site/deployment-config.test.mjs site/src/download-metrics.test.mjs site/beta-request.test.mjs worker/test/*.test.mjs analytics/tests/*.test.mjs"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",

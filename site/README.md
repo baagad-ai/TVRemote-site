@@ -1,13 +1,13 @@
 # The Remote website
 
-This public repository contains The Remote beta landing page and privacy policy. The Android app is maintained separately; this repository contains no app source, build outputs, signing files, or release credentials.
+This public repository contains The Remote website and privacy policy. The Android app is maintained separately; this repository contains no app source, signing files, or release credentials.
 
 - Website: https://baagad-ai.github.io/TVRemote-site/
 - Privacy policy: https://baagad-ai.github.io/TVRemote-site/privacy/
 
 The Remote is a free Android phone remote for compatible Android TV and Google TV devices. Compatibility and available controls vary by TV and its Android TV Remote Service version.
 
-The email-only beta request form uses the existing Cloudflare Worker, private D1 database and hostname-restricted Turnstile widget. The validated GitHub Pages workflow deploys the public form from main. A genuine browser submission through the complete public Pages-to-Worker-to-D1 path remains unverified. Requests are reviewed privately; approved Google Play accounts are invited manually and must accept the Play opt-in before installing. See [Worker setup and private CSV export](../worker/README.md). The app has no account or developer-operated cloud relay; the website request service is separate.
+The migration candidate replaces beta signup with direct APK links. The release remains inactive until the final signed current-source APK identity is verified. Ordinary prerendered anchors work without JavaScript and click analytics never delays navigation. The existing beta service and private records remain intact; see [Worker management](../worker/README.md). Cloudflare Web Analytics supplies visit metrics; a separate D1 database stores private aggregate click totals. See [analytics](../docs/ANALYTICS.md) and [deployment](../docs/PAGES-DEPLOYMENT.md).
 
 ## Landing-page copy
 
@@ -15,7 +15,7 @@ The email-only beta request form uses the existing Cloudflare Worker, private D1
 - Give each heading, label, and caption enough context to make the action or benefit clear. Avoid narrating how the page or its artwork was built.
 - Describe screenshots and illustrations accurately. Name what is visible, and say when a TV result or other outcome is not shown.
 - Limit claims to shipped features and compatible devices. Do not promise support for every TV or add invented results, testimonials, counts, or endorsements.
-- Keep beta copy honest: a request is not enrollment. A developer reviews each request and manually invites approved Google Play accounts; testers must accept the Play invitation before installing.
+- Describe the approved direct APK and compatible devices accurately; do not invent download counts.
 
 ## Build and publication
 

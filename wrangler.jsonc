@@ -1,0 +1,33 @@
+{
+  "name": "tvremote-site",
+  "pages_build_output_dir": "./_site",
+  "compatibility_date": "2026-10-07",
+  "send_metrics": false,
+  "d1_databases": [
+    {
+      "binding": "METRICS_DB",
+      "database_name": "the-remote-download-metrics",
+      "database_id": "REPLACE_WITH_SEPARATE_METRICS_DATABASE_ID",
+      "migrations_dir": "analytics/migrations"
+    }
+  ],
+  "vars": {
+    "METRICS_ENABLED": "false",
+    "METRICS_ALLOWED_ORIGINS": "https://tvremote-site.pages.dev",
+    "METRICS_ALLOWED_RELEASES": "",
+    "METRICS_DAILY_CAP": "1000",
+    "METRICS_PER_MINUTE": "20"
+  },
+  "env": {
+    "preview": {
+      "d1_databases": [],
+      "vars": {
+        "METRICS_ENABLED": "false",
+        "METRICS_ALLOWED_ORIGINS": "",
+        "METRICS_ALLOWED_RELEASES": "",
+        "METRICS_DAILY_CAP": "1000",
+        "METRICS_PER_MINUTE": "20"
+      }
+    }
+  }
+}

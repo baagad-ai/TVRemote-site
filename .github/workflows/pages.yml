@@ -7,6 +7,10 @@ on:
     paths:
       - "site/**"
       - "worker/**"
+      - "functions/**"
+      - "analytics/**"
+      - "wrangler.jsonc"
+      - "docs/**"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/pages.yml"
@@ -17,6 +21,10 @@ on:
     paths:
       - "site/**"
       - "worker/**"
+      - "functions/**"
+      - "analytics/**"
+      - "wrangler.jsonc"
+      - "docs/**"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/pages.yml"
@@ -51,10 +59,10 @@ jobs:
           node --check site/build.mjs
           node site/check.mjs
           node site/check-config.mjs
-          node --test site/beta-request.test.mjs worker/test/*.test.mjs
+          npm test
 
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && vars.CLOUDFLARE_CUTOVER == 'true'
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -65,6 +73,9 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      VERIFIED_APK_SHA256: ${{ vars.VERIFIED_APK_SHA256 }}
+      SITE_URL: ${{ vars.SITE_URL }}
     steps:
       - name: Check out site repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -74,14 +85,10 @@ jobs:
           node-version: "24"
       - name: Install the pinned site dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Prerender pages and build the React runtime
-        run: npm run build
+      - name: Build the old-host transition after verified Cloudflare cutover
+        run: npm run build:github-transition
       - name: Configure GitHub Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-      - name: Stage the public page allowlist
-        run: |
-          node site/stage.mjs _site
-          node site/build.mjs _site
       - name: Package the public site
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

@@ -1,6 +1,6 @@
 # Open a YouTube link on Android TV from your phone
 
-If you already have the video’s link, open it in the YouTube app on your Android phone and connect to the TV. The Remote beta offers another route for compatible Android TV and Google TV devices: share the link, review the destination, then choose the **Open** action for your selected TV.
+If you already have the video’s link, open it in the YouTube app on your Android phone and connect to the TV. The Remote offers another route for compatible Android TV and Google TV devices: share the link, review the destination, then choose the **Open** action for your selected TV.
 
 You don’t need to type the title into the TV and hunt for the same video again.
 
@@ -14,7 +14,7 @@ Check the title and destination before sending it. You’ll need an existing way
 
 ## Use The Remote’s share-and-review route
 
-This route is for people who already have The Remote beta installed. You need an Android phone, a compatible Android TV or Google TV device with Android TV Remote Service v2, and a paired TV reachable on your local network. YouTube behaviour depends on the TV and its YouTube version. [The Remote’s requirements](https://baagad-ai.github.io/TVRemote-site/#compatibility)
+This route is for people who already have The Remote installed. You need an Android phone, a compatible Android TV or Google TV device with Android TV Remote Service v2, and a paired TV reachable on your local network. YouTube behaviour depends on the TV and its YouTube version. [The Remote’s requirements](https://baagad-ai.github.io/TVRemote-site/#compatibility)
 
 ### Share one video
 
@@ -48,4 +48,4 @@ Check the TV for the result. Its YouTube app, signed-in account and the video’
 
 A shared video deserves a quick check before it reaches a bigger screen. The Remote keeps that choice explicit: review the link, choose the TV, then send it.
 
-Want to try it? [Request beta access](https://baagad-ai.github.io/TVRemote-site/#beta-enrollment) with your Google Play account email. The app needs no account; the email is for private beta review. If approved, you’ll receive a manual Google Play invitation to accept before installing. [Email privacy](https://baagad-ai.github.io/TVRemote-site/privacy/)
+The Remote needs no app account. [Download The Remote APK](https://baagad-ai.github.io/TVRemote-site/#download) when available. No signup or email is needed. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.

@@ -227,17 +227,10 @@ test("provider whitespace and submitted email text are handled without HTML or U
   assert(!source.includes("innerHTML")); assert(!source.includes("localStorage"));
 });
 
-test("result is outside the form, reset is a real button, and live status remains mounted", () => {
+test("retained beta client is absent from the current public page", () => {
   const html = fs.readFileSync(new URL("index.html", import.meta.url), "utf8");
-  const css = fs.readFileSync(new URL("styles.css", import.meta.url), "utf8");
-  const form = html.slice(html.indexOf("<form data-beta-request-form"), html.indexOf("</form>", html.indexOf("<form data-beta-request-form")));
-  assert(!form.includes("data-request-result")); assert(!form.includes("data-request-status"));
-  assert.match(html, /<section(?=[^>]*data-request-result)(?=[^>]*hidden)(?=[^>]*aria-labelledby="request-result-heading")/);
-  assert.match(html, /<h3(?=[^>]*data-result-heading)(?=[^>]*tabindex="-1")/); assert.match(html, /<button(?=[^>]*type="button")(?=[^>]*data-register-another)/);
-  assert.match(html, /<p(?=[^>]*data-request-status)(?=[^>]*role="status")(?=[^>]*aria-live="polite")/); assert.match(html, /<noscript>/);
-  assert.match(css, /\[hidden\].*display:\s*none\s*!important/);
-  assert.match(css, /\.request-result strong\{[^}]*overflow-wrap:anywhere/);
-  assert.match(css, /\[tabindex\]:focus-visible/); assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.doesNotMatch(html, /<form|data-beta-request-form|data-request-result|data-request-status|beta-request\.js|turnstile/i);
+  assert.match(html, /id="download"/);
 });
 
 

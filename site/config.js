@@ -1,5 +1,5 @@
-/* Public identifiers for the verified Cloudflare request service. */
+/* Set apkRelease only after verifying the signed APK's identity and checksum.
+   Approved shape: { id, url, version, sha256 }; url must be a direct HTTPS APK. */
 window.remoteSiteConfig = Object.freeze({
-  betaRequestUrl: "https://the-remote-beta-requests.baagad-ai.workers.dev/beta-requests",
-  turnstileSiteKey: "0x4AAAAAAFNQLbByCk934BgF"
+  apkRelease: null
 });

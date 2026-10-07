@@ -1,0 +1,4 @@
+# Preserve visitors who copy the former GitHub Pages path onto the new host.
+/TVRemote-site / 301
+/TVRemote-site/* /:splat 301
+/previews/* / 301

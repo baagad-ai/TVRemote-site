@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import SplitText from './components/SplitText';
 import { useEnvironment } from './environment';
+import { DownloadLink } from './Download';
 
 const shots = [
   ['assets/remote-demo-ltr.png', 'The Remote with a sample YouTube query and the Android keyboard open. No TV result is shown.', 'App preview · sample TV'],
@@ -11,9 +12,7 @@ export function NativePhone({ shot = 0, className = '', priority = false, annota
   const [src, alt, caption] = Array.isArray(shot) ? shot : shots[shot];
   return <figure className={`native-phone ${className}`}><div className="native-phone-shell"><img src={src} alt={alt} width="1080" height="2340" loading={priority ? 'eager' : 'lazy'} decoding="async" fetchPriority={priority ? 'high' : 'auto'} />{annotation !== undefined && <span className={`phone-annotation annotation-${annotation}`} aria-hidden="true" />}</div><figcaption>{caption}</figcaption></figure>;
 }
-export function StoryCta({ children = 'Request beta access' }) {
-  return <a className="beta-cta" href="#beta-enrollment" data-beta-cta aria-controls="beta-enrollment"><span>{children}</span><span className="cta-arrow" aria-hidden="true">↗</span></a>;
-}
+export function StoryCta() { return <DownloadLink button="hero" />; }
 function LinkJourney({ ready, step, setStep }) {
   const names = ['Check the link', 'Choose its TV', 'Open when ready'];
   return <div className="link-journey"><div className="journey-rail" role="group" aria-label="Explore the share review preview">{names.map((name, i) => <button key={name} disabled={!ready} type="button" aria-pressed={step === i} onClick={() => setStep(i)}><span className="journey-number">0{i + 1}</span><span>{name}</span></button>)}</div><div className="journey-progress" aria-hidden="true"><span style={{ width: `${(step + 1) / 3 * 100}%` }} /></div><p className="journey-status" role="status">{['Review the shared YouTube link before sending.', 'Check its TV destination. You can choose another saved TV.', 'Open sends the request. Playback still needs TV confirmation.'][step]}</p><p className="fine-print">Choose a step to highlight it in the preview. No link is sent.</p></div>;

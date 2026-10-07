@@ -31,10 +31,10 @@ YouTube’s same-account companion experience lets you look for another video on
 
 That is a YouTube feature. A separate local-network remote still needs its own connection to the TV. Keep that distinction in mind if YouTube can see a screen that another remote app can’t find.
 
-## The Remote beta: start with the query
+## The Remote: start with the query
 
 The Remote includes a dedicated YouTube search entered with your Android phone keyboard and sent to your selected TV over the local network. It is for compatible Android TV and Google TV devices with Android TV Remote Service v2. The TV model and YouTube version determine whether the action is accepted. [The Remote’s requirements](https://baagad-ai.github.io/TVRemote-site/#compatibility)
 
 The [phone-side search demo](https://baagad-ai.github.io/TVRemote-site/#search-proof) shows where you enter the query. If a query doesn’t arrive on your TV, check the selected destination, then try a search directly in the TV’s YouTube app. If that also fails, resolve the TV-side issue first. If YouTube works but the remote query fails, record the TV model, YouTube version and a harmless sample query for support.
 
-Prefer entering the query on your phone? [Request beta access](https://baagad-ai.github.io/TVRemote-site/#beta-enrollment) with your Google Play account email. Requests are reviewed privately. If approved, you’ll receive a manual Google Play invitation to accept before installing. [How your email is handled](https://baagad-ai.github.io/TVRemote-site/privacy/)
+The Remote needs no app account. [Download The Remote APK](https://baagad-ai.github.io/TVRemote-site/#download) when available. No signup or email is needed. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
