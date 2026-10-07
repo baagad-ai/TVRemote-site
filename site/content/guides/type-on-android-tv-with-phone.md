@@ -46,6 +46,6 @@ For Google TV app feedback, open your profile picture, choose **Help & feedback*
 
 ## A phone-first option in beta
 
-The Remote’s beta includes a phone-entered YouTube search that you send to a selected compatible Android TV or Google TV over your home network. It requires Android TV Remote Service v2; whether the TV accepts the search depends on the device and its YouTube version. Its dedicated YouTube search is useful when that’s the task you came to do. [The Remote’s compatibility and search details](https://baagad-ai.github.io/TVRemote-site/#compatibility)
+The Remote’s beta includes a phone-entered YouTube search that you send to a selected compatible Android TV or Google TV over your home network. It requires Android TV Remote Service v2; whether the TV accepts the search depends on the device and its YouTube version. Its dedicated YouTube search is useful when that’s the task you came to do. [The Remote’s compatibility and search details](https://theremote-site.pages.dev/#compatibility)
 
-Want to try it? [Request beta access](https://baagad-ai.github.io/TVRemote-site/#beta-enrollment) with the email you use on Google Play. Requests are reviewed privately. If approved, you’ll receive a manual Google Play invitation to accept before installing. [Email handling and privacy](https://baagad-ai.github.io/TVRemote-site/privacy/)
+Want to try it? [Request beta access](https://theremote-site.pages.dev/#beta-enrollment) with the email you use on Google Play. Requests are reviewed privately. If approved, you’ll receive a manual Google Play invitation to accept before installing. [Email handling and privacy](https://theremote-site.pages.dev/privacy/)

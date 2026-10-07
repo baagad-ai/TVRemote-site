@@ -14,7 +14,7 @@ for(const route of routes){
  assert.equal((html.match(/<h1\b/g)||[]).length,1,route+' needs one H1');
  assert.match(html,/<main\b[^>]*id="main"/);
  assert.match(html,/class="skip-link" href="#main"/);
- assert.match(html,/rel="canonical" href="https:\/\/baagad-ai.github.io\/TVRemote-site\//);
+ assert.match(html,/rel="canonical" href="https:\/\/theremote-site.pages.dev\//);
  assert.match(html,/<meta name="description" content="[^"]+"/);
  assert(!/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(html),route+' contains control characters');
  assert(!/editorial-review|publication gate|content launch plan|research-ai-search|Google Groups|groups\.google\.com/i.test(html),route+' contains private strategy or legacy flow');

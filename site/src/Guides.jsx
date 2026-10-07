@@ -9,7 +9,7 @@ function inline(text, key = '') {
     pieces.push(text.slice(position, match.index));
     if (match[2]) {
       let href = match[3];
-      if (href.startsWith('https://baagad-ai.github.io/TVRemote-site/')) href = '../../' + href.slice('https://baagad-ai.github.io/TVRemote-site/'.length);
+      if (href.startsWith('https://theremote-site.pages.dev/')) href = '../../' + href.slice('https://theremote-site.pages.dev/'.length);
       pieces.push(/^https:\/\//.test(href) || href.startsWith('../../') ? <a key={key + match.index} href={href}>{match[2]}</a> : match[2]);
     } else if (match[4]) pieces.push(<strong key={key + match.index}>{match[4]}</strong>);
     else pieces.push(<code key={key + match.index}>{match[5]}</code>);

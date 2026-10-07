@@ -2,12 +2,12 @@
 
 This public repository contains The Remote beta landing page and privacy policy. The Android app is maintained separately; this repository contains no app source, build outputs, signing files, or release credentials.
 
-- Website: https://baagad-ai.github.io/TVRemote-site/
-- Privacy policy: https://baagad-ai.github.io/TVRemote-site/privacy/
+- Website: https://theremote-site.pages.dev/
+- Privacy policy: https://theremote-site.pages.dev/privacy/
 
 The Remote is a free Android phone remote for compatible Android TV and Google TV devices. Compatibility and available controls vary by TV and its Android TV Remote Service version.
 
-Email-only beta access requests use the existing Cloudflare Worker, private D1 database and hostname-restricted Turnstile widget. The validated GitHub Pages workflow deploys the public form from main. A genuine browser submission through the public Pages-to-Worker-to-D1 path remains unverified. Requests are reviewed privately; approved Google Play accounts are invited manually and must accept the Play opt-in before installing. See [Worker setup and private CSV export](worker/README.md). The app has no account or developer-operated cloud relay; the website request service is separate.
+The live public site is hosted on Cloudflare Pages at theremote-site.pages.dev. Email-only beta access requests use the existing Cloudflare Worker, private D1 database and hostname-restricted Turnstile widget. The validated GitHub Actions workflow still stages and checks the public form from main. A genuine browser submission through the public Pages-to-Worker-to-D1 path remains unverified. Requests are reviewed privately; approved Google Play accounts are invited manually and must accept the Play opt-in before installing. See [Worker setup and private CSV export](worker/README.md). The app has no account or developer-operated cloud relay; the website request service is separate.
 
 ## Landing-page copy
 

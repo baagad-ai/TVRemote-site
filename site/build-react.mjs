@@ -16,7 +16,7 @@ const generated = new Set(Object.keys(browserBuild.metafile.outputs).map(file =>
 for (const name of await fs.readdir(path.join(root, 'runtime'))) if (/^chunk-[A-Z0-9]+\.js$/.test(name) && !generated.has(name)) await fs.unlink(path.join(root, 'runtime', name));
 const context = { window: {} }; vm.runInNewContext(await fs.readFile(path.join(root, 'config.js'), 'utf8'), context);
 const config = context.window.remoteSiteConfig;
-const canonical = 'https://baagad-ai.github.io/TVRemote-site/';
+const canonical = 'https://theremote-site.pages.dev/';
 function document(route, markup) {
   const privacy = route === 'privacy', article = articles.find(a => route === `guides/${a.slug}`), guides = route === 'guides', prefix = article ? '../../' : privacy || guides ? '../' : '';
   const suffix = route === 'landing' ? '' : route + '/';

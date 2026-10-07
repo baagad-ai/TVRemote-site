@@ -14,7 +14,7 @@ Check the title and destination before sending it. You’ll need an existing way
 
 ## Use The Remote’s share-and-review route
 
-This route is for people who already have The Remote beta installed. You need an Android phone, a compatible Android TV or Google TV device with Android TV Remote Service v2, and a paired TV reachable on your local network. YouTube behaviour depends on the TV and its YouTube version. [The Remote’s requirements](https://baagad-ai.github.io/TVRemote-site/#compatibility)
+This route is for people who already have The Remote beta installed. You need an Android phone, a compatible Android TV or Google TV device with Android TV Remote Service v2, and a paired TV reachable on your local network. YouTube behaviour depends on the TV and its YouTube version. [The Remote’s requirements](https://theremote-site.pages.dev/#compatibility)
 
 ### Share one video
 
@@ -48,4 +48,4 @@ Check the TV for the result. Its YouTube app, signed-in account and the video’
 
 A shared video deserves a quick check before it reaches a bigger screen. The Remote keeps that choice explicit: review the link, choose the TV, then send it.
 
-Want to try it? [Request beta access](https://baagad-ai.github.io/TVRemote-site/#beta-enrollment) with your Google Play account email. The app needs no account; the email is for private beta review. If approved, you’ll receive a manual Google Play invitation to accept before installing. [Email privacy](https://baagad-ai.github.io/TVRemote-site/privacy/)
+Want to try it? [Request beta access](https://theremote-site.pages.dev/#beta-enrollment) with your Google Play account email. The app needs no account; the email is for private beta review. If approved, you’ll receive a manual Google Play invitation to accept before installing. [Email privacy](https://theremote-site.pages.dev/privacy/)
