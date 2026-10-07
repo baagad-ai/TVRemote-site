@@ -1,6 +1,6 @@
 # Cloudflare Pages migration
 
-Status: source prepared; Cloudflare project `tvremote-site` created on 7 October 2026. Its confirmed free hostname is `https://tvremote-site.pages.dev/`; no content deployment or public cutover has occurred. Set `SITE_URL` to that HTTPS origin; canonical tags, Open Graph URLs, sitemap and robots all use it. No domain purchase is required.
+Status: Cloudflare project `tvremote-site` created on 7 October 2026. Its confirmed free production hostname is `https://tvremote-site.pages.dev/`; public cutover has not occurred. The inactive-release branch preview is https://analytics-preview.tvremote-site.pages.dev/ (deployment `27b7a34d-6039-403f-b407-f8dcf45b7166`). Its nine routes, metadata, signup removal, redirects and disabled metrics endpoint passed deployed smoke checks. No production deployment exists; collection remains disabled and the analytics tables contain no click or budget rows. Set `SITE_URL` to the production HTTPS origin; canonical tags, Open Graph URLs, sitemap and robots all use it. No domain purchase is required.
 
 ## Preview and production
 
