@@ -1,12 +1,12 @@
 # Cloudflare Pages migration
 
-Status: source prepared; deployment has not occurred. The free `tvremote-site.pages.dev` name is a candidate until Cloudflare confirms availability. Set `SITE_URL` to the confirmed HTTPS origin (a trailing slash is normalized); canonical tags, Open Graph URLs, sitemap and robots all use it. No domain purchase is required.
+Status: source prepared; Cloudflare project `tvremote-site` created on 7 October 2026. Its confirmed free hostname is `https://tvremote-site.pages.dev/`; no content deployment or public cutover has occurred. Set `SITE_URL` to that HTTPS origin; canonical tags, Open Graph URLs, sitemap and robots all use it. No domain purchase is required.
 
 ## Preview and production
 
-Use existing authorized Cloudflare access and the existing GitHub connection. Do not create tokens, change repository visibility or add paid services. The current CLI OAuth can read D1 but lacks `pages:write`; Pages list/deploy currently returns authentication error 10000. A user-authorized account login or supported connected route with Pages access is required. No scope refresh was performed. If the user later authorizes login, inspect the installed CLI with `wrangler login --help` and `wrangler login --scopes-list` before selecting minimum existing account/D1 and Pages scopes; do not execute a login automatically.
+Use existing authorized Cloudflare access and the existing GitHub connection. Do not create API tokens, change repository visibility or add paid services. The user approved OAuth renewal retaining user/account read, Workers scripts write, D1 write and Turnstile write, while adding only `pages:write`. The renewal completed on 7 October 2026; Pages, D1 and the existing beta Worker deployment access were verified read-only. No broader permissions or plan changes were requested.
 
-Connect repository `baagad-ai/TVRemote-site` to a Pages project. Use repository root, build command `npm run build:pages`, output `_site`, Node 24, and production branch `main`. Set `PAGES_PRODUCTION_BRANCH` if the actual production branch differs. `CF_PAGES_BRANCH` selects production validation; direct production builds use `npm run build:pages:production` explicitly. Preview deployments retain the canonical production host.
+The created project uses Direct Upload and production branch `main`. Build from the reviewed repository with `npm run build:pages`, output `_site`, Node 24; deploy using the existing authorized Wrangler. Direct Upload does not automatically build on GitHub pushes. If choosing Git integration later, Cloudflare requires a separate project; do not silently assume the existing project is connected. `CF_PAGES_BRANCH` selects production validation; direct production builds use `npm run build:pages:production` explicitly. Preview deployments retain the canonical production host.
 
 The release remains `apkRelease: null` until the parent supplies the verified current-source final APK. To publish, populate `site/config.js` with immutable `id`, direct HTTPS `.apk` `url`, `version` and lowercase SHA-256. Set the build environment `VERIFIED_APK_SHA256` to that exact independently verified digest. A missing release, AAB URL or unmatched digest aborts production before build output is written. A local or branch preview can build without a release. This guard does not itself verify a signing certificate or download artifact bytes; those are release prerequisites.
 
@@ -14,7 +14,9 @@ For repeated local staging, remove only the verified repository `_site` build-ou
 
 ## Metrics setup before production
 
-`wrangler.jsonc` is a nonsecret configuration template. Replace the separate metrics database ID placeholder after creating `the-remote-download-metrics` with existing authorized access. Apply `analytics/migrations` only to that new database. Never substitute the beta intake database. Runtime variables are distinct from Pages build variables.
+`wrangler.jsonc` is nonsecret configuration. The separate metrics database `the-remote-download-metrics` was created with ID `0b9109ef-88b4-4521-9fcc-d043a09e9ef8`. Migration `0001_download_clicks.sql` applied successfully to remote D1 on 7 October 2026. Apply future `analytics/migrations` only to that database. Never substitute the beta intake database. Runtime variables are distinct from Pages build variables. Database identifiers are not authentication credentials; no public read endpoint exists.
+
+Keep SQL migration files as LF via `.gitattributes`. Remote D1's trigger parser rejected a nested `CASE ... END` expression with error 7500 although local SQLite accepted it. The equivalent `SELECT RAISE(IGNORE) WHERE changes() = 0` trigger applied successfully, preserving the shared atomic cap. Failed attempts applied no partial analytics schema.
 
 Set runtime `METRICS_ALLOWED_ORIGINS` to the confirmed exact site origin and `METRICS_ALLOWED_RELEASES` to the verified release ID; enable `METRICS_ENABLED=true` only after schema and endpoint validation. Keep preview metrics disabled with no production D1 binding. `METRICS_DAILY_CAP=1000` bounds accepted events; `METRICS_PER_MINUTE=20` is an isolate-local admission throttle. It does not guarantee a global request or D1 read-spend ceiling. Review usage in the existing account; do not change subscriptions.
 

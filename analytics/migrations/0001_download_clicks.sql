@@ -18,5 +18,5 @@ CREATE TRIGGER download_click_budget BEFORE INSERT ON download_click_daily
 BEGIN
   INSERT INTO metrics_daily_budget (day, accepted) VALUES (NEW.day, 1)
   ON CONFLICT (day) DO UPDATE SET accepted = accepted + 1 WHERE accepted < 5000;
-  SELECT CASE WHEN changes() = 0 THEN RAISE(IGNORE) END;
+  SELECT RAISE(IGNORE) WHERE changes() = 0;
 END;

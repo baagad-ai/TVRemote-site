@@ -7,7 +7,7 @@
     {
       "binding": "METRICS_DB",
       "database_name": "the-remote-download-metrics",
-      "database_id": "REPLACE_WITH_SEPARATE_METRICS_DATABASE_ID",
+      "database_id": "0b9109ef-88b4-4521-9fcc-d043a09e9ef8",
       "migrations_dir": "analytics/migrations"
     }
   ],

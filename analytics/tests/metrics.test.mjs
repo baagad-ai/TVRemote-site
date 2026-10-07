@@ -9,6 +9,16 @@ const origin = 'https://tvremote.pages.dev';
 const click = { event: 'apk_download_click', release: 'v1.2.3-security', button: 'hero', platform: 'android' };
 const initialTime = Date.parse('2026-10-07T12:00:00Z');
 
+test('migration bytes remain compatible with the remote D1 trigger splitter', () => {
+  // https://github.com/cloudflare/workers-sdk/issues/15314: local SQLite accepts
+  // CRLF/lowercase BEGIN, but the remote /query splitter rejects those forms.
+  assert.equal(migration.includes('\r'), false, 'D1 migration SQL must use LF');
+  assert.match(migration, /CREATE TRIGGER[^;]+\nBEGIN\n/);
+  assert.equal((migration.match(/\bEND\b/g) || []).length, 1, 'Avoid nested CASE END in the trigger splitter');
+  assert.equal(readFileSync(new URL('../../.gitattributes', import.meta.url), 'utf8')
+    .split(/\r?\n/).includes('analytics/migrations/*.sql text eol=lf'), true);
+});
+
 function fixture(overrides = {}) {
   const db = new DatabaseSync(':memory:');
   db.exec(migration);
