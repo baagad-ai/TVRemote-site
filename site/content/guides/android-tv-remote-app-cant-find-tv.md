@@ -77,4 +77,4 @@ Leave passwords and account details out of screenshots. This is more useful than
 
 The Remote is a free Android phone app for compatible Android TV and Google TV devices. It uses your home network and requires Android TV Remote Service v2; controls vary by model.
 
-[Download the available Android APK](https://baagad-ai.github.io/TVRemote-site/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
+[Download the available Android APK](https://theremote-site.pages.dev/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.

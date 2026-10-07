@@ -46,6 +46,6 @@ For Google TV app feedback, open your profile picture, choose **Help & feedback*
 
 ## A phone-first option
 
-The Remote includes a phone-entered YouTube search that you send to a selected compatible Android TV or Google TV over your home network. It requires Android TV Remote Service v2; whether the TV accepts the search depends on the device and its YouTube version. Its dedicated YouTube search is useful when that’s the task you came to do. [The Remote’s compatibility and search details](https://baagad-ai.github.io/TVRemote-site/#compatibility)
+The Remote includes a phone-entered YouTube search that you send to a selected compatible Android TV or Google TV over your home network. It requires Android TV Remote Service v2; whether the TV accepts the search depends on the device and its YouTube version. Its dedicated YouTube search is useful when that’s the task you came to do. [The Remote’s compatibility and search details](https://theremote-site.pages.dev/#compatibility)
 
-[Download the available Android APK](https://baagad-ai.github.io/TVRemote-site/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
+[Download the available Android APK](https://theremote-site.pages.dev/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.

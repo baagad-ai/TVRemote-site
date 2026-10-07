@@ -1,5 +1,5 @@
 {
-  "name": "tvremote-site",
+  "name": "theremote-site",
   "pages_build_output_dir": "./_site",
   "compatibility_date": "2026-10-07",
   "send_metrics": false,
@@ -13,7 +13,7 @@
   ],
   "vars": {
     "METRICS_ENABLED": "false",
-    "METRICS_ALLOWED_ORIGINS": "https://tvremote-site.pages.dev",
+    "METRICS_ALLOWED_ORIGINS": "https://theremote-site.pages.dev",
     "METRICS_ALLOWED_RELEASES": "",
     "METRICS_DAILY_CAP": "1000",
     "METRICS_PER_MINUTE": "20"

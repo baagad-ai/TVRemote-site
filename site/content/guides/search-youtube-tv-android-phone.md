@@ -33,8 +33,8 @@ That is a YouTube feature. A separate local-network remote still needs its own c
 
 ## The Remote: start with the query
 
-The Remote includes a dedicated YouTube search entered with your Android phone keyboard and sent to your selected TV over the local network. It is for compatible Android TV and Google TV devices with Android TV Remote Service v2. The TV model and YouTube version determine whether the action is accepted. [The Remote’s requirements](https://baagad-ai.github.io/TVRemote-site/#compatibility)
+The Remote includes a dedicated YouTube search entered with your Android phone keyboard and sent to your selected TV over the local network. It is for compatible Android TV and Google TV devices with Android TV Remote Service v2. The TV model and YouTube version determine whether the action is accepted. [The Remote’s requirements](https://theremote-site.pages.dev/#compatibility)
 
-The [phone-side search demo](https://baagad-ai.github.io/TVRemote-site/#search-proof) shows where you enter the query. If a query doesn’t arrive on your TV, check the selected destination, then try a search directly in the TV’s YouTube app. If that also fails, resolve the TV-side issue first. If YouTube works but the remote query fails, record the TV model, YouTube version and a harmless sample query for support.
+The [phone-side search demo](https://theremote-site.pages.dev/#search-proof) shows where you enter the query. If a query doesn’t arrive on your TV, check the selected destination, then try a search directly in the TV’s YouTube app. If that also fails, resolve the TV-side issue first. If YouTube works but the remote query fails, record the TV model, YouTube version and a harmless sample query for support.
 
-[Download the available Android APK](https://baagad-ai.github.io/TVRemote-site/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
+[Download the available Android APK](https://theremote-site.pages.dev/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.

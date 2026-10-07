@@ -64,6 +64,6 @@ The same-network setup described here isn't an away-from-home control service. A
 
 The Remote is a separate, free Android phone app. It's built for compatible Android TV and Google TV devices on your home network, with Android TV Remote Service v2 required. Available controls vary by model.
 
-You can enter a YouTube search on your phone, review a shared YouTube link before sending it, name saved TVs by room, and choose app-specific controls. YouTube behavior also depends on the TV and its YouTube version. [See The Remote's features and requirements](https://baagad-ai.github.io/TVRemote-site/)
+You can enter a YouTube search on your phone, review a shared YouTube link before sending it, name saved TVs by room, and choose app-specific controls. YouTube behavior also depends on the TV and its YouTube version. [See The Remote's features and requirements](https://theremote-site.pages.dev/)
 
-[Download the available Android APK](https://baagad-ai.github.io/TVRemote-site/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
+[Download the available Android APK](https://theremote-site.pages.dev/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.

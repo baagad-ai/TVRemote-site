@@ -3,7 +3,7 @@
 This public repository contains The Remote website and privacy policy. The Android app is maintained separately; this repository contains no app source, signing files, or release credentials.
 
 - Existing live website before cutover: https://baagad-ai.github.io/TVRemote-site/
-- Confirmed Cloudflare project hostname: https://tvremote-site.pages.dev/ (`SITE_URL` sets canonical URLs and sitemap; public cutover still pending)
+- Current Cloudflare project hostname: https://theremote-site.pages.dev/ (`SITE_URL` sets canonical URLs and sitemap; verified APK release cutover still pending)
 
 The Remote is a free Android phone remote for compatible Android TV and Google TV devices. Compatibility and available controls vary by TV and its Android TV Remote Service version.
 

@@ -14,7 +14,7 @@ Check the title and destination before sending it. You’ll need an existing way
 
 ## Use The Remote’s share-and-review route
 
-This route is for people who already have The Remote installed. You need an Android phone, a compatible Android TV or Google TV device with Android TV Remote Service v2, and a paired TV reachable on your local network. YouTube behaviour depends on the TV and its YouTube version. [The Remote’s requirements](https://baagad-ai.github.io/TVRemote-site/#compatibility)
+This route is for people who already have The Remote installed. You need an Android phone, a compatible Android TV or Google TV device with Android TV Remote Service v2, and a paired TV reachable on your local network. YouTube behaviour depends on the TV and its YouTube version. [The Remote’s requirements](https://theremote-site.pages.dev/#compatibility)
 
 ### Share one video
 
@@ -48,4 +48,4 @@ Check the TV for the result. Its YouTube app, signed-in account and the video’
 
 A shared video deserves a quick check before it reaches a bigger screen. The Remote keeps that choice explicit: review the link, choose the TV, then send it.
 
-[Download the available Android APK](https://baagad-ai.github.io/TVRemote-site/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
+[Download the available Android APK](https://theremote-site.pages.dev/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
