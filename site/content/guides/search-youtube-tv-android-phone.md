@@ -37,4 +37,4 @@ The Remote includes a dedicated YouTube search entered with your Android phone k
 
 The [phone-side search demo](https://baagad-ai.github.io/TVRemote-site/#search-proof) shows where you enter the query. If a query doesn’t arrive on your TV, check the selected destination, then try a search directly in the TV’s YouTube app. If that also fails, resolve the TV-side issue first. If YouTube works but the remote query fails, record the TV model, YouTube version and a harmless sample query for support.
 
-The Remote needs no app account. [Download The Remote APK](https://baagad-ai.github.io/TVRemote-site/#download) when available. No signup or email is needed. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
+[Download the available Android APK](https://baagad-ai.github.io/TVRemote-site/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
