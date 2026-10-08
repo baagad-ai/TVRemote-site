@@ -11,6 +11,5 @@
   { "q": "A YouTube search or link won't open on the TV.", "a": "Open YouTube on the TV, make sure it's up to date, and try again. Search and link support depend on the TV and its YouTube version. If the TV shows a sign-in or playback message, sort that out on the TV first." },
   { "q": "I have more than one TV. How do I pick the right one?", "a": "Give each saved TV a name and a room, like Living room or Bedroom. Choose the TV before you send a YouTube search or link, so it opens on the screen you meant." },
   { "q": "How do I update the app?", "a": "Download the latest version from this page and open it. Android installs it over your current app when the app version and signing identity are compatible. If Android rejects it, keep the app you have. Uninstalling removes saved TVs, pairings, and settings." },
-  { "q": "Where does my YouTube search go?", "a": "To the TV you picked, over your local network. YouTube may process the search link under its own privacy policy. The Remote doesn't keep a search history." },
-  { "q": "Does the Bluetooth mouse work on every phone?", "a": "No. D-pad controls are the default over your home network. The optional Bluetooth mouse needs Android 9.0 or later, Bluetooth HID support on your phone, and a TV that supports the connection." }
+  { "q": "Where does my YouTube search go?", "a": "To the TV you picked, over your local network. YouTube may process the search link under its own privacy policy. The Remote doesn't keep a search history." }
 ]
