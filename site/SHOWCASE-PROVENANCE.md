@@ -1,17 +1,30 @@
 # Showcase screenshot provenance
 
-This maintainer record describes the five unaltered native app captures used by the website. They were captured on 2026-10-03 from the app's local demo on a disposable Android API 35 emulator at 1080 × 2340 and 440 dpi. Each site PNG is byte-identical to its source capture. The phone frames and detail insets are composed in the page; the source files themselves were not redrawn, composited, cropped, or edited.
+This maintainer record describes the native app captures used by the website.
 
-| Website asset | Source capture | Visible state and limits |
-| --- | --- | --- |
-| `assets/showcase/youtube-share-review.png` | `01-youtube-share-review.png` | Native YouTube link review dialog. The app labels the destination as a local demo with no TV connected. The Open action was not tapped; this is a review UI, not evidence of playback. |
-| `assets/showcase/youtube-manual-controls.png` | `02-youtube-manual-profile.png` | YouTube was chosen manually. The screen says “Demo · chosen by you” and shows the controls available for that app selection. No TV command was sent, and no reported foreground app is set. |
-| `assets/showcase/spotify-controls-manual-demo.png` | `07-spotify-player-controls-manual-demo.png` | Spotify was chosen manually and the native screen was naturally scrolled to its player controls. “Demo · chosen by you” and the “Local demo” labels remain visible; no control was tapped. |
-| `assets/showcase/saved-tv-room-list-demo.png` | `04-your-tvs-disconnected-samples.png` | The local-demo screen says no TV commands are sent. The living-room and bedroom entries are sample UI fixtures, not paired or saved TVs. |
-| `assets/showcase/tv-details-edit-demo.png` | `05-tv-details-disconnected-sample.png` | The name-and-room form for a sample TV is shown with the keyboard dismissed. No field was changed or saved. |
+## Real-device captures (beta.8.1)
 
-The player-controls capture was taken after natural in-app scrolling; its file has not been modified. The website's small native-detail insets use CSS positioning over the same original PNGs. They do not add a second, synthesized UI state.
+Four of the website PNGs come from Baagad's own screen recordings of The Remote 0.1.0-beta.8.1 on a real Android phone, paired with a real TV ("Family Room TV", room "Living room"), recorded on 8 October 2026 (recordings rec4 and rec5). Design cleaned the Android status bar (time, signal and battery icons) and made no edits to app content. The website files are byte-identical to the cleaned stills in `launch-assets/beta8.1/clean/`. The phone frames are composed in the page.
 
-## Earlier keyboard capture
+| Website asset | Size | Cleaned source still | Used for | Visible state and limits |
+| --- | --- | --- | --- | --- |
+| `assets/showcase/remote-home.png` | 1080 × 2340 | `clean/site/hero-C1-1080x2340.png` (same bytes as `controls-C1-1080x2340.png` and `C1-remote-home.png`) | Hero, sticky proof track #1, controls section "Remote" tab | Remote home screen. Family Room TV, Living room, connected. YouTube card, D-pad, Back/Home/Play, volume and the Search YouTube button. |
+| `assets/showcase/youtube-search.png` | 1080 × 2340 | `clean/C2-search.png` | Controls section "Search" tab | YouTube search sheet titled "Search YouTube on Family Room TV" with "lofi beats" typed and the phone keyboard open. The still shows the query before it is sent; it is not evidence of a TV result. |
+| `assets/showcase/your-tvs.png` | 1080 × 2340 | `clean/C5-your-tvs.png` (full height) | Rooms chapter, sticky proof track #3 | Your TVs sheet: one TV, Family Room TV, Living room, connected; the Add a TV button; Couch mode and Guest mode cards (shipped features, both off). |
+| `assets/showcase/pair-name-and-room.png` | 1080 × 1420 | `clean/C6-name-and-room-crop.png` | "Make the names your own" details | The Name and room part of the Pair your TV screen: TV name Family Room TV, Living room chip selected, Pair this TV button. The crop starts below the pairing-code field, so no pairing code is visible. The full-height raw still shows a code and is never used on the site. |
 
-`assets/remote-demo-ltr.png` was introduced in published commit `6a4569fe50800204eee71ed60a71fa5402ed0180` as the reviewed demo screen with explicit local-demo context. Its older UI visibly includes a sample Connected label. This redesign preserves its exact bytes, labels it a native sample screen, and makes no claim that its displayed TV was actually paired or that any search played on a TV. Its capture date and source-device details are not independently established by this repository.
+## Real-device capture (beta.8.2)
+
+`assets/showcase/youtube-share.png` (1080 × 2340) is from Baagad's own screenshot of The Remote 0.1.0-beta.8.2 on the same real phone, taken on 8 October 2026. Design cleaned the Android status bar and made no other edits; the website file is byte-identical to `launch-assets/beta8.2/clean/site/share-C4-1080x2340.png`. Baagad had renamed the TV and room by then, so this screen shows "Family Room TV 1" in "Hall" while the beta.8.1 captures show "Family Room TV" in "Living room". Both are real app UI and are left as captured.
+
+| Website asset | Size | Cleaned source still | Used for | Visible state and limits |
+| --- | --- | --- | --- | --- |
+| `assets/showcase/youtube-share.png` | 1080 × 2340 | `beta8.2/clean/site/share-C4-1080x2340.png` | Share chapter, sticky proof track #2 (with three CSS highlight boxes) | "Shared to The Remote" / "Open YouTube video?" sheet: a youtube.com/watch link card, "Choose a TV. Nothing sends until you confirm.", Family Room TV 1 (Hall · Connected) selected, "TV still needs to confirm playback.", Discard and Open on Hall buttons. It shows the review step before Open; it is not evidence of playback. |
+
+The highlight boxes are page CSS drawn over the unmodified PNG (link card, selected TV card, Open on Hall button); they are not part of the image.
+
+No demo, sample or emulator images remain on the website.
+
+## Removed
+
+The emulator demo captures `remote-demo-ltr.png`, `showcase/youtube-manual-controls.png`, `showcase/saved-tv-room-list-demo.png`, `showcase/tv-details-edit-demo.png` and the second-app controls demo were removed on 8 October 2026 when the real captures above replaced them. The emulator share capture `showcase/youtube-share-review.png` (local demo, no TV connected) was removed the same day when the beta.8.2 share screenshot replaced it. The second app tab in the controls section was dropped because the app only has a YouTube shortcut; that tab now shows YouTube search.

@@ -1,0 +1,33 @@
+{
+  "name": "theremote-site",
+  "pages_build_output_dir": "./_site",
+  "compatibility_date": "2026-10-07",
+  "send_metrics": false,
+  "d1_databases": [
+    {
+      "binding": "METRICS_DB",
+      "database_name": "the-remote-download-metrics",
+      "database_id": "0b9109ef-88b4-4521-9fcc-d043a09e9ef8",
+      "migrations_dir": "analytics/migrations"
+    }
+  ],
+  "vars": {
+    "METRICS_ENABLED": "true",
+    "METRICS_ALLOWED_ORIGINS": "https://theremote-site.pages.dev",
+    "METRICS_ALLOWED_RELEASES": "0.1.0-beta.8.2-b8dfd7f8b41e,0.1.0-beta.8.1-3fbb8e414cdf,0.1.0-beta.8-8ea325cd117f,0.1.0-beta.7-b60880306e71",
+    "METRICS_DAILY_CAP": "1000",
+    "METRICS_PER_MINUTE": "20"
+  },
+  "env": {
+    "preview": {
+      "d1_databases": [],
+      "vars": {
+        "METRICS_ENABLED": "false",
+        "METRICS_ALLOWED_ORIGINS": "",
+        "METRICS_ALLOWED_RELEASES": "",
+        "METRICS_DAILY_CAP": "1000",
+        "METRICS_PER_MINUTE": "20"
+      }
+    }
+  }
+}

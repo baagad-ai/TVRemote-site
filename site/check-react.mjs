@@ -3,7 +3,10 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
+import { siteUrl, loadConfig } from './deployment-config.mjs';
+import { approvedRelease } from './src/download-metrics.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
+const canonical=siteUrl(process.env.SITE_URL);
 const articles=JSON.parse(fs.readFileSync(path.join(root,'src/guides.json'),'utf8'));
 assert.equal(articles.length,6);
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
@@ -14,7 +17,9 @@ for(const route of routes){
  assert.equal((html.match(/<h1\b/g)||[]).length,1,route+' needs one H1');
  assert.match(html,/<main\b[^>]*id="main"/);
  assert.match(html,/class="skip-link" href="#main"/);
- assert.match(html,/rel="canonical" href="https:\/\/theremote-site.pages.dev\//);
+ const suffix=route==='index.html'?'':route.replace(/index\.html$/,'');
+ assert(html.includes(`rel="canonical" href="${canonical}${suffix}"`),route+' canonical host/path mismatch');
+ assert(html.includes(`property="og:url" content="${canonical}${suffix}"`),route+' Open Graph host/path mismatch');
  assert.match(html,/<meta name="description" content="[^"]+"/);
  assert(!/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(html),route+' contains control characters');
  assert(!/editorial-review|publication gate|content launch plan|research-ai-search|Google Groups|groups\.google\.com/i.test(html),route+' contains private strategy or legacy flow');
@@ -26,16 +31,35 @@ for(const route of routes){
   else assert(fs.existsSync(file),route+': '+ref);
  }
 }
+{
+ // 404 page: Pages serves it for unknown paths at any depth, so links must be root-absolute and resolve from the site root.
+ const notFound=read('404.html');
+ assert.equal((notFound.match(/<h1\b/g)||[]).length,1,'404 needs one H1');
+ assert.match(notFound,/<meta name="robots" content="noindex">/);
+ assert.match(notFound,/<main\b[^>]*id="main"/);assert.match(notFound,/class="skip-link" href="#main"/);
+ assert(!/<script\b|rel="canonical"|og:url|data-download-cta|cloudflareinsights|\/api\/metrics/i.test(notFound),'404 must stay static: no scripts, canonical, analytics or click counting');
+ for(const href of ['/','/guides/','/privacy/'])assert(notFound.includes(`href="${href}"`),'404 needs a link to '+href);
+ for(const match of notFound.matchAll(/\b(?:href|src)="([^"]+)"/g)){
+  const ref=match[1];if(/^(https?:|mailto:|#|data:)/.test(ref))continue;
+  assert(ref.startsWith('/'),'404 links must be root-absolute: '+ref);
+  const file=path.join(root,ref.split('#')[0].split('?')[0]);
+  assert(fs.existsSync(ref.split('#')[0].endsWith('/')?path.join(file,'index.html'):file),'404.html: '+ref);
+ }
+ const release404=approvedRelease(loadConfig());
+ assert(release404?notFound.includes(`href="${release404.url.replaceAll('&','&amp;')}"`):notFound.includes('href="/#download"'),'404 download link must match the homepage release');
+ assert(!read('sitemap.xml').includes('404'),'404 stays out of the sitemap');
+}
 const html=read('index.html'),privacy=read('privacy/index.html');
-assert.match(html,/data-beta-request-form/);assert.match(html,/Google Play account email/);assert.match(html,/<input(?=[^>]*name="consent")(?=[^>]*required)/);assert.match(html,/data-request-status[^>]*role="status"/);
-assert.match(html,/<fieldset disabled/);assert.match(html,/data-request-result[^>]*hidden/);assert.match(html,/data-mobile-cta-bar[^>]*inert/);
-assert.match(html,/manual.*Google Play|manually through Google Play/);assert.match(html,/accept.*invitation|Accept.*invitation/);
-assert.match(privacy,/private Cloudflare D1 database/);assert.match(privacy,/Cloudflare Turnstile/);assert.match(privacy,/request removal/);
-assert.match(privacy,/doesn&#x27;t store the IP/);assert.match(privacy,/doesn&#x27;t enroll/);
+for(const route of routes) assert(!/data-beta-request-form|beta-enrollment|Google Play account email|Request beta access|turnstile|beta-request\.js/i.test(read(route)),route+' must not expose the retired signup flow');
+assert.match(html,/id="download"/);assert.match(html,/data-mobile-cta-bar[^>]*inert/);
+const release=approvedRelease(loadConfig());
+if(release) {assert(html.includes(`href="${release.url.replaceAll('&','&amp;')}"`));assert.match(html,/data-download-cta="hero"/);assert(html.includes(release.sha256));}
+else {assert.match(html,/Download is being prepared/);assert(!html.includes('data-download-cta='));}
+assert.match(privacy,/Cloudflare Web Analytics/);assert.match(privacy,/click/i);assert.match(privacy,/D1/);
 assert.match(read('styles.css'),/prefers-reduced-motion/);assert.match(read('styles.css'),/:focus-visible/);assert.match(read('styles.css'),/safe-area-inset-bottom/);
-for(const file of ['remote-demo-ltr.png','showcase/youtube-share-review.png','showcase/youtube-manual-controls.png','showcase/spotify-controls-manual-demo.png','showcase/saved-tv-room-list-demo.png','showcase/tv-details-edit-demo.png']){
+for(const [file,height] of [['showcase/remote-home.png',2340],['showcase/youtube-share.png',2340],['showcase/youtube-search.png',2340],['showcase/your-tvs.png',2340],['showcase/pair-name-and-room.png',1420]]){
  const bytes=fs.readFileSync(path.join(root,'assets',file));
- assert.equal(bytes.readUInt32BE(16),1080);assert.equal(bytes.readUInt32BE(20),2340);
+ assert.equal(bytes.readUInt32BE(16),1080,file);assert.equal(bytes.readUInt32BE(20),height,file);
 }
 const contract=JSON.parse(read('assets/3d/room-destinations-contract.json'));
 {
@@ -54,4 +78,6 @@ assert(sizes.find(x=>x.name==='app.js').gzip<240000,'Initial runtime budget');
 assert(sizes.filter(x=>x.name!=='app.js').every(x=>x.gzip<240000),'Lazy runtime budget');
 for(const name of ['ReactBits-LICENSE.md','MagicUI-LICENSE.md','React-LICENSE.txt','ReactDOM-LICENSE.txt','Motion-LICENSE.md','Three-LICENSE.txt','OGL-LICENSE.txt','GSAP-LICENSE-NOTICE.txt'])assert(fs.existsSync(path.join(root,'licenses',name)));
 assert.equal((read('sitemap.xml').match(/<loc>/g)||[]).length,9);
-console.log('PASS: nine prerendered routes, metadata/links, honest screenshots and beta semantics, embedded GLB contracts, licenses and runtime budgets.',JSON.stringify(sizes));
+assert(!read('sitemap.xml').includes('baagad-ai.github.io'));
+assert(read('robots.txt').includes(`Sitemap: ${canonical}sitemap.xml`));
+console.log('PASS: nine prerendered routes, host metadata/links, direct download semantics, embedded GLB contracts, licenses and runtime budgets.',JSON.stringify(sizes));

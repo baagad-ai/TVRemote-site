@@ -1,0 +1,3 @@
+# D1's remote migration splitter requires LF in trigger bodies (workers-sdk #15314).
+analytics/migrations/*.sql text eol=lf
+site/content/guides/*.md text eol=lf

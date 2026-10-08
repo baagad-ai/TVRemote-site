@@ -44,8 +44,8 @@ Write down the phone model, Android version, TV or streamer model, remote app ve
 
 For Google TV app feedback, open your profile picture, choose **Help & feedback**, then **Send feedback**. Review what you’re sending and keep passwords out of the report. [Google’s feedback instructions](https://support.google.com/googletv/answer/9654581?hl=en)
 
-## A phone-first option in beta
+## A phone-first option
 
-The Remote’s beta includes a phone-entered YouTube search that you send to a selected compatible Android TV or Google TV over your home network. It requires Android TV Remote Service v2; whether the TV accepts the search depends on the device and its YouTube version. Its dedicated YouTube search is useful when that’s the task you came to do. [The Remote’s compatibility and search details](https://theremote-site.pages.dev/#compatibility)
+With The Remote, you can search YouTube from your phone: type the query on your Android phone and send it to YouTube on a selected compatible Android TV or Google TV over your home network. Its phone typing is for YouTube search only; for other TV apps, use the methods above. It requires Android TV Remote Service v2; whether the TV accepts the search depends on the device and its YouTube version. [The Remote’s compatibility and search details](https://theremote-site.pages.dev/#compatibility)
 
-Want to try it? [Request beta access](https://theremote-site.pages.dev/#beta-enrollment) with the email you use on Google Play. Requests are reviewed privately. If approved, you’ll receive a manual Google Play invitation to accept before installing. [Email handling and privacy](https://theremote-site.pages.dev/privacy/)
+[Download the app](https://theremote-site.pages.dev/#download) on your Android phone. It's free, with no ads and no account. Before installing, check that your TV is compatible and on the same home network as your phone.

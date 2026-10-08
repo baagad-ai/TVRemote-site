@@ -75,5 +75,6 @@ Leave passwords and account details out of screenshots. This is more useful than
 
 ## Trying The Remote
 
-The Remote is a free Android phone app in beta for compatible Android TV and Google TV devices. It uses your home network and requires Android TV Remote Service v2; controls vary by model.
-If those requirements fit and you'd like another phone-control option, [Request beta access](https://theremote-site.pages.dev/#beta-enrollment) with your Google Play account email. Requests are reviewed privately. If approved, you'll receive a manual Google Play invitation to accept before installing.
+The Remote is a free Android phone app for compatible Android TV and Google TV devices. It uses your home network and requires Android TV Remote Service v2; controls vary by model.
+
+[Download the app](https://theremote-site.pages.dev/#download) on your Android phone. It's free, with no ads and no account. Before installing, check that your TV is compatible and on the same home network as your phone.

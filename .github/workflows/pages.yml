@@ -7,6 +7,10 @@ on:
     paths:
       - "site/**"
       - "worker/**"
+      - "functions/**"
+      - "analytics/**"
+      - "wrangler.jsonc"
+      - "docs/**"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/pages.yml"
@@ -17,6 +21,10 @@ on:
     paths:
       - "site/**"
       - "worker/**"
+      - "functions/**"
+      - "analytics/**"
+      - "wrangler.jsonc"
+      - "docs/**"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/pages.yml"
@@ -51,5 +59,4 @@ jobs:
           node --check site/build.mjs
           node site/check.mjs
           node site/check-config.mjs
-          node --test site/beta-request.test.mjs worker/test/*.test.mjs
-
+          npm test

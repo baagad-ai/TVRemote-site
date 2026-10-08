@@ -21,7 +21,7 @@ const localPath = (reference, fromFile) => {
   if (!pathname) return null;
   let decoded;
   try { decoded = decodeURIComponent(pathname); } catch { decoded = pathname; }
-  const resolved = path.resolve(path.dirname(fromFile), decoded);
+  const resolved = decoded.startsWith("/") ? path.join(root, decoded) : path.resolve(path.dirname(fromFile), decoded);
   const relative = path.relative(root, resolved);
   if (relative.startsWith("..") || path.isAbsolute(relative)) throw new Error("Asset escapes staging root: " + reference);
   if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) return null;
