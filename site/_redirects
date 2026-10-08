@@ -7,3 +7,5 @@
 /TVRemote-site / 301
 /TVRemote-site/* /:splat 301
 /previews/* / 301
+# Old file-style link to the privacy policy.
+/privacy.html /privacy/ 301

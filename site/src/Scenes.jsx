@@ -73,6 +73,6 @@ function ScreenOverlay({ name, shot }) {
   const data = contract.scenes[name], quad = data.screen_quads_normalized[name === 'hero' ? 'PhoneScreen' : 'ReviewPhoneScreen'];
   const [width, height] = data.size, [bottomLeft, , topRight, topLeft] = quad;
   const matrix = [(topRight[0] - topLeft[0]) * width / 1080, (topRight[1] - topLeft[1]) * height / 1080, (bottomLeft[0] - topLeft[0]) * width / 2340, (bottomLeft[1] - topLeft[1]) * height / 2340, topLeft[0] * width, topLeft[1] * height];
-  const src = name === 'handoff' ? 'assets/showcase/youtube-share-review.png' : 'assets/showcase/remote-home.png';
+  const src = name === 'handoff' ? 'assets/showcase/youtube-share.png' : 'assets/showcase/remote-home.png';
   return <svg className="screen-overlay" viewBox={`0 0 ${width} ${height}`} aria-hidden="true"><image href={src} width="1080" height="2340" transform={`matrix(${matrix.join(' ')})`} /></svg>;
 }

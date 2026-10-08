@@ -5,7 +5,7 @@ import { DownloadLink } from './Download';
 
 const shots = [
   ['assets/showcase/remote-home.png', 'The Remote on an Android phone: Family Room TV connected, with a D-pad, volume keys and a Search YouTube button.', 'App screen · Family Room TV'],
-  ['assets/showcase/youtube-share-review.png', 'The native YouTube share review screen in local demo mode. No TV is connected.', 'Review the link. Choose its TV.'],
+  ['assets/showcase/youtube-share.png', "The Remote's share sheet after sharing a YouTube video: the link, Family Room TV 1 in Hall selected, and an Open on Hall button. Nothing plays until you confirm.", 'Review the link. Choose its TV.'],
   ['assets/showcase/your-tvs.png', 'The Your TVs list in The Remote: one TV, Family Room TV, labeled with its room.', 'Your TV, named by its room.']
 ];
 export function NativePhone({ shot = 0, className = '', priority = false, annotation }) {
