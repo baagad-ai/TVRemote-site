@@ -54,6 +54,7 @@ test('privacy signals suppress click telemetry without affecting the download', 
 });
 test('APK size is one decimal-MB string from apkRelease.bytes (bytes / 1,000,000), never MiB', () => {
   assert.equal(formatApkSize(4635380), '4.6 MB');
+  assert.equal(formatApkSize(4728566), '4.7 MB');
   assert.equal(formatApkSize(2097152), '2.1 MB');
   assert.equal(formatApkSize(4449999), '4.4 MB');
   assert.equal(formatApkSize(1000000), '1.0 MB');
