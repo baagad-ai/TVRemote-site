@@ -57,9 +57,13 @@ test('self-hosted APK staging verifies exact immutable path, source bytes, SHA a
   }
 });
 
-test('GitHub publication is only a gated post-cutover transition', () => {
+test('CI only validates; it never publishes the site', () => {
+  // Production is a manual Cloudflare Pages direct upload; GitHub Pages is not enabled for this repo.
   const workflow = fs.readFileSync(new URL('../.github/workflows/pages.yml', import.meta.url), 'utf8');
-  assert(workflow.includes("if: github.event_name != 'pull_request' && vars.CLOUDFLARE_CUTOVER == 'true'"));
-  assert(workflow.includes('run: npm run build:github-transition'));
-  assert(!workflow.includes('run: npm run build:production'));
+  assert.match(workflow, /^  validate:$/m);
+  assert.match(workflow, /^\s+npm test$/m);
+  assert.doesNotMatch(workflow, /^  deploy:$/m);
+  for (const forbidden of ['deploy-pages', 'upload-pages-artifact', 'configure-pages', 'pages: write', 'id-token: write', 'wrangler pages', 'wrangler deploy', 'build:production']) {
+    assert(!workflow.includes(forbidden), forbidden);
+  }
 });
