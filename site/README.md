@@ -16,6 +16,7 @@ The migration candidate replaces beta signup with direct APK links. The release 
 - Describe screenshots and illustrations accurately. Name what is visible, and say when a TV result or other outcome is not shown.
 - Limit claims to shipped features and compatible devices. Do not promise support for every TV or add invented results, testimonials, counts, or endorsements.
 - Describe the approved direct APK and compatible devices accurately; do not invent download counts.
+- Typing claims are YouTube-only. Say "search YouTube from your phone" or "share a YouTube link to the TV you pick". Don't claim typing into other TV apps or text fields, a general phone keyboard for the TV, password or login entry, or search in other apps (including through the optional TV companion).
 
 ## Build and publication
 
