@@ -4,6 +4,7 @@ import PhoneStory, { ControlsProof } from './PhoneStory';
 import Destination from './Destination';
 import Download, { DownloadLink, DownloadProvider } from './Download';
 import Privacy from './Privacy';
+import NotFound from './NotFound';
 import { GuidesPage, GuidesPreview } from './Guides';
 import faq from './faq.json';
 
@@ -45,4 +46,4 @@ function MobileCta() {
   return <div ref={ref} className={`mobile-cta-bar ${visible ? 'is-visible' : ''}`} data-mobile-cta-bar aria-hidden={!visible} inert={!visible}><DownloadLink button="footer" /><span>Free Android APK. No ads. No account.</span></div>;
 }
 function Landing({ config }) { return <><Header /><main id="main" tabIndex={-1}><PhoneStory Destination={Destination} /><ControlsProof /><Compatibility /><Download /><GuidesPreview /><Questions /><Closing /></main><Footer /><MobileCta /></>; }
-export default function App({ route = 'landing', config }) { return <EnvironmentProvider><DownloadProvider config={config}><a className="skip-link" href="#main">Skip to content</a>{route === 'privacy' ? <Privacy /> : route.startsWith('guides') ? <GuidesPage slug={route.split('/')[1]} /> : <Landing config={config} />}</DownloadProvider></EnvironmentProvider>; }
+export default function App({ route = 'landing', config }) { return <EnvironmentProvider><DownloadProvider config={config}><a className="skip-link" href="#main">Skip to content</a>{route === 'not-found' ? <NotFound config={config} /> : route === 'privacy' ? <Privacy /> : route.startsWith('guides') ? <GuidesPage slug={route.split('/')[1]} /> : <Landing config={config} />}</DownloadProvider></EnvironmentProvider>; }

@@ -31,6 +31,24 @@ for(const route of routes){
   else assert(fs.existsSync(file),route+': '+ref);
  }
 }
+{
+ // 404 page: Pages serves it for unknown paths at any depth, so links must be root-absolute and resolve from the site root.
+ const notFound=read('404.html');
+ assert.equal((notFound.match(/<h1\b/g)||[]).length,1,'404 needs one H1');
+ assert.match(notFound,/<meta name="robots" content="noindex">/);
+ assert.match(notFound,/<main\b[^>]*id="main"/);assert.match(notFound,/class="skip-link" href="#main"/);
+ assert(!/<script\b|rel="canonical"|og:url|data-download-cta|cloudflareinsights|\/api\/metrics/i.test(notFound),'404 must stay static: no scripts, canonical, analytics or click counting');
+ for(const href of ['/','/guides/','/privacy/'])assert(notFound.includes(`href="${href}"`),'404 needs a link to '+href);
+ for(const match of notFound.matchAll(/\b(?:href|src)="([^"]+)"/g)){
+  const ref=match[1];if(/^(https?:|mailto:|#|data:)/.test(ref))continue;
+  assert(ref.startsWith('/'),'404 links must be root-absolute: '+ref);
+  const file=path.join(root,ref.split('#')[0].split('?')[0]);
+  assert(fs.existsSync(ref.split('#')[0].endsWith('/')?path.join(file,'index.html'):file),'404.html: '+ref);
+ }
+ const release404=approvedRelease(loadConfig());
+ assert(release404?notFound.includes(`href="${release404.url.replaceAll('&','&amp;')}"`):notFound.includes('href="/#download"'),'404 download link must match the homepage release');
+ assert(!read('sitemap.xml').includes('404'),'404 stays out of the sitemap');
+}
 const html=read('index.html'),privacy=read('privacy/index.html');
 for(const route of routes) assert(!/data-beta-request-form|beta-enrollment|Google Play account email|Request beta access|turnstile|beta-request\.js/i.test(read(route)),route+' must not expose the retired signup flow');
 assert.match(html,/id="download"/);assert.match(html,/data-mobile-cta-bar[^>]*inert/);

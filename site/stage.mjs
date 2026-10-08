@@ -11,7 +11,7 @@ const relativeTarget = path.relative(path.dirname(root), target);
 if (!relativeTarget || relativeTarget.startsWith('..') || path.isAbsolute(relativeTarget) || target === root) throw Error('Choose a separate staging directory');
 await fs.mkdir(target, { recursive: true });
 if ((await fs.readdir(target)).length) throw Error('Staging directory must be empty to prevent publishing stale files');
-const files = ['index.html', 'privacy/index.html', 'guides/index.html', 'styles.css', 'config.js', 'sitemap.xml', 'robots.txt', '_headers', '_redirects', '_routes.json', ...articles.map(a => `guides/${a.slug}/index.html`)];
+const files = ['index.html', '404.html', 'privacy/index.html', 'guides/index.html', 'styles.css', 'config.js', 'sitemap.xml', 'robots.txt', '_headers', '_redirects', '_routes.json', ...articles.map(a => `guides/${a.slug}/index.html`)];
 for (const folder of ['runtime', 'licenses', 'assets/3d', 'assets/showcase', 'assets/licenses']) {
   for (const entry of await fs.readdir(path.join(root, folder), { withFileTypes: true })) {
     if (!entry.isFile()) throw Error('Unexpected nested public asset');

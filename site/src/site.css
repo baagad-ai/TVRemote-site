@@ -41,3 +41,5 @@ body:not([data-route=landing]) .site-header{border-bottom:1px solid var(--line)}
 
 .download-panel>.android-badge{display:inline-flex;align-items:center;border:1px solid #617348;border-radius:999px;color:var(--lime);font-size:.67rem;font-weight:600;letter-spacing:.04em;padding:7px 11px;margin:0 0 22px}.download-requirements{margin-top:26px;padding-top:20px;border-top:1px solid var(--line);max-width:430px}.download-requirements>p:not(.eyebrow){font-size:.78rem;color:var(--muted);margin-top:12px;line-height:1.65}.compatibility-requirements{margin:24px 0 0;padding-left:18px;color:var(--muted);font-size:.79rem;line-height:1.65}.compatibility-requirements li{margin-bottom:14px}.compatibility-requirements strong{color:var(--paper);font-weight:500}
 .pair-detail-phone .native-phone-shell img{aspect-ratio:1080/1420}
+.not-found-main{min-height:min(62vh,640px)}.not-found-main .section-heading>p:not(.eyebrow){margin-top:24px;color:var(--muted)}.not-found-actions{margin-top:40px}
+@media(max-width:740px){.not-found-actions .download-cta{flex-basis:100%}}
