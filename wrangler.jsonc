@@ -14,7 +14,7 @@
   "vars": {
     "METRICS_ENABLED": "true",
     "METRICS_ALLOWED_ORIGINS": "https://theremote-site.pages.dev",
-    "METRICS_ALLOWED_RELEASES": "0.1.0-beta.8.1-3fbb8e414cdf,0.1.0-beta.8-8ea325cd117f,0.1.0-beta.7-b60880306e71",
+    "METRICS_ALLOWED_RELEASES": "0.1.0-beta.8.2-b8dfd7f8b41e,0.1.0-beta.8.1-3fbb8e414cdf,0.1.0-beta.8-8ea325cd117f,0.1.0-beta.7-b60880306e71",
     "METRICS_DAILY_CAP": "1000",
     "METRICS_PER_MINUTE": "20"
   },
