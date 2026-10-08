@@ -14,7 +14,7 @@ test('Lenis is desktop-only and never smooths touch', () => {
 test('Lenis is skipped and torn down under reduced motion', () => {
   assert.match(source, /prefers-reduced-motion: reduce/);
   assert.match(source, /reduced\.addEventListener\('change', configure\)/);
-  assert.match(source, /lenis\.destroy\(\)/);
+  assert.match(source, /dead\.destroy\(\)/);
 });
 
 test('Lenis drives ScrollTrigger from the GSAP ticker', () => {
@@ -24,9 +24,25 @@ test('Lenis drives ScrollTrigger from the GSAP ticker', () => {
   assert.match(source, /autoRaf: false/);
 });
 
-test('same-page anchors keep URL and focus behaviour', () => {
+test('same-page anchors land like a native jump from the live scroll position', () => {
+  // Lenis' own element targeting adds its possibly stale animatedScroll; use a number from scrollY.
+  assert.doesNotMatch(source, /scrollTo\(node/);
+  assert.match(source, /getBoundingClientRect\(\)\.top \+ scrollY - px\(getComputedStyle\(node\)\.scrollMarginTop\)/);
+  assert.match(source, /const sync = \(\) => \{ lenis\?\.reset\(\); lenis\?\.resize\(\); \}/);
   assert.match(source, /history\.pushState/);
-  assert.match(source, /preventScroll: true/);
+  assert.match(source, /location\.replace\(hash\)/);
+});
+
+test('native keyboard, focus and scrollbar scrolling stop Lenis animation', () => {
+  for (const key of ['Tab', 'Home', 'End', 'PageUp', 'PageDown']) assert.ok(source.includes(`'${key}'`), key);
+  assert.match(source, /addEventListener\('keydown', onKey, true\)/);
+  assert.match(source, /removeEventListener\('keydown', onKey, true\)/);
+});
+
+test('reduced-motion teardown cannot be undone by Lenis timers', () => {
+  assert.match(source, /clearTimeout\(dead\._resetVelocityTimeout\)/);
+  assert.match(source, /dead\.updateClassName = \(\) => \{\}/);
+  assert.match(source, /queries \?\?= /);
 });
 
 test('SmoothScroll is mounted once and licensed', () => {

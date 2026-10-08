@@ -9,50 +9,67 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const DESKTOP = '(hover: hover) and (pointer: fine)';
-const REDUCED = '(prefers-reduced-motion: reduce)';
+// One MediaQueryList per query for the page's lifetime (created on first use: the
+// module is also loaded by the prerenderer, which has no window).
+let queries = null;
+const media = () => (queries ??= { desktop: matchMedia('(hover: hover) and (pointer: fine)'), reduced: matchMedia('(prefers-reduced-motion: reduce)') });
+// Keys the browser scrolls or moves focus for natively; Lenis must not keep animating over them.
+const NATIVE_KEYS = new Set(['Tab', 'Enter', ' ', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown']);
+const px = value => Number.parseFloat(value) || 0;
 
-// Same-page anchors: smooth-scroll, then update the URL and move focus like a
-// native jump would, so skip links and keyboard users land in the right place.
+// Same-page anchors clicked with a pointer. Keyboard activation is left to the browser.
 function anchorTarget(event) {
-  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null;
+  if (event.defaultPrevented || event.detail === 0 || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null;
   const link = event.target.closest?.('a[href*="#"]');
   if (!link || link.target || link.hasAttribute('download')) return null;
   const url = new URL(link.href, location.href);
   if (url.origin !== location.origin || url.pathname !== location.pathname || url.search !== location.search || !url.hash) return null;
-  const id = decodeURIComponent(url.hash.slice(1));
-  const node = id === 'top' ? document.body : document.getElementById(id);
+  const node = document.getElementById(decodeURIComponent(url.hash.slice(1)));
   return node ? { node, hash: url.hash } : null;
 }
 
 export default function SmoothScroll() {
   useEffect(() => {
-    const desktop = matchMedia(DESKTOP), reduced = matchMedia(REDUCED);
+    const { desktop, reduced } = media();
     let lenis = null, tick = null;
+    // Lenis only learns about native scrolling (keyboard, focus, scrollbar, automation)
+    // from scroll events, which arrive a frame late and are ignored while it animates.
+    // Re-read the real position before anything that depends on it.
+    const sync = () => { lenis?.reset(); lenis?.resize(); };
+    const onKey = event => { if (lenis?.isScrolling && NATIVE_KEYS.has(event.key)) lenis.reset(); };
+    const onPointer = event => { if (lenis?.isScrolling && event.clientX >= document.documentElement.clientWidth) lenis.reset(); };
     const onClick = event => {
       const target = lenis && anchorTarget(event);
       if (!target) return;
       event.preventDefault();
       const { node, hash } = target;
-      // Keyboard activation (Enter on a skip link) jumps instantly; pointer clicks glide.
-      lenis.scrollTo(node === document.body ? 0 : node, {
-        immediate: event.detail === 0,
-        onComplete: () => {
-          if (location.hash !== hash) history.pushState(null, '', hash);
-          // Match a native fragment jump: the target becomes the focus start point.
-          if (!node.matches('a[href],button,input,select,textarea,summary,[tabindex]')) {
-            node.setAttribute('tabindex', '-1');
-            node.addEventListener('blur', () => node.removeAttribute('tabindex'), { once: true });
-          }
-          node.focus({ preventScroll: true });
+      sync();
+      // Same landing as the native jump: live document position minus scroll-margin/-padding.
+      const top = node.getBoundingClientRect().top + scrollY - px(getComputedStyle(node).scrollMarginTop) - px(getComputedStyle(document.documentElement).scrollPaddingTop);
+      // URL updates at click time, like a native fragment link.
+      if (location.hash !== hash) history.pushState(null, '', hash);
+      lenis.scrollTo(top, {
+        force: true,
+        onComplete: instance => {
+          // Finish with the browser's own fragment navigation (same URL, so no new history
+          // entry): exact native landing, :target and focus start point, as without Lenis.
+          location.replace(hash);
+          instance.reset();
         },
       });
     };
     const stop = () => {
       if (!lenis) return;
-      gsap.ticker.remove(tick); gsap.ticker.lagSmoothing(500, 33);
+      const dead = lenis; lenis = null;
+      gsap.ticker.remove(tick); tick = null; gsap.ticker.lagSmoothing(500, 33);
       document.removeEventListener('click', onClick);
-      lenis.destroy(); lenis = null; tick = null;
+      document.removeEventListener('keydown', onKey, true);
+      document.removeEventListener('pointerdown', onPointer, true);
+      dead.destroy();
+      // Lenis 1.3.26 destroy() leaves its 400 ms post-native-scroll timer armed; when it fires
+      // it re-adds the `lenis` classes to <html>. Disarm it and make the dead instance inert.
+      clearTimeout(dead._resetVelocityTimeout);
+      dead.updateClassName = () => {};
       ScrollTrigger.refresh();
     };
     const start = () => {
@@ -62,6 +79,8 @@ export default function SmoothScroll() {
       tick = time => lenis?.raf(time * 1000);
       gsap.ticker.add(tick); gsap.ticker.lagSmoothing(0);
       document.addEventListener('click', onClick);
+      document.addEventListener('keydown', onKey, true);
+      document.addEventListener('pointerdown', onPointer, true);
     };
     const configure = () => (desktop.matches && !reduced.matches ? start() : stop());
     configure();
