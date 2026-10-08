@@ -1,14 +1,22 @@
 const BUTTONS = new Set(['nav', 'hero', 'footer', 'guide', 'download']);
 const PLATFORMS = new Set(['android', 'ios', 'windows', 'macos', 'linux', 'other']);
 const RELEASE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+// Only these campaign sources are kept; anything else (missing, other, junk) is stored as 'none'.
+export const SOURCES = new Set(['linkedin', 'x', 'instagram']);
+export function allowedSource(value) {
+  if (typeof value !== 'string' || value.length > 32) return 'none';
+  const source = value.trim().toLowerCase();
+  return SOURCES.has(source) ? source : 'none';
+}
 const BODY_LIMIT = 1024;
 
 // A single SQLite statement and trigger atomically enforce the shared UTC-day budget.
+// download_click_daily_v2 (migration 0002) adds the source tag; the beta.8 table is left untouched.
 export const RECORD_CLICK_SQL = `
-INSERT INTO download_click_daily (day, event, release, button, platform, clicks)
-SELECT ?, 'apk_download_click', ?, ?, ?, 1
+INSERT INTO download_click_daily_v2 (day, event, release, button, platform, source, clicks)
+SELECT ?, 'apk_download_click', ?, ?, ?, ?, 1
 WHERE COALESCE((SELECT accepted FROM metrics_daily_budget WHERE day = ?), 0) < ?
-ON CONFLICT (day, event, release, button, platform)
+ON CONFLICT (day, event, release, button, platform, source)
 DO UPDATE SET clicks = clicks + 1`;
 
 function reply(status) {
@@ -95,14 +103,15 @@ export function createMetricsHandler(now = () => Date.now()) {
     let event;
     try { event = await readEvent(request); }
     catch { return reply(400); }
+    const keys = event && typeof event === 'object' && !Array.isArray(event) ? Object.keys(event).sort().join(',') : '';
     if (!event || Array.isArray(event) || typeof event !== 'object' ||
-        Object.keys(event).sort().join(',') !== 'button,event,platform,release' ||
+        (keys !== 'button,event,platform,release' && keys !== 'button,event,platform,release,source') ||
         event.event !== 'apk_download_click' || !config.releases.includes(event.release) ||
         !BUTTONS.has(event.button) || !PLATFORMS.has(event.platform)) return reply(400);
 
     try {
       const result = await env.METRICS_DB.prepare(RECORD_CLICK_SQL)
-        .bind(day, event.release, event.button, event.platform, day, config.dailyCap).run();
+        .bind(day, event.release, event.button, event.platform, allowedSource(event.source), day, config.dailyCap).run();
       if (!result.success) throw new Error('storage');
       if (result.meta?.changes === 0) { saturatedDay = day; return reply(429); }
       return reply(204);

@@ -5,6 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { createMetricsHandler, RECORD_CLICK_SQL } from '../../functions/api/metrics.js';
 
 const migration = readFileSync(new URL('../migrations/0001_download_clicks.sql', import.meta.url), 'utf8');
+const sourceMigration = readFileSync(new URL('../migrations/0002_download_click_source.sql', import.meta.url), 'utf8');
 const origin = 'https://tvremote.pages.dev';
 const click = { event: 'apk_download_click', release: 'v1.2.3-security', button: 'hero', platform: 'android' };
 const initialTime = Date.parse('2026-10-07T12:00:00Z');
@@ -22,6 +23,7 @@ test('migration bytes remain compatible with the remote D1 trigger splitter', ()
 function fixture(overrides = {}) {
   const db = new DatabaseSync(':memory:');
   db.exec(migration);
+  db.exec(sourceMigration);
   const calls = [];
   const env = {
     METRICS_ENABLED: 'true', METRICS_ALLOWED_ORIGINS: origin,
@@ -35,7 +37,7 @@ function fixture(overrides = {}) {
   };
   let time = initialTime;
   const handle = createMetricsHandler(() => time);
-  const count = () => Number(db.prepare('SELECT COALESCE(SUM(clicks), 0) AS count FROM download_click_daily').get().count);
+  const count = () => Number(db.prepare('SELECT (SELECT COALESCE(SUM(clicks), 0) FROM download_click_daily) + (SELECT COALESCE(SUM(clicks), 0) FROM download_click_daily_v2) AS count').get().count);
   return { env, db, calls, handle, count, setTime(value) { time = value; } };
 }
 
@@ -63,9 +65,9 @@ test('records only allowed aggregate dimensions, ignoring private request header
   } })), 204);
   assert.equal(await status(f), 204);
   assert.equal(f.count(), 2);
-  assert.deepEqual(f.calls[0].args, ['2026-10-07', click.release, 'hero', 'android', '2026-10-07', 1000]);
-  assert.deepEqual(Object.keys(f.db.prepare('SELECT * FROM download_click_daily').get()).sort(),
-    ['button', 'clicks', 'day', 'event', 'platform', 'release']);
+  assert.deepEqual(f.calls[0].args, ['2026-10-07', click.release, 'hero', 'android', 'none', '2026-10-07', 1000]);
+  assert.deepEqual(Object.keys(f.db.prepare('SELECT * FROM download_click_daily_v2').get()).sort(),
+    ['button', 'clicks', 'day', 'event', 'platform', 'release', 'source']);
   assert.equal(f.db.prepare('SELECT accepted FROM metrics_daily_budget').get().accepted, 2);
   f.db.close();
 });
@@ -172,12 +174,12 @@ test('SQLite hard ceiling survives attempts to bypass the configurable cap', () 
   const f = fixture();
   const statement = f.db.prepare(RECORD_CLICK_SQL);
   for (let i = 0; i < 5001; i++) {
-    statement.run('2026-10-07', click.release, 'hero', 'android', '2026-10-07', 999999);
+    statement.run('2026-10-07', click.release, 'hero', 'android', 'none', '2026-10-07', 999999);
   }
   assert.equal(f.count(), 5000);
   assert.equal(f.db.prepare('SELECT accepted FROM metrics_daily_budget').get().accepted, 5000);
   // Constraint failures roll back the trigger's budget update as well.
-  assert.throws(() => statement.run('2026-10-08', click.release, 'invalid', 'android', '2026-10-08', 1000));
+  assert.throws(() => statement.run('2026-10-08', click.release, 'invalid', 'android', 'none', '2026-10-08', 1000));
   assert.equal(f.db.prepare("SELECT accepted FROM metrics_daily_budget WHERE day='2026-10-08'").get(), undefined);
   f.db.close();
 });
@@ -192,4 +194,48 @@ test('storage failures fail closed and cool down retries without exposing diagno
   assert.equal(await status(f), 503);
   assert.equal(attempts, 2);
   f.db.close();
+});
+
+test('0002 migration is additive and keeps the remote trigger splitter happy', () => {
+  assert.equal(sourceMigration.includes('\r'), false);
+  assert.match(sourceMigration, /CREATE TRIGGER[^;]+\nBEGIN\n/);
+  assert.equal((sourceMigration.match(/\bEND\b/g) || []).length, 1);
+  assert.doesNotMatch(sourceMigration, /\b(DROP|ALTER|RENAME|DELETE|UPDATE\s+download_click_daily\b)/i);
+});
+
+test('source is allow-listed: linkedin, x, instagram (any case); everything else is none', async () => {
+  const f = fixture();
+  const cases = [['linkedin', 'linkedin'], ['X', 'x'], ['Instagram', 'instagram'], [' LinkedIn ', 'linkedin'],
+    ['facebook', 'none'], ['', 'none'], ['x'.repeat(40), 'none'], [42, 'none'], [null, 'none'], [['x'], 'none'], [undefined, 'none']];
+  for (const [value, expected] of cases) {
+    const body = value === undefined ? click : { ...click, source: value };
+    assert.equal(await status(f, request(body)), 204, String(value));
+    assert.equal(f.calls.at(-1).args[4], expected, String(value));
+  }
+  const rows = f.db.prepare('SELECT source, SUM(clicks) AS clicks FROM download_click_daily_v2 GROUP BY source ORDER BY source').all()
+    .map(row => [row.source, Number(row.clicks)]);
+  assert.deepEqual(rows, [['instagram', 1], ['linkedin', 2], ['none', 7], ['x', 1]]);
+  // Only source is new: other extra fields are still rejected without a write.
+  const before = f.calls.length;
+  assert.equal(await status(f, request({ ...click, source: 'x', utm_campaign: 'launch' })), 400);
+  assert.equal(await status(f, request({ ...click, referrer: 'https://x.com/' })), 400);
+  assert.equal(f.calls.length, before);
+});
+
+test('rollback safety: the beta.8 statement still writes to the untouched 0001 table after 0002', () => {
+  const db = new DatabaseSync(':memory:');
+  db.exec(migration);
+  db.prepare("INSERT INTO download_click_daily (day, event, release, button, platform, clicks) VALUES ('2026-10-07', 'apk_download_click', 'r1', 'hero', 'android', 3)").run();
+  db.exec(sourceMigration);
+  const legacy = `INSERT INTO download_click_daily (day, event, release, button, platform, clicks)
+SELECT ?, 'apk_download_click', ?, ?, ?, 1
+WHERE COALESCE((SELECT accepted FROM metrics_daily_budget WHERE day = ?), 0) < ?
+ON CONFLICT (day, event, release, button, platform)
+DO UPDATE SET clicks = clicks + 1`;
+  db.prepare(legacy).run('2026-10-07', 'r1', 'hero', 'android', '2026-10-07', 1000);
+  db.prepare(RECORD_CLICK_SQL).run('2026-10-07', 'r1', 'hero', 'android', 'x', '2026-10-07', 1000);
+  assert.equal(Number(db.prepare('SELECT clicks FROM download_click_daily').get().clicks), 4);
+  assert.equal(Number(db.prepare('SELECT clicks FROM download_click_daily_v2').get().clicks), 1);
+  // Both tables draw on the one shared daily budget (seed row + legacy + v2).
+  assert.equal(Number(db.prepare("SELECT accepted FROM metrics_daily_budget WHERE day = '2026-10-07'").get().accepted), 3);
 });

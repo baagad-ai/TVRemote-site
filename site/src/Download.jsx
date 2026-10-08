@@ -1,8 +1,10 @@
-import { createContext, useContext } from 'react';
-import { approvedRelease, recordDownloadClick } from './download-metrics.mjs';
+import { createContext, useContext, useEffect } from 'react';
+import { approvedRelease, recordDownloadClick, rememberSource } from './download-metrics.mjs';
 
 const Release = createContext(null);
 export function DownloadProvider({ config, children }) {
+  // Keep an allow-listed utm_source from the landing page so a later page in this tab can send it.
+  useEffect(() => { rememberSource(); }, []);
   return <Release.Provider value={approvedRelease(config)}>{children}</Release.Provider>;
 }
 export function DownloadLink({ button = 'download', className = 'download-cta', children = 'Download the app', fallback = '#download' }) {

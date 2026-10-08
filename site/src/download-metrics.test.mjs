@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { approvedRelease, broadPlatform, recordDownloadClick } from './download-metrics.mjs';
+import { allowedSource, approvedRelease, broadPlatform, currentSource, recordDownloadClick } from './download-metrics.mjs';
 
 const release = { id: 'security-1', version: '1.0.1', url: 'https://example.com/remote.apk', sha256: 'a'.repeat(64) };
 test('download stays inactive unless every release identity field is valid', () => {
@@ -51,4 +51,30 @@ test('privacy signals suppress click telemetry without affecting the download', 
   }
   recordDownloadClick(release, 'download', { doNotTrack: '1', fetch });
   assert.equal(calls, 0);
+});
+
+function memoryStorage() { const map = new Map(); return { getItem: k => map.get(k) ?? null, setItem: (k, v) => map.set(k, String(v)) }; }
+test('client source allow-list: linkedin, x, instagram in any case; junk and missing send nothing', () => {
+  assert.equal(allowedSource('linkedin'), 'linkedin');
+  assert.equal(allowedSource('X'), 'x');
+  assert.equal(allowedSource('INSTAGRAM'), 'instagram');
+  for (const value of ['facebook', '', null, undefined, 42, 'linkedin.com', 'x'.repeat(40)]) assert.equal(allowedSource(value), null);
+});
+test('utm_source is kept for the tab and only an allow-listed value is sent', () => {
+  const sessionStorage = memoryStorage();
+  const sent = [];
+  const env = (search) => ({ location: { search }, sessionStorage, navigator: { platform: 'Win32' }, fetch: (url, init) => { sent.push(JSON.parse(init.body)); return Promise.resolve(); } });
+  recordDownloadClick(release, 'hero', env('?utm_source=junk&utm_medium=social'));
+  assert.equal('source' in sent.at(-1), false);
+  recordDownloadClick(release, 'hero', env('?utm_source=LinkedIn&utm_medium=social&utm_campaign=launch'));
+  assert.equal(sent.at(-1).source, 'linkedin');
+  // A later page in the same tab without the query still sends the kept source, and nothing else from the URL.
+  recordDownloadClick(release, 'guide', env(''));
+  assert.deepEqual(Object.keys(sent.at(-1)).sort(), ['button', 'event', 'platform', 'release', 'source']);
+  assert.equal(sent.at(-1).source, 'linkedin');
+  assert.equal(currentSource({ location: { search: '' }, sessionStorage: memoryStorage() }), null);
+  // No storage or location at all: the click still goes out without a source.
+  const bare = [];
+  recordDownloadClick(release, 'hero', { navigator: {}, fetch: (u, init) => { bare.push(JSON.parse(init.body)); return Promise.resolve(); } });
+  assert.equal('source' in bare[0], false);
 });
