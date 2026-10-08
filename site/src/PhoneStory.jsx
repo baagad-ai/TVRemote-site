@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import SplitText from './components/SplitText';
 import { useEnvironment } from './environment';
-import { DownloadLink } from './Download';
+import { CtaPair } from './Download';
 
 const shots = [
   ['assets/remote-demo-ltr.png', 'The Remote with a sample YouTube query and the Android keyboard open. No TV result is shown.', 'App preview · sample TV'],
@@ -12,7 +12,7 @@ export function NativePhone({ shot = 0, className = '', priority = false, annota
   const [src, alt, caption] = Array.isArray(shot) ? shot : shots[shot];
   return <figure className={`native-phone ${className}`}><div className="native-phone-shell"><img src={src} alt={alt} width="1080" height="2340" loading={priority ? 'eager' : 'lazy'} decoding="async" fetchPriority={priority ? 'high' : 'auto'} />{annotation !== undefined && <span className={`phone-annotation annotation-${annotation}`} aria-hidden="true" />}</div><figcaption>{caption}</figcaption></figure>;
 }
-export function StoryCta() { return <DownloadLink button="hero" />; }
+export function StoryCta() { return <CtaPair button="hero" />; }
 function LinkJourney({ ready, step, setStep }) {
   const names = ['Check the link', 'Choose its TV', 'Open when ready'];
   return <div className="link-journey"><div className="journey-rail" role="group" aria-label="Explore the share review preview">{names.map((name, i) => <button key={name} disabled={!ready} type="button" aria-pressed={step === i} onClick={() => setStep(i)}><span className="journey-number">0{i + 1}</span><span>{name}</span></button>)}</div><div className="journey-progress" aria-hidden="true"><span style={{ width: `${(step + 1) / 3 * 100}%` }} /></div><p className="journey-status" role="status">{['Review the shared YouTube link before sending.', 'Check its TV destination. You can choose another saved TV.', 'Open sends the request. Playback still needs TV confirmation.'][step]}</p><p className="fine-print">Choose a step to highlight it in the preview. No link is sent.</p></div>;
@@ -37,7 +37,7 @@ export default function PhoneStory({ Destination }) {
     <div className="story-grid page-width">
       <div className="story-chapters">
         <section className="story-chapter hero" id="search-proof" data-chapter="0" aria-labelledby="hero-title">
-          <div className="chapter-copy"><div className="hero-heading"><p className="eyebrow"><span className="status-dot" />The phone remote for Android TV + Google TV</p><SplitText id="hero-title" tag="h1" text="Skip the TV keyboard on YouTube." className="hero-title" textAlign="left" splitType="words" enabled={motion} delay={70} duration={.75} from={{ opacity: 1, y: 20 }} to={{ opacity: 1, y: 0 }} rootMargin="0px" /><p className="hero-lede">Search YouTube on your phone.<br />Watch it on your TV.</p></div><div className="hero-followthrough"><p className="chapter-description">A full keyboard for YouTube searches. A quick way to share a link. Your TVs, organized by room.</p><div className="hero-actions"><StoryCta /><a className="text-link" href="#share-story">See how it works <span aria-hidden="true">↓</span></a></div><p className="hero-note">Free Android APK. No ads. No account.</p><a className="chapter-guide text-link" href="guides/search-youtube-tv-android-phone/">How YouTube search works ↗</a><p className="fine-print chapter-limit">Search support depends on your TV and its YouTube version.</p></div></div>
+          <div className="chapter-copy"><div className="hero-heading"><p className="eyebrow"><span className="status-dot" />The phone remote for Android TV + Google TV</p><SplitText id="hero-title" tag="h1" text="Skip the TV keyboard on YouTube." className="hero-title" textAlign="left" splitType="words" enabled={motion} delay={70} duration={.75} from={{ opacity: 1, y: 20 }} to={{ opacity: 1, y: 0 }} rootMargin="0px" /><p className="hero-lede">Search YouTube on your phone.<br />Watch it on your TV.</p></div><div className="hero-followthrough"><p className="chapter-description">A full keyboard for YouTube searches. A quick way to share a link. Your TVs, organized by room.</p><div className="hero-actions"><StoryCta /><a className="text-link" href="#share-story">See how it works <span aria-hidden="true">↓</span></a></div><a className="chapter-guide text-link" href="guides/search-youtube-tv-android-phone/">How YouTube search works ↗</a><p className="fine-print chapter-limit">Search support depends on your TV and its YouTube version.</p></div></div>
           <NativePhone className="inline-proof" priority />
         </section>
         <section className="story-chapter share-section" id="share-story" data-chapter="1" aria-labelledby="share-title">

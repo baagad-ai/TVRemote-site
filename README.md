@@ -20,7 +20,7 @@ The existing beta Worker, private D1 database and earlier requests are preserved
 - Describe screenshots and illustrations accurately. The showcase captures show local demo screens; name what is visible and never imply that a TV is connected, a command was sent, or playback was confirmed.
 - Limit claims to shipped features and compatible devices. Do not promise support for every TV or add invented results, testimonials, counts, or endorsements.
 - Describe the approved APK accurately, without invented download counts or support for every TV.
-- Distribution is the direct APK download on this site. Download buttons read "Download the app"; don't add Google Play, beta-access, invitation, waitlist, or request-access wording.
+- Distribution is the direct APK download on this site while `playTesting.enabled` in `site/config.js` is `false` (the main button reads "Download APK"). Setting it to `true` is the one-line switch for the Play-first experience: a "Join the beta on Google Play" button leading to `/join/`, with "Download APK" as the secondary button that opens a short sheet before the counted APK download. Don't add other beta-access, invitation, waitlist, or request-access wording, and keep "Google Play is a trademark of Google LLC." in the footer while Play testing is on.
 - Typing claims are YouTube-only. Say "search YouTube from your phone" or "share a YouTube link to the TV you pick". Don't claim typing into other TV apps or text fields, a general phone keyboard for the TV, password or login entry, or search in other apps (including through the optional TV companion).
 - Home FAQ copy lives in `site/src/faq.json`; the build renders the visible FAQ and its FAQPage JSON-LD from that one file so they stay identical.
 

@@ -37,3 +37,6 @@ export function recordDownloadClick(release, button, environment = globalThis) {
     Promise.resolve(request).catch(() => {});
   } catch { /* Download navigation must work even when telemetry fails. */ }
 }
+
+// Play-first switch (site/config.js playTesting.enabled). Off = direct APK download only.
+export const playTestingEnabled = config => config?.playTesting?.enabled === true;

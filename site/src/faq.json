@@ -1,6 +1,6 @@
 [
   { "q": "Is The Remote free?", "a": "Yes. No ads, no in-app purchases, no subscription, and no account." },
-  { "q": "Is it on Google Play?", "a": "No. You download The Remote directly from this site. Tap Download the app on your Android phone, open the file, and install it." },
+  { "q": "Is it on Google Play?", "a": "No. You download The Remote directly from this site. Tap Download APK on your Android phone, open the file, and install it." },
   { "q": "Is installing the APK safe?", "a": "Download it only from this page. Android checks the app's signature before installing it, and you can compare the file's SHA-256 checksum in the download section. If Android asks you to allow installs from your browser, you can turn that off again afterwards." },
   { "q": "Does it work on iPhone?", "a": "No. The Remote is for Android phones running Android 8.0 or later. There's no iPhone version." },
   { "q": "Which TVs does it work with?", "a": "Android TV and Google TV devices with Android TV Remote Service v2. Available controls vary by model and firmware." },

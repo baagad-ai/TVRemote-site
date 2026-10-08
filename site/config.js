@@ -10,5 +10,11 @@ window.remoteSiteConfig = Object.freeze({
     bytes: 4635380,
     sha256: 'b60880306e71229e3771250860ad26a467f9851c5c2bd49af6ac691545fca320',
     certificateSha256: '5e38d04fc52f486d06e96f043ee68b44eea3de59f99c6fddced3272589563445'
+  }),
+  playTesting: Object.freeze({
+    // Play-first switch: false = direct APK download only; true = Google Play testing CTA, APK sheet and /join/ page.
+    enabled: false,
+    optInUrl: 'https://play.google.com/apps/testing/com.theremote.app',
+    groupUrl: 'https://groups.google.com/g/the-remote-beta-testers'
   })
 });

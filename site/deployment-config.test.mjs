@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { assertPublicationReady, candidateSiteUrl, maximumPagesAssetBytes, siteUrl, verifyApkAsset } from './deployment-config.mjs';
+import { assertPlayTestingReady, assertPublicationReady, candidateSiteUrl, groupUrlPlaceholder, loadConfig, maximumPagesAssetBytes, playOptInUrl, playTestingEnabled, siteUrl, verifyApkAsset } from './deployment-config.mjs';
 
 test('canonical overrides accept HTTPS origins and reject unsafe or path-based URLs', () => {
   assert.equal(siteUrl(), candidateSiteUrl);
@@ -62,4 +62,27 @@ test('GitHub publication is only a gated post-cutover transition', () => {
   assert(workflow.includes("if: github.event_name != 'pull_request' && vars.CLOUDFLARE_CUTOVER == 'true'"));
   assert(workflow.includes('run: npm run build:github-transition'));
   assert(!workflow.includes('run: npm run build:production'));
+});
+
+test('playTesting switch: config has a boolean enabled flag and the exact Play opt-in URL', () => {
+  const play = loadConfig().playTesting;
+  assert.equal(typeof play.enabled, 'boolean');
+  assert.equal(play.optInUrl, playOptInUrl);
+  assert.equal(typeof play.groupUrl, 'string');
+  assert(Object.isFrozen(play));
+});
+
+test('playTesting placeholder guard: enabled Play testing must not ship the __GROUP_URL__ placeholder', () => {
+  // Fails on purpose if site/config.js has enabled: true while groupUrl is still the placeholder.
+  const config = loadConfig();
+  if (playTestingEnabled(config)) assert(!config.playTesting.groupUrl.includes(groupUrlPlaceholder), 'Set playTesting.groupUrl to the real Google Group address before enabling');
+  assert.doesNotThrow(() => assertPlayTestingReady(config));
+  const base = { optInUrl: playOptInUrl, groupUrl: groupUrlPlaceholder };
+  assert.doesNotThrow(() => assertPlayTestingReady({ playTesting: { ...base, enabled: false } }));
+  assert.doesNotThrow(() => assertPlayTestingReady({}));
+  assert.throws(() => assertPlayTestingReady({ playTesting: { ...base, enabled: true } }), /placeholder/);
+  assert.throws(() => assertPlayTestingReady({ playTesting: { ...base, enabled: 'yes' } }));
+  for (const groupUrl of ['http://groups.google.com/g/x', 'not a url', 'https://user@groups.google.com/g/x']) assert.throws(() => assertPlayTestingReady({ playTesting: { ...base, enabled: true, groupUrl } }));
+  assert.throws(() => assertPlayTestingReady({ playTesting: { enabled: true, optInUrl: 'https://example.com/', groupUrl: 'https://groups.google.com/g/x' } }));
+  assert.doesNotThrow(() => assertPlayTestingReady({ playTesting: { ...base, enabled: true, groupUrl: 'https://groups.google.com/g/the-remote-testers' } }));
 });
