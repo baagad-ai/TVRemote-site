@@ -1,5 +1,6 @@
 # BEGIN apk-release-redirects (managed by update-site-apk.sh: previous APK URLs -> current release, 302)
-/downloads/b60880306e71229e3771250860ad26a467f9851c5c2bd49af6ac691545fca320/the-remote-0.1.0-beta.7-b60880306e71.apk /downloads/8ea325cd117fb2dcaafd9164b1f23f67633d4cca1993aa2a394b53e3a5d2d0d1/the-remote-0.1.0-beta.8-8ea325cd117f.apk 302
+/downloads/8ea325cd117fb2dcaafd9164b1f23f67633d4cca1993aa2a394b53e3a5d2d0d1/the-remote-0.1.0-beta.8-8ea325cd117f.apk /downloads/3fbb8e414cdf5f01a3bf9fca5501652c2f6a4cc0dce4424a0569d92de4e870ee/the-remote-0.1.0-beta.8.1-3fbb8e414cdf.apk 302
+/downloads/b60880306e71229e3771250860ad26a467f9851c5c2bd49af6ac691545fca320/the-remote-0.1.0-beta.7-b60880306e71.apk /downloads/3fbb8e414cdf5f01a3bf9fca5501652c2f6a4cc0dce4424a0569d92de4e870ee/the-remote-0.1.0-beta.8.1-3fbb8e414cdf.apk 302
 # END apk-release-redirects
 # Preserve visitors who copy the former GitHub Pages path onto the new host.
 /TVRemote-site / 301
