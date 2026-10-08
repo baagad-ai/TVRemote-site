@@ -45,6 +45,12 @@ if(play&&release){assert.match(html,/<dialog[^>]*class="apk-sheet"[^>]*aria-labe
 if(release) {assert(html.includes(`href="${release.url.replaceAll('&','&amp;')}"`));assert.match(html,/data-download-cta="hero"/);assert(html.includes(release.sha256));}
 else {assert.match(html,/Download is being prepared/);assert(!html.includes('data-download-cta='));}
 assert.match(privacy,/Cloudflare Web Analytics/);assert.match(privacy,/click/i);assert.match(privacy,/D1/);
+{const css=read('styles.css');
+ // Skip link: visually hidden (1px, clipped) until it takes focus; shown on :focus / :focus-visible.
+ assert.match(css,/\.skip-link\{[^}]*clip-path:inset\(50%\)[^}]*\}/,'skip link must be visually hidden at rest');assert.match(css,/\.skip-link:focus,\.skip-link:focus-visible\{[^}]*clip-path:none/,'skip link must appear on focus');assert(!/\.skip-link\{[^}]*transform/.test(css),'skip link must not be parked off-screen with a transform');
+ // scrollbar-gutter only while the APK sheet is open (html.sheet-open), never on html at rest.
+ assert(!/(^|[}\s])html\{[^}]*scrollbar-gutter/.test(css),'scrollbar-gutter must not be applied to html at rest');assert.match(css,/html\.sheet-open\{[^}]*scrollbar-gutter:stable/);
+ assert(!/MiB/.test(read('index.html')),'APK size is shown in MB');}
 assert.match(read('styles.css'),/prefers-reduced-motion/);assert.match(read('styles.css'),/:focus-visible/);assert.match(read('styles.css'),/safe-area-inset-bottom/);
 for(const file of ['remote-demo-ltr.png','showcase/youtube-share-review.png','showcase/youtube-manual-controls.png','showcase/spotify-controls-manual-demo.png','showcase/saved-tv-room-list-demo.png','showcase/tv-details-edit-demo.png']){
  const bytes=fs.readFileSync(path.join(root,'assets',file));

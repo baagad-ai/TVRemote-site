@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { loadConfig } from './deployment-config.mjs';
-import { approvedRelease } from './src/download-metrics.mjs';
+import { approvedRelease, formatApkSize } from './src/download-metrics.mjs';
 import articles from './src/guides.json' with { type: 'json' };
 const config = loadConfig();
 assert(Object.isFrozen(config));
@@ -17,7 +17,9 @@ for (const value of [{}, { apkRelease: null }, config, fixture]) {
     if (value.apkRelease.minSdk === 26) assert(markup.includes('Android 8.0 or later'), 'Verified phone OS minimum must be visible');
     assert(markup.includes(value.apkRelease.version), 'Actual beta version label must be preserved');
     if (value.apkRelease.versionCode === 7) assert(markup.includes('build 7'));
-    if (value.apkRelease.bytes === 2097152) assert(markup.replace(/<!--.*?-->/g, '').includes('APK size: 2.0 MiB'));
+    if (value.apkRelease.bytes === 2097152) assert(markup.replace(/<!--.*?-->/g, '').includes('APK size: 2.1 MB'));
+    assert(markup.includes(`APK size: ${formatApkSize(value.apkRelease.bytes)}`), 'APK size uses the shared decimal-MB formatter');
+    assert(!/MiB/.test(markup), 'APK size is shown in MB, never MiB');
   } else {
     assert(markup.includes('Download is being prepared.'));
     assert(!markup.includes('data-download-cta='), 'Inactive release must not be counted');
@@ -42,6 +44,12 @@ if (approvedRelease(config) && config.playTesting) {
   for (const text of ['Google Play is the easier way', 'Updates arrive on their own.', 'Download APK anyway', config.apkRelease.sha256, 'id="apk-sheet-title" tabindex="-1"']) assert(on.includes(text), text);
   assert(on.includes(`data-sheet-download="download" ${url}`) || on.includes('data-sheet-download="download"'), 'sheet download is the counted link');
   const join = render('join', mode(true));
+  // One size string everywhere (download section, sheet, /join/), all from formatApkSize(apkRelease.bytes).
+  const size = formatApkSize(config.apkRelease.bytes), sizes = markup => [...markup.replace(/<!--.*?-->/g, '').matchAll(/\d+(?:\.\d+)?\s?(?:MB|MiB|KB|GB)\b/g)].map(m => m[0]);
+  for (const [name, markup, count] of [['off', off, 1], ['on', on, 2], ['join', join, 1]]) { const found = sizes(markup); assert.equal(found.length, count, name + ' size count ' + found); assert(found.every(s => s === size), name + ' sizes ' + found); }
+  // /join/: the two Play steps are the primary pills; the 'Want it today?' Download APK is the outline secondary.
+  assert.equal((join.match(/cta-pill cta-primary/g) || []).length, 2, '/join/ has exactly two primary pills (the Play steps)');
+  assert(join.includes('class="cta-pill cta-secondary" href="' + config.apkRelease.url), '/join/ Download APK is the secondary outline pill');
   for (const text of ['Get The Remote on Google Play', `href="${config.playTesting.optInUrl}"`, `href="${config.playTesting.groupUrl}"`, 'target="_blank" rel="noopener"', url, 'Please stay opted in for at least 14 days']) assert(join.includes(text), '/join/ ' + text);
   assert(!join.includes('apk-sheet'), '/join/ links straight to the APK');
   const guideOn = render('guides/' + articles[0].slug, mode(true)), guideOff = render('guides/' + articles[0].slug, mode(false));

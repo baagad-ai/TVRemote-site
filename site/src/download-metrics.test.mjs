@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { approvedRelease, broadPlatform, recordDownloadClick } from './download-metrics.mjs';
+import { approvedRelease, broadPlatform, formatApkSize, recordDownloadClick } from './download-metrics.mjs';
 
 const release = { id: 'security-1', version: '1.0.1', url: 'https://example.com/remote.apk', sha256: 'a'.repeat(64) };
 test('download stays inactive unless every release identity field is valid', () => {
@@ -51,4 +51,11 @@ test('privacy signals suppress click telemetry without affecting the download', 
   }
   recordDownloadClick(release, 'download', { doNotTrack: '1', fetch });
   assert.equal(calls, 0);
+});
+test('APK size is one decimal-MB string from apkRelease.bytes (bytes / 1,000,000), never MiB', () => {
+  assert.equal(formatApkSize(4635380), '4.6 MB');
+  assert.equal(formatApkSize(2097152), '2.1 MB');
+  assert.equal(formatApkSize(4449999), '4.4 MB');
+  assert.equal(formatApkSize(1000000), '1.0 MB');
+  for (const bytes of [undefined, null, 0, -1, 1.5, '4635380', Number.MAX_SAFE_INTEGER + 1]) assert.equal(formatApkSize(bytes), null);
 });

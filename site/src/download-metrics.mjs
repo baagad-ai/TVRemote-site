@@ -40,3 +40,7 @@ export function recordDownloadClick(release, button, environment = globalThis) {
 
 // Play-first switch (site/config.js playTesting.enabled). Off = direct APK download only.
 export const playTestingEnabled = config => config?.playTesting?.enabled === true;
+
+// One APK size string everywhere (download section, APK sheet, /join/): decimal megabytes from
+// apkRelease.bytes, i.e. bytes / 1,000,000 to one decimal, labelled "MB" (e.g. 4635380 -> "4.6 MB").
+export const formatApkSize = bytes => Number.isSafeInteger(bytes) && bytes > 0 ? `${(bytes / 1e6).toFixed(1)} MB` : null;

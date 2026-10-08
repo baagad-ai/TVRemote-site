@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { approvedRelease, playTestingEnabled, recordDownloadClick } from './download-metrics.mjs';
+import { approvedRelease, formatApkSize, playTestingEnabled, recordDownloadClick } from './download-metrics.mjs';
 import Icon from './Icon';
 
 const Release = createContext({ release: null, play: null, prefix: '', sheet: { current: null } });
@@ -36,11 +36,11 @@ export function CtaPair({ button, compact = false }) {
     <DownloadLink button={button} className={play ? (compact ? 'cta-text-button' : 'cta-pill cta-secondary') : 'cta-pill cta-primary'} icon={!(play && compact)} arrow={false}>Download APK</DownloadLink>
   </div>{release && <p className="cta-note">Free · No ads · No account</p>}</div>;
 }
-const megabytes = bytes => (bytes / 1e6).toFixed(1);
 export function FileDetails({ release, copy = true }) {
   const [copied, setCopied] = useState(false);
+  const size = formatApkSize(release.bytes);
   const onCopy = () => navigator.clipboard?.writeText(release.sha256).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }, () => {});
-  return <div className="file-card"><p>Version {release.version}{Number.isSafeInteger(release.bytes) ? ` · ${megabytes(release.bytes)} MB` : ''}</p>
+  return <div className="file-card"><p>Version {release.version}{size ? ` · ${size}` : ''}</p>
     <div className="file-sha"><p>SHA-256 <code>{release.sha256}</code></p>{copy && <button type="button" className="copy-button" onClick={onCopy} aria-label={copied ? 'SHA-256 copied' : 'Copy SHA-256'}><Icon name={copied ? 'check' : 'copy'} size={18} /><span aria-hidden="true">{copied ? 'Copied' : 'Copy'}</span></button>}</div>
     <p className="visually-hidden" role="status">{copied ? 'SHA-256 copied to clipboard' : ''}</p></div>;
 }
@@ -59,7 +59,7 @@ function ApkSheet() {
       clearTimeout(timer.current); node.classList.remove('is-closing'); trigger.current = element; setButton(position);
       document.documentElement.classList.add('sheet-open'); node.showModal(); title.current.focus(); return true;
     } };
-    return () => { sheet.current = null; clearTimeout(timer.current); };
+    return () => { sheet.current = null; clearTimeout(timer.current); document.documentElement.classList.remove('sheet-open'); };
   }, [sheet]);
   const onClose = () => { dialog.current.classList.remove('is-closing'); document.documentElement.classList.remove('sheet-open'); trigger.current?.focus({ preventScroll: true }); };
   const onKeyDown = event => {
@@ -87,7 +87,7 @@ export default function Download() {
   const { release } = useDownload();
   return <section className="download-section page-width" id="download" aria-labelledby="download-title">
     <div className="download-intro"><p className="eyebrow">Get The Remote</p><h2 id="download-title" tabIndex={-1}>Download.<br />Pair. Watch.</h2><p>The Remote is free for Android phones and works with compatible Android TV and Google TV. No ads, no account, no signup.</p><div className="download-steps"><p><b>01</b> Download the app on your Android phone.</p><p><b>02</b> If Android asks, allow installs from your browser.</p><p><b>03</b> Open the file and tap Install.</p><p><b>04</b> Pick your TV and enter the code it shows.</p></div><div className="download-requirements"><p className="eyebrow">What you need</p><p>{release?.minSdk === 26 ? "Phone: Android 8.0 or later. There's no iPhone version." : "Phone: an Android phone that meets the requirement shown with the download. There's no iPhone version."}</p><p>TV: Android TV or Google TV with Android TV Remote Service v2, on the same home Wi-Fi as your phone.</p><p>Controls vary by TV and firmware. <a href="#compatibility">Check your TV and optional extras</a>.</p></div></div>
-    <div className="download-panel"><p className="android-badge">Android phone APK</p>{release ? <><h3>The Remote for Android.</h3><p>Version {release.version}{Number.isInteger(release.versionCode) && release.versionCode > 0 ? ` · build ${release.versionCode}` : ''}</p>{release.minSdk === 26 && <p className="download-requirement">Requires Android 8.0 or later on your phone.</p>}<CtaPair button="download" />{Number.isSafeInteger(release.bytes) && release.bytes > 0 && <p className="fine-print">APK size: {(release.bytes / 1024 / 1024).toFixed(1)} MiB</p>}<p className="fine-print">Android may ask you to allow installs from your browser or file manager. You can turn that off again after installing.</p><details className="download-help"><summary>Installing or updating</summary><p>Open the downloaded file and tap Install. To update, download the latest version from this page and open it. Android installs it over your current app when the app version and signing identity are compatible.</p><p>If Android rejects an update, keep the app you have and check that the file came from this page. Uninstalling removes locally saved TVs, pairings, and settings.</p></details><details className="download-integrity"><summary>Check the APK checksum</summary><p>Compare the downloaded file's SHA-256 with this release checksum.</p><code>{release.sha256}</code><p className="fine-print">A matching checksum confirms these file bytes; it does not replace Android's installation and signature checks.</p></details></> : <><h3>Download is being prepared.</h3><p>The verified Android APK will appear here when it is ready.</p><p className="fine-print">No signup or email is needed. Check the <a href="#compatibility">TV requirements</a> while you wait.</p></>}</div>
+    <div className="download-panel"><p className="android-badge">Android phone APK</p>{release ? <><h3>The Remote for Android.</h3><p>Version {release.version}{Number.isInteger(release.versionCode) && release.versionCode > 0 ? ` · build ${release.versionCode}` : ''}</p>{release.minSdk === 26 && <p className="download-requirement">Requires Android 8.0 or later on your phone.</p>}<CtaPair button="download" />{formatApkSize(release.bytes) && <p className="fine-print">{`APK size: ${formatApkSize(release.bytes)}`}</p>}<p className="fine-print">Android may ask you to allow installs from your browser or file manager. You can turn that off again after installing.</p><details className="download-help"><summary>Installing or updating</summary><p>Open the downloaded file and tap Install. To update, download the latest version from this page and open it. Android installs it over your current app when the app version and signing identity are compatible.</p><p>If Android rejects an update, keep the app you have and check that the file came from this page. Uninstalling removes locally saved TVs, pairings, and settings.</p></details><details className="download-integrity"><summary>Check the APK checksum</summary><p>Compare the downloaded file's SHA-256 with this release checksum.</p><code>{release.sha256}</code><p className="fine-print">A matching checksum confirms these file bytes; it does not replace Android's installation and signature checks.</p></details></> : <><h3>Download is being prepared.</h3><p>The verified Android APK will appear here when it is ready.</p><p className="fine-print">No signup or email is needed. Check the <a href="#compatibility">TV requirements</a> while you wait.</p></>}</div>
   </section>;
 }
 
@@ -104,7 +104,7 @@ export function JoinPage({ Header, Footer }) {
     <p className="join-note">If Play says the app isn't available yet, Google is still reviewing this release. That can take a day or two, and the install shows up on its own.</p>
     <p className="join-note">Please stay opted in for at least 14 days. It helps us bring The Remote to everyone on the Play Store.</p>
     <section className="join-fallback" aria-labelledby="join-fallback-title"><h2 id="join-fallback-title">Want it today?</h2><p>Download the APK from this site. It's the same app, signed with the same key as the Google Play version, so Google Play can update it later.</p>
-      {release ? <><div className="cta-group"><div className="cta-pair"><DownloadLink button="download" direct className="cta-pill cta-primary" icon arrow={false}>Download APK</DownloadLink></div><p className="cta-note">Free · No ads · No account</p></div><FileDetails release={release} /></> : <p className="fine-print">The APK download is being prepared.</p>}
+      {release ? <><div className="cta-group"><div className="cta-pair"><DownloadLink button="download" direct className="cta-pill cta-secondary" icon arrow={false}>Download APK</DownloadLink></div><p className="cta-note">Free · No ads · No account</p></div><FileDetails release={release} /></> : <p className="fine-print">The APK download is being prepared.</p>}
     </section>
   </main><Footer privacy /></>;
 }
