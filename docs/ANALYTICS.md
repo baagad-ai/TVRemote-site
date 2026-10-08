@@ -16,7 +16,7 @@ The browser sends exactly event, immutable release, button position and broad pl
 
 The SQL stores UTC-day totals in `download_click_daily` and the aggregate cap in `metrics_daily_budget`. Production settings:
 
-The 8 October 2026 publication check recorded one disclosed verification event for release `0.1.0-beta.7-b60880306e71`, button `download`, platform `other`. It remains in the report; no records were deleted. Direct APK URL requests bypass this button-click counter, and no short-link tracking is configured.
+The 8 October 2026 publication check recorded two disclosed verification events for release `0.1.0-beta.7-b60880306e71`: an endpoint check under `download` / `other`, then an actual browser button click under `hero` / `windows`. Both remain in the report; no records were deleted. Direct APK URL requests bypass this button-click counter, and no short-link tracking is configured.
 
 | Setting | Value |
 | --- | --- |
