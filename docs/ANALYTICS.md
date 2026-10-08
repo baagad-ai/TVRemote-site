@@ -10,9 +10,9 @@ Official references: [Pages setup](https://developers.cloudflare.com/pages/how-t
 
 ## Private recorded clicks
 
-`POST /api/metrics` is the only Function route. Its private `METRICS_DB` binding must use a **new** D1 database named `the-remote-download-metrics`. Never reuse `the-remote-beta-requests`, database ID `361c5549-6046-4d2c-8a34-23bdcce72db0`. Keep preview counters disabled and production logs off. No public report/read endpoint exists.
+`POST /api/metrics` is the only Function route. Its private `METRICS_DB` binding uses the separate D1 database `the-remote-download-metrics`, ID `0b9109ef-88b4-4521-9fcc-d043a09e9ef8`. Never reuse `the-remote-beta-requests`, database ID `361c5549-6046-4d2c-8a34-23bdcce72db0`. Keep preview counters disabled. The Function emits no request or diagnostic logs; Pages live logs are nonpersistent. No public report/read endpoint exists.
 
-The browser sends exactly event, immutable release, button position and broad platform. The API accepts fixed allowlists and an explicitly configured same-origin HTTPS host. It rejects queries, extra fields, invalid types and bodies over 1024 bytes. It honors DNT and GPC. No cookies, local storage, persistent identifiers, raw IP, full user agent, referrer or query are stored. Hosting infrastructure still processes request metadata under Cloudflare's policy; disabled application logs do not mean the network host sees no requests.
+The browser sends exactly event, immutable release, button position and broad platform. The API accepts fixed allowlists and an explicitly configured same-origin HTTPS host. It rejects queries, extra fields, invalid types and bodies over 1024 bytes. It honors DNT and GPC. No cookies, local storage, persistent identifiers, raw IP, full user agent, referrer or query are stored. Hosting infrastructure still processes request metadata under Cloudflare's policy; absence of application logs does not mean the network host sees no requests.
 
 The SQL stores UTC-day totals in `download_click_daily` and the aggregate cap in `metrics_daily_budget`. Production settings:
 

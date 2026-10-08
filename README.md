@@ -2,12 +2,12 @@
 
 This public repository contains The Remote website and privacy policy. The Android app is maintained separately; this repository contains no app source, signing files, or release credentials.
 
-- Existing live website before cutover: https://baagad-ai.github.io/TVRemote-site/
-- Current Cloudflare project hostname: https://theremote-site.pages.dev/ (`SITE_URL` sets canonical URLs and sitemap; verified APK release cutover still pending)
+- Former GitHub Pages URL: https://baagad-ai.github.io/TVRemote-site/ (legacy workflow is manually disabled)
+- Cloudflare project hostname: https://theremote-site.pages.dev/ (`SITE_URL` sets canonical URLs and sitemap)
 
 The Remote is a free Android phone remote for compatible Android TV and Google TV devices. Compatibility and available controls vary by TV and its Android TV Remote Service version.
 
-Public beta-access CTAs are replaced with direct APK anchors. `site/config.js` starts with `apkRelease: null`: preview pages explain that the verified download is being prepared, and production publishing rejects an inactive release. Activate only the final signed APK verified from current security-fixed app source, with immutable release ID, HTTPS APK URL, version and SHA-256. Older beta artifacts are not substitutes. Download anchors work without JavaScript; analytics never intercepts navigation.
+Public beta-access CTAs are replaced with direct APK anchors. `site/config.js` identifies the approved, verified Play-signed beta.7 APK, with an immutable release ID, same-origin HTTPS URL, actual version and SHA-256. See [artifact evidence](docs/RELEASE-REQUIREMENTS.md#verified-beta7-artifact). Production publishing rejects an inactive release or any source-byte mismatch. Download anchors work without JavaScript; analytics never intercepts navigation.
 
 Enable free Cloudflare Web Analytics for visits, platform and performance. A separate Pages Function records private daily download-click aggregates in a new D1 database. See [analytics setup and dashboard queries](docs/ANALYTICS.md) and [deployment/cutover](docs/PAGES-DEPLOYMENT.md). Recorded clicks are not unique people, installations or completed downloads; clicks/visits is directional only.
 
@@ -46,4 +46,4 @@ node site/check-config.mjs
 npm test
 ```
 
-GitHub Actions validates the candidate. Deployment authentication and the final APK identity are separate prerequisites. No deployment tokens or secrets are stored in this repository.
+The legacy GitHub Pages workflow is manually disabled and remains disabled. Current validation is the local production build, 56 tests and independent review; do not describe current-head GitHub CI as passed. No deployment tokens or secrets are stored in this repository.

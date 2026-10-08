@@ -10,3 +10,11 @@ The reference source is [TVRemote commit 49fea80](https://github.com/baagad-ai/T
 The website uses a compact Android APK label, explicit phone destination, installation/update guidance and separate optional-feature conditions. Phone minimum/build/size/version/checksum display comes from verified release metadata. A matching SHA-256 proves file bytes, not installation success, certificate trust or universal compatibility.
 
 For release acceptance, expect the Play app-signing certificate SHA-256 `5e38d04fc52f486d06e96f043ee68b44eea3de59f99c6fddced3272589563445`. Reject upload-signed artifacts. Version code 7 and this signer alone are insufficient provenance: match the exact APK to the current security-fixed AAB/build and Play-generated universal APK record. Do not run devices, emulators or instrumentation as part of this website deployment.
+
+## Verified beta.7 artifact
+
+On 8 October 2026 the user approved the repository artifact [release/the-remote-0.1.0-beta.7.apk at ae3568e](https://github.com/baagad-ai/TVRemote/blob/ae3568eebe7bb0bc7b53db12079477409ef5861b/release/the-remote-0.1.0-beta.7.apk). The downloaded file matches Git blob `26d883d2530117170ec2fa0ef1fbac8b660d5857`, 4,635,380 bytes, and SHA-256 `b60880306e71229e3771250860ad26a467f9851c5c2bd49af6ac691545fca320`.
+
+Android SDK `apksigner` verifies APK signature schemes v2/v3 and the exact expected Play certificate above. It also verifies Google's source stamp dated `2026-10-07T17:17:08Z`. `aapt2` confirms package `com.theremote.app`, version `0.1.0-beta.7`, code 7, minSdk 26 and targetSdk 36; no debuggable or required split flags are declared, and all four ARM/x86 ABI payloads are present. The upload commit descends from security-fixed `49fea80` by eight commits. This establishes the approved repository artifact's identity and declared provenance; it is not a reproducible-build proof or physical installation test.
+
+Website release ID: `0.1.0-beta.7-b60880306e71`. Publication stages the verified bytes at the SHA-256-specific path in `site/config.js`; the APK and private local source path remain outside website Git history.

@@ -12,9 +12,9 @@
     }
   ],
   "vars": {
-    "METRICS_ENABLED": "false",
+    "METRICS_ENABLED": "true",
     "METRICS_ALLOWED_ORIGINS": "https://theremote-site.pages.dev",
-    "METRICS_ALLOWED_RELEASES": "",
+    "METRICS_ALLOWED_RELEASES": "0.1.0-beta.7-b60880306e71",
     "METRICS_DAILY_CAP": "1000",
     "METRICS_PER_MINUTE": "20"
   },
