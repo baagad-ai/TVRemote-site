@@ -37,4 +37,4 @@ The Remote includes a dedicated YouTube search entered with your Android phone k
 
 The [phone-side search demo](https://theremote-site.pages.dev/#search-proof) shows where you enter the query. If a query doesn’t arrive on your TV, check the selected destination, then try a search directly in the TV’s YouTube app. If that also fails, resolve the TV-side issue first. If YouTube works but the remote query fails, record the TV model, YouTube version and a harmless sample query for support.
 
-[Download the available Android APK](https://theremote-site.pages.dev/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
+[Download the app](https://theremote-site.pages.dev/#download) on your Android phone. It's free, with no ads and no account. Before installing, check that your TV is compatible and on the same home network as your phone.

@@ -48,4 +48,4 @@ Check the TV for the result. Its YouTube app, signed-in account and the video’
 
 A shared video deserves a quick check before it reaches a bigger screen. The Remote keeps that choice explicit: review the link, choose the TV, then send it.
 
-[Download the available Android APK](https://theremote-site.pages.dev/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
+[Download the app](https://theremote-site.pages.dev/#download) on your Android phone. It's free, with no ads and no account. Before installing, check that your TV is compatible and on the same home network as your phone.

@@ -20,6 +20,8 @@ The existing beta Worker, private D1 database and earlier requests are preserved
 - Describe screenshots and illustrations accurately. The showcase captures show local demo screens; name what is visible and never imply that a TV is connected, a command was sent, or playback was confirmed.
 - Limit claims to shipped features and compatible devices. Do not promise support for every TV or add invented results, testimonials, counts, or endorsements.
 - Describe the approved APK accurately, without invented download counts or support for every TV.
+- Distribution is the direct APK download on this site. Download buttons read "Download the app"; don't add Google Play, beta-access, invitation, waitlist, or request-access wording.
+- Home FAQ copy lives in `site/src/faq.json`; the build renders the visible FAQ and its FAQPage JSON-LD from that one file so they stay identical.
 
 ## Showcase screenshot notes
 
