@@ -39,9 +39,9 @@ if(release) {assert(html.includes(`href="${release.url.replaceAll('&','&amp;')}"
 else {assert.match(html,/Download is being prepared/);assert(!html.includes('data-download-cta='));}
 assert.match(privacy,/Cloudflare Web Analytics/);assert.match(privacy,/click/i);assert.match(privacy,/D1/);
 assert.match(read('styles.css'),/prefers-reduced-motion/);assert.match(read('styles.css'),/:focus-visible/);assert.match(read('styles.css'),/safe-area-inset-bottom/);
-for(const file of ['remote-demo-ltr.png','showcase/youtube-share-review.png','showcase/youtube-manual-controls.png','showcase/spotify-controls-manual-demo.png','showcase/saved-tv-room-list-demo.png','showcase/tv-details-edit-demo.png']){
+for(const [file,height] of [['showcase/remote-home.png',2340],['showcase/youtube-share-review.png',2340],['showcase/youtube-search.png',2340],['showcase/your-tvs.png',2340],['showcase/pair-name-and-room.png',1420]]){
  const bytes=fs.readFileSync(path.join(root,'assets',file));
- assert.equal(bytes.readUInt32BE(16),1080);assert.equal(bytes.readUInt32BE(20),2340);
+ assert.equal(bytes.readUInt32BE(16),1080,file);assert.equal(bytes.readUInt32BE(20),height,file);
 }
 const contract=JSON.parse(read('assets/3d/room-destinations-contract.json'));
 {

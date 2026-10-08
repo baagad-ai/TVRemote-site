@@ -20,7 +20,7 @@ for (const folder of ['runtime', 'licenses', 'assets/3d', 'assets/showcase', 'as
     files.push(folder + '/' + entry.name);
   }
 }
-files.push('assets/focus-key.svg', 'assets/remote-demo-ltr.png', 'assets/og-preview.png', 'assets/work-sans-variable.ttf', 'assets/outfit-variable.ttf');
+files.push('assets/focus-key.svg', 'assets/og-preview.png', 'assets/work-sans-variable.ttf', 'assets/outfit-variable.ttf');
 for (const relative of files) {
   const output = path.join(target, relative); await fs.mkdir(path.dirname(output), { recursive: true }); await fs.copyFile(path.join(root, relative), output);
 }

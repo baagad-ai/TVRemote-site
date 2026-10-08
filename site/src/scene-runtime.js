@@ -127,7 +127,7 @@ export async function createSceneRuntime() {
     }
     if ((key === 'hero' || key === 'handoff') && (key === 'handoff' ? 'share' : state.shot) !== previousShot) {
       previousShot = key === 'handoff' ? 'share' : state.shot; const revision = generation, screenshotRevision = ++shotGeneration, object = active;
-      const url = key === 'handoff' ? '../assets/showcase/youtube-share-review.png' : state.shot === 'controls' ? '../assets/showcase/youtube-manual-controls.png' : '../assets/remote-demo-ltr.png';
+      const url = key === 'handoff' ? '../assets/showcase/youtube-share-review.png' : '../assets/showcase/remote-home.png';
       new THREE.TextureLoader().load(new URL(url, import.meta.url).href, texture => {
         if (disposed || generation !== revision || screenshotRevision !== shotGeneration || active !== object) { texture.dispose(); return; }
         texture.colorSpace = THREE.SRGBColorSpace; texture.flipY = false;
