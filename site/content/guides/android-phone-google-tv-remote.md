@@ -66,4 +66,4 @@ The Remote is a separate, free Android phone app. It's built for compatible Andr
 
 You can enter a YouTube search on your phone, review a shared YouTube link before sending it, name saved TVs by room, and choose app-specific controls. YouTube behavior also depends on the TV and its YouTube version. [See The Remote's features and requirements](https://theremote-site.pages.dev/)
 
-[Download the available Android APK](https://theremote-site.pages.dev/#download) and check the release version and installation guidance. No signup or email is needed to download. Check compatibility before installing; a phone remote still needs a reachable TV on your home network.
+[Download the app](https://theremote-site.pages.dev/#download) on your Android phone. It's free, with no ads and no account. Before installing, check that your TV is compatible and on the same home network as your phone.

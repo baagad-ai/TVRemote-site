@@ -1,0 +1,16 @@
+[
+  { "q": "Is The Remote free?", "a": "Yes. No ads, no in-app purchases, no subscription, and no account." },
+  { "q": "Is it on Google Play?", "a": "No. You download The Remote directly from this site. Tap Download the app on your Android phone, open the file, and install it." },
+  { "q": "Is installing the APK safe?", "a": "Download it only from this page. Android checks the app's signature before installing it, and you can compare the file's SHA-256 checksum in the download section. If Android asks you to allow installs from your browser, you can turn that off again afterwards." },
+  { "q": "Does it work on iPhone?", "a": "No. The Remote is for Android phones running Android 8.0 or later. There's no iPhone version." },
+  { "q": "Which TVs does it work with?", "a": "Android TV and Google TV devices with Android TV Remote Service v2. Available controls vary by model and firmware." },
+  { "q": "Do I need the TV companion or the YouTube app on my phone?", "a": "No. YouTube search and YouTube links go straight to the TV you pick, without the companion and without YouTube on your phone. The TV's YouTube app and its version decide whether a search or link opens." },
+  { "q": "The app can't find my TV. What should I check?", "a": "Turn the TV on and put your phone on the same home Wi-Fi as the TV, not mobile data. Guest, hotel, and school networks, and routers with AP or client isolation turned on, can stop devices from reaching each other. Then search again." },
+  { "q": "The pairing code timed out. Now what?", "a": "Pairing codes only last a short time. Ask the TV for a new code and enter the one on the screen now, not one from an earlier try. If no code appears, check that you picked the TV in front of you." },
+  { "q": "My TV stopped showing up after an update.", "a": "Let the update finish, turn the TV on, and check it's still on the same Wi-Fi as your phone. Then open The Remote. If it asks you to pair again, enter the new code shown on the TV." },
+  { "q": "A YouTube search or link won't open on the TV.", "a": "Open YouTube on the TV, make sure it's up to date, and try again. Search and link support depend on the TV and its YouTube version. If the TV shows a sign-in or playback message, sort that out on the TV first." },
+  { "q": "I have more than one TV. How do I pick the right one?", "a": "Give each saved TV a name and a room, like Living room or Bedroom. Choose the TV before you send a YouTube search or link, so it opens on the screen you meant." },
+  { "q": "How do I update the app?", "a": "Download the latest version from this page and open it. Android installs it over your current app when the app version and signing identity are compatible. If Android rejects it, keep the app you have. Uninstalling removes saved TVs, pairings, and settings." },
+  { "q": "Where does my YouTube search go?", "a": "To the TV you picked, over your local network. YouTube may process the search link under its own privacy policy. The Remote doesn't keep a search history." },
+  { "q": "Does the Bluetooth mouse work on every phone?", "a": "No. D-pad controls are the default over your home network. The optional Bluetooth mouse needs Android 9.0 or later, Bluetooth HID support on your phone, and a TV that supports the connection." }
+]
