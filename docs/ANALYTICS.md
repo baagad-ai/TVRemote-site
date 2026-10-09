@@ -12,9 +12,9 @@ Official references: [Pages setup](https://developers.cloudflare.com/pages/how-t
 
 `POST /api/metrics` is the only Function route. Its private `METRICS_DB` binding uses the separate D1 database `the-remote-download-metrics`, ID `0b9109ef-88b4-4521-9fcc-d043a09e9ef8`. Never reuse `the-remote-beta-requests`, database ID `361c5549-6046-4d2c-8a34-23bdcce72db0`. Keep preview counters disabled. The Function emits no request or diagnostic logs; Pages live logs are nonpersistent. No public report/read endpoint exists.
 
-The browser sends exactly event, immutable release, button position and broad platform, plus `source` only when the landing URL's `utm_source` is `linkedin`, `x`, `instagram` or `qr` (case-insensitive, kept in sessionStorage for the tab). The API re-checks that allow-list and stores anything else, or a missing source, as `none`; no other part of the URL is read. The API accepts fixed allowlists and an explicitly configured same-origin HTTPS host. It rejects queries, extra fields, invalid types and bodies over 1024 bytes. It honors DNT and GPC. No cookies, local storage, persistent identifiers, raw IP, full user agent, referrer or query are stored. Hosting infrastructure still processes request metadata under Cloudflare's policy; absence of application logs does not mean the network host sees no requests.
+The browser sends exactly event, immutable release, button position and broad platform, plus `source` only when the landing URL's `utm_source` is `linkedin`, `x`, `instagram`, `qr` or `qr_site` (case-insensitive, kept in sessionStorage for the tab). The API re-checks that allow-list and stores anything else, or a missing source, as `none`; no other part of the URL is read. The API accepts fixed allowlists and an explicitly configured same-origin HTTPS host. It rejects queries, extra fields, invalid types and bodies over 1024 bytes. It honors DNT and GPC. No cookies, local storage, persistent identifiers, raw IP, full user agent, referrer or query are stored. Hosting infrastructure still processes request metadata under Cloudflare's policy; absence of application logs does not mean the network host sees no requests.
 
-The SQL stores UTC-day totals in `download_click_daily_v2` (migration 0002, with `source` in its key; migration 0003 rebuilt it with the same rows, key and trigger so `source` may also be `qr`) and the aggregate cap in `metrics_daily_budget`. Clicks recorded before 8 October 2026 23:30 IST stay in `download_click_daily`, which 0002 leaves untouched so an older deployment can still write to it; report across both tables (`UNION ALL`, treating the old table's source as `none`). Production settings:
+The SQL stores UTC-day totals in `download_click_daily_v2` (migration 0002, with `source` in its key; migration 0003 rebuilt it with the same rows, key and trigger so `source` may also be `qr` or `qr_site`) and the aggregate cap in `metrics_daily_budget`. Clicks recorded before 8 October 2026 23:30 IST stay in `download_click_daily`, which 0002 leaves untouched so an older deployment can still write to it; report across both tables (`UNION ALL`, treating the old table's source as `none`). Production settings:
 
 The 8 October 2026 publication check recorded two disclosed verification events for release `0.1.0-beta.7-b60880306e71`: an endpoint check under `download` / `other`, then an actual browser button click under `hero` / `windows`. Both remain in the report; no records were deleted. Direct APK URL requests bypass this button-click counter, and no short-link tracking is configured.
 
@@ -53,13 +53,33 @@ GROUP BY release, platform, button
 ORDER BY recorded_clicks DESC;
 ```
 
-Daily recorded clicks by source (`qr` = landings tagged `utm_source=qr`, for example from a printed QR code):
+Two QR sources are kept apart: `qr` is the film's QR code (`utm_source=qr`) and `qr_site` is the QR tile on the website itself (`utm_source=qr_site`, scanned from a desktop screen onto a phone).
+
+Daily recorded clicks by source:
 
 ```sql
 SELECT day, source, SUM(clicks) AS recorded_clicks
 FROM download_click_daily_v2
 WHERE day >= '2026-10-07' AND day < '2026-11-01'
 GROUP BY day, source ORDER BY day, source;
+```
+
+Daily clicks from the film's QR code:
+
+```sql
+SELECT day, SUM(clicks) AS film_qr_clicks
+FROM download_click_daily_v2
+WHERE source = 'qr' AND day >= '2026-10-07' AND day < '2026-11-01'
+GROUP BY day ORDER BY day;
+```
+
+Daily clicks from the website's QR tile:
+
+```sql
+SELECT day, SUM(clicks) AS site_qr_clicks
+FROM download_click_daily_v2
+WHERE source = 'qr_site' AND day >= '2026-10-07' AND day < '2026-11-01'
+GROUP BY day ORDER BY day;
 ```
 
 Cap visibility (a day at the configured cap is censored, not a complete count):

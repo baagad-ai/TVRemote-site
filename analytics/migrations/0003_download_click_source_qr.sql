@@ -1,6 +1,6 @@
--- Allows the 'qr' source tag. SQLite cannot alter a CHECK constraint, so this rebuilds
+-- Allows the 'qr' (film QR code) and 'qr_site' (website QR code) source tags. SQLite cannot alter a CHECK constraint, so this rebuilds
 -- download_click_daily_v2 with the same columns, primary key and budget trigger as 0002.
--- Only the source allow-list gains 'qr'. Rows are copied before the trigger is recreated,
+-- Only the source allow-list gains 'qr' and 'qr_site'. Rows are copied before the trigger is recreated,
 -- so the copy does not count against metrics_daily_budget. The table is WITHOUT ROWID with
 -- its primary key as the only index, so there are no other indexes to recreate.
 -- download_click_daily (0001), its trigger and metrics_daily_budget are not touched.
@@ -11,7 +11,7 @@ CREATE TABLE download_click_daily_v2_new (
   release TEXT NOT NULL CHECK (length(release) BETWEEN 1 AND 64 AND release NOT GLOB '*[^A-Za-z0-9._-]*'),
   button TEXT NOT NULL CHECK (button IN ('nav', 'hero', 'footer', 'guide', 'download')),
   platform TEXT NOT NULL CHECK (platform IN ('android', 'ios', 'windows', 'macos', 'linux', 'other')),
-  source TEXT NOT NULL CHECK (source IN ('linkedin', 'x', 'instagram', 'qr', 'none')),
+  source TEXT NOT NULL CHECK (source IN ('linkedin', 'x', 'instagram', 'qr', 'qr_site', 'none')),
   clicks INTEGER NOT NULL CHECK (clicks BETWEEN 1 AND 5000),
   PRIMARY KEY (day, event, release, button, platform, source)
 ) WITHOUT ROWID;

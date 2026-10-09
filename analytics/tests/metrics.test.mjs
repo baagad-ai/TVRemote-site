@@ -205,10 +205,11 @@ test('0002 migration is additive and keeps the remote trigger splitter happy', (
   assert.doesNotMatch(sourceMigration, /\b(DROP|ALTER|RENAME|DELETE|UPDATE\s+download_click_daily\b)/i);
 });
 
-test('source is allow-listed: linkedin, x, instagram, qr (any case); everything else is none', async () => {
-  const f = fixture();
+test('source is allow-listed: linkedin, x, instagram, qr, qr_site (any case); everything else is none', async () => {
+  const f = fixture({ METRICS_PER_MINUTE: '60' }); // more cases than the default 20-per-minute throttle
   const cases = [['linkedin', 'linkedin'], ['X', 'x'], ['Instagram', 'instagram'], [' LinkedIn ', 'linkedin'],
-    ['qr', 'qr'], ['QR', 'qr'], ['qrcode', 'none'], ['q r', 'none'], ['facebook', 'none'], ['', 'none'], ['x'.repeat(40), 'none'], [42, 'none'], [null, 'none'], [['x'], 'none'], [undefined, 'none']];
+    ['qr', 'qr'], ['QR', 'qr'], ['qr_site', 'qr_site'], [' QR_SITE ', 'qr_site'], ['Qr_Site', 'qr_site'],
+    ['qrcode', 'none'], ['q r', 'none'], ['qr-site', 'none'], ['qrsite', 'none'], ['qr_site2', 'none'], ['facebook', 'none'], ['', 'none'], ['x'.repeat(40), 'none'], [42, 'none'], [null, 'none'], [['x'], 'none'], [undefined, 'none']];
   for (const [value, expected] of cases) {
     const body = value === undefined ? click : { ...click, source: value };
     assert.equal(await status(f, request(body)), 204, String(value));
@@ -216,7 +217,7 @@ test('source is allow-listed: linkedin, x, instagram, qr (any case); everything 
   }
   const rows = f.db.prepare('SELECT source, SUM(clicks) AS clicks FROM download_click_daily_v2 GROUP BY source ORDER BY source').all()
     .map(row => [row.source, Number(row.clicks)]);
-  assert.deepEqual(rows, [['instagram', 1], ['linkedin', 2], ['none', 9], ['qr', 2], ['x', 1]]);
+  assert.deepEqual(rows, [['instagram', 1], ['linkedin', 2], ['none', 12], ['qr', 2], ['qr_site', 3], ['x', 1]]);
   // Only source is new: other extra fields are still rejected without a write.
   const before = f.calls.length;
   assert.equal(await status(f, request({ ...click, source: 'x', utm_campaign: 'launch' })), 400);
@@ -253,7 +254,7 @@ test('0003 migration keeps the remote trigger splitter happy', () => {
   assert.doesNotMatch(qrMigration, /\b(DELETE|UPDATE)\s+(FROM\s+)?download_click_daily/i);
 });
 
-test('0003 rebuild keeps every row, the key, the trigger and the budget, and only widens source to qr', () => {
+test('0003 rebuild keeps every row, the key, the trigger and the budget, and only widens source to qr and qr_site', () => {
   const db = new DatabaseSync(':memory:');
   db.exec(migration);
   db.exec(sourceMigration);
@@ -265,8 +266,9 @@ test('0003 rebuild keeps every row, the key, the trigger and the budget, and onl
     for (let i = 0; i < 3; i++) record.run('2026-10-08', 'r1', 'hero', 'android', source, '2026-10-08', 1000);
     record.run('2026-10-09', 'r1', 'nav', 'ios', source, '2026-10-09', 1000);
   }
-  // Before 0003 the database rejects qr.
+  // Before 0003 the database rejects qr and qr_site.
   assert.throws(() => record.run('2026-10-09', 'r1', 'hero', 'android', 'qr', '2026-10-09', 1000), /CHECK/);
+  assert.throws(() => record.run('2026-10-09', 'r1', 'hero', 'android', 'qr_site', '2026-10-09', 1000), /CHECK/);
   const rowsSql = 'SELECT day, event, release, button, platform, source, clicks FROM download_click_daily_v2 ORDER BY day, event, release, button, platform, source';
   const rows = JSON.stringify(db.prepare(rowsSql).all());
   const budget = JSON.stringify(db.prepare('SELECT day, accepted FROM metrics_daily_budget ORDER BY day').all());
@@ -283,10 +285,14 @@ test('0003 rebuild keeps every row, the key, the trigger and the budget, and onl
   // qr is now stored; junk is still rejected by the database itself.
   record.run('2026-10-09', 'r1', 'hero', 'android', 'qr', '2026-10-09', 1000);
   record.run('2026-10-09', 'r1', 'hero', 'android', 'qr', '2026-10-09', 1000);
+  record.run('2026-10-09', 'r1', 'hero', 'android', 'qr_site', '2026-10-09', 1000);
   assert.equal(Number(db.prepare("SELECT clicks FROM download_click_daily_v2 WHERE source = 'qr'").get().clicks), 2);
-  assert.throws(() => record.run('2026-10-09', 'r1', 'hero', 'android', 'facebook', '2026-10-09', 1000), /CHECK/);
+  assert.equal(Number(db.prepare("SELECT clicks FROM download_click_daily_v2 WHERE source = 'qr_site'").get().clicks), 1);
+  for (const junk of ['facebook', 'qr-site', 'qrsite', 'qr_site2']) {
+    assert.throws(() => record.run('2026-10-09', 'r1', 'hero', 'android', junk, '2026-10-09', 1000), /CHECK/, junk);
+  }
   // The recreated trigger still draws on the shared budget and the 5000 hard ceiling.
-  assert.equal(Number(db.prepare("SELECT accepted FROM metrics_daily_budget WHERE day = '2026-10-09'").get().accepted), 6);
+  assert.equal(Number(db.prepare("SELECT accepted FROM metrics_daily_budget WHERE day = '2026-10-09'").get().accepted), 7);
   db.prepare("UPDATE metrics_daily_budget SET accepted = 5000 WHERE day = '2026-10-09'").run();
   const result = record.run('2026-10-09', 'r1', 'hero', 'android', 'qr', '2026-10-09', 999999);
   assert.equal(Number(result.changes), 0);
