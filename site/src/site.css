@@ -43,3 +43,17 @@ body:not([data-route=landing]) .site-header{border-bottom:1px solid var(--line)}
 .pair-detail-phone .native-phone-shell img{aspect-ratio:1080/1420}
 .not-found-main{min-height:min(62vh,640px)}.not-found-main .section-heading>p:not(.eyebrow){margin-top:24px;color:var(--muted)}.not-found-actions{margin-top:40px}
 @media(max-width:740px){.not-found-actions .download-cta{flex-basis:100%}}
+
+/* Desktop-only QR tile (QrHint). Hidden by default; shown only on wide, fine-pointer, hover-capable screens, so phones and touch devices never see it and it needs no JS. */
+.qr-hint{display:none;align-items:center;gap:14px}
+.qr-hint-tile{display:block;flex:none;width:136px;height:136px;border-radius:12px;background:#f1f4e9}
+.qr-hint p{margin:0;white-space:nowrap;font-family:Work Sans,system-ui,sans-serif;font-size:.7rem;line-height:1.45;color:var(--muted)}
+.qr-hint-closing{margin:30px auto 0;width:max-content}
+.qr-hint-closing .qr-hint-tile{box-shadow:0 0 0 1px #18201629}
+.closing-section .qr-hint p{color:#445738}
+@media (min-width:1024px) and (hover:hover) and (pointer:fine){
+.qr-hint{display:flex}
+.hero-actions:has(>.qr-hint){align-items:flex-start}
+.hero-actions .qr-hint{align-self:flex-start}
+.hero-actions:has(>.qr-hint)>.text-link{align-self:flex-start;margin-top:19px}
+}
