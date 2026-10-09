@@ -54,5 +54,5 @@ body:not([data-route=landing]) .site-header{border-bottom:1px solid var(--line)}
 @media(max-width:740px){.phone-story.hero-only .story-chapter{display:flex;padding-block:38px 55px}.pin-beat{display:flex;flex-direction:column;align-items:stretch;gap:36px;padding:60px 20px}.pin-copy{width:min(520px,100%);margin-inline:auto}.pin-copy h2{font-size:clamp(2.6rem,11vw,3.6rem)}.pin-text{font-size:.92rem}.pin-static-phone{width:272px;align-self:center;border-radius:32px;padding:6px}.pin-static-phone img{border-radius:26px}.pin-static-phone.is-card{width:100%}}
 .pin-room-card img,.pin-static-phone img{width:100%;height:auto}.pin-check{bottom:auto;top:41%}
 
-.pin-layer{position:absolute;inset:0}.pin-sheet{will-change:transform,opacity}
+.pin-layer{position:absolute;inset:0}.pin-dim{clip-path:inset(0 0 45.4% 0)}.pin-sheet{clip-path:inset(54.6% 0 0 0);will-change:transform}
 @media(max-width:740px){.pin-beat{padding-bottom:calc(var(--mobile-cta-height) + 50px)}}
