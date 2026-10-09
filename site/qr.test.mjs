@@ -33,7 +33,7 @@ test('committed QR SVG is exactly what the generator produces for QR_URL (error 
 });
 
 test('QR decodes to QR_URL at a large raster and at the 136 px tile size, with a 4-module quiet zone', () => {
-  for (const size of [328, 136]) {
+  for (const size of [328, 123]) {
     const { units, dark, data } = rasterize(svg, size);
     const decoded = jsQR(data, size, size, { inversionAttempts: 'dontInvert' });
     assert.equal(decoded?.data, QR_URL, `decode at ${size}px`);
@@ -47,7 +47,7 @@ test('QR decodes to QR_URL at a large raster and at the 136 px tile size, with a
 test('landing page prerenders the desktop QR tile with an empty alt and a text label, hidden by CSS by default', () => {
   const html = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
   const css = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
-  const hints = [...html.matchAll(/<div class="qr-hint qr-hint-(\w+)" data-qr-spot="\1"><img class="qr-hint-tile" src="assets\/qr-download\.svg" alt="" aria-hidden="true" width="136" height="136"[^>]*\/><p>Scan to get it on your phone\.<\/p><\/div>/g)].map(m => m[1]);
+  const hints = [...html.matchAll(/<div class="qr-hint qr-hint-(\w+)" data-qr-spot="\1"><img class="qr-hint-tile" src="assets\/qr-download\.svg" alt="" aria-hidden="true" width="123" height="123"[^>]*\/><p>Scan to get it on your phone\.<\/p><\/div>/g)].map(m => m[1]);
   assert.deepEqual(hints, ['hero', 'closing'], 'default variant B: hero and closing section');
   assert.match(css, /\.qr-hint\{display:none;/);
   assert.match(css, /@media \(min-width:1024px\) and \(hover:hover\) and \(pointer:fine\)\{\n\.qr-hint\{display:flex\}/);

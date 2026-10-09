@@ -24,7 +24,7 @@ export default function QrHint({ spot }) {
   useEffect(() => { const preview = previewVariant(globalThis.location); if (preview) setVariant(preview); }, []);
   if (!release || !QR_VARIANTS[variant].includes(spot)) return null;
   return <div className={`qr-hint qr-hint-${spot}`} data-qr-spot={spot}>
-    <img className="qr-hint-tile" src="assets/qr-download.svg" alt="" aria-hidden="true" width="136" height="136" loading="lazy" decoding="async" />
+    <img className="qr-hint-tile" src="assets/qr-download.svg" alt="" aria-hidden="true" width="123" height="123" loading="lazy" decoding="async" />
     <p>Scan to get it on your phone.</p>
   </div>;
 }

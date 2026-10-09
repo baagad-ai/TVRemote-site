@@ -46,7 +46,7 @@ body:not([data-route=landing]) .site-header{border-bottom:1px solid var(--line)}
 
 /* Desktop-only QR tile (QrHint). Hidden by default; shown only on wide, fine-pointer, hover-capable screens, so phones and touch devices never see it and it needs no JS. */
 .qr-hint{display:none;align-items:center;gap:14px}
-.qr-hint-tile{display:block;flex:none;width:136px;height:136px;border-radius:12px;background:#f1f4e9}
+.qr-hint-tile{display:block;flex:none;box-sizing:content-box;width:123px;height:123px;padding:6px 7px 7px 6px;border-radius:12px;background:#f1f4e9;image-rendering:pixelated}
 .qr-hint p{margin:0;white-space:nowrap;font-family:Work Sans,system-ui,sans-serif;font-size:.7rem;line-height:1.45;color:var(--muted)}
 .qr-hint-closing{margin:30px auto 0;width:max-content}
 .qr-hint-closing .qr-hint-tile{box-shadow:0 0 0 1px #18201629}

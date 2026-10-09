@@ -11,7 +11,7 @@ export const QR_URL = 'https://theremote-site.pages.dev/?utm_source=qr_site';
 export const QR_QUIET_ZONE = 4;
 export const QR_INK = '#0b0e0d';
 export const QR_PAPER = '#f1f4e9';
-export const QR_TILE_PX = 136;
+export const QR_TILE_PX = 123;
 export const QR_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'assets/qr-download.svg');
 
 /** Ink modules on the paper tile colour, error correction M, a 4-module quiet zone baked into the viewBox. */
