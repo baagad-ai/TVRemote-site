@@ -44,7 +44,7 @@ export default function PinnedStory() {
   useEffect(() => {
     if (!pinned) return;
     const el = root.current, q = s => el.querySelectorAll(s);
-    const copies = q('.pin-copy'), screens = q('.pin-screen'), card = el.querySelector('.pin-room-card'), check = el.querySelector('.pin-check'), sheet = el.querySelector('.pin-sheet');
+    const copies = q('.pin-copy'), screens = q('.pin-screen'), card = el.querySelector('.pin-room-card'), check = el.querySelector('.pin-check'), sheet = el.querySelector('.pin-sheet'), dim = el.querySelector('.pin-dim');
     const tl = gsap.timeline({ defaults: { ease: push, duration: 1 }, scrollTrigger: { trigger: el.querySelector('.pin-track'), start: 'top top', end: 'bottom bottom', scrub: 0.4, onUpdate: self => setActive(Math.min(3, Math.floor(self.progress * 4 + 0.08))) } });
     gsap.set([...copies].slice(1), { autoAlpha: 0, y: 28 }); gsap.set([...screens].slice(1), { autoAlpha: 0, yPercent: 8, scale: 0.96 });
     gsap.set(card, { autoAlpha: 0, yPercent: 40, scale: 0.9 }); gsap.set(check, { autoAlpha: 0, scale: 0 });
@@ -55,7 +55,7 @@ export default function PinnedStory() {
     tl.to({}, { duration: 0.8 }, 0); // read the first beat
     swap(0, 0.8);
     // Commit on the share beat: the sheet slides away to the remote, then a springy check, 0 → 110 → 100 %.
-    tl.to(sheet, { yPercent: 24, autoAlpha: 0, duration: 0.5 }, 1.85);
+    tl.to(sheet, { yPercent: 46, duration: 0.5 }, 1.85).to(dim, { autoAlpha: 0, duration: 0.4 }, 1.9);
     tl.to(check, { autoAlpha: 1, scale: 1, ease: 'back.out(2.2)', duration: 0.45 }, 2.4);
     tl.to(check, { autoAlpha: 0, scale: 0.9, duration: 0.3 }, 3.0);
     swap(1, 3.0);
@@ -63,7 +63,7 @@ export default function PinnedStory() {
     tl.to(screens[2], { scale: 0.9, filter: 'brightness(.45) blur(2px)' }, 4.9).to(card, { autoAlpha: 1, yPercent: 0, scale: 1 }, 4.9);
     tl.to(copies[2], { autoAlpha: 0, y: -28, duration: 0.6 }, 4.9).to(copies[3], { autoAlpha: 1, y: 0, duration: 0.6 }, 5.25);
     tl.to({}, { duration: 0.8 }, 6.0);
-    return () => { tl.scrollTrigger?.kill(); tl.kill(); gsap.set([...copies, ...screens, card, check, sheet], { clearProps: 'all' }); setActive(0); };
+    return () => { tl.scrollTrigger?.kill(); tl.kill(); gsap.set([...copies, ...screens, card, check, sheet, dim], { clearProps: 'all' }); setActive(0); };
   }, [pinned]);
   return <section ref={root} className={`pin-story ${pinned ? 'is-pinned' : ''}`} aria-label="How The Remote works">
     {pinned && beats.map((b, i) => b.id && <span key={b.id} id={b.id} className={`pin-anchor pin-anchor-${i}`} />)}
@@ -77,7 +77,7 @@ export default function PinnedStory() {
         </div>
         {pinned && <div className="pin-phone" aria-hidden="true">
           <div className="pin-phone-shell">{beats.slice(0, 3).map((b, i) => <div className="pin-screen" key={i}>{i === 1
-              ? <><div className="pin-layer"><Shot shot={afterShare} /></div><div className="pin-layer pin-sheet"><Shot shot={b.shot} /></div></>
+              ? <><div className="pin-layer"><Shot shot={afterShare} /></div><div className="pin-layer pin-dim"><Shot shot={b.shot} /></div><div className="pin-layer pin-sheet"><Shot shot={b.shot} /></div></>
               : <Shot shot={b.shot} eager={i === 0} />}</div>)}
             <div className="pin-check"><span>✓</span>Sent to Living Room TV</div>
           </div>
