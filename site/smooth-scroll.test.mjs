@@ -51,3 +51,17 @@ test('SmoothScroll is mounted once and licensed', () => {
   assert.equal(app.match(/<SmoothScroll \/>/g)?.length, 1);
   assert.ok(fs.existsSync(new URL('./licenses/Lenis-LICENSE.txt', import.meta.url)));
 });
+
+test('section-link glides end on time, follow the live target and are not stalled by scene loads', () => {
+  const destination = fs.readFileSync(new URL('./src/Destination.jsx', import.meta.url), 'utf8');
+  const idle = fs.readFileSync(new URL('./src/scroll-idle.js', import.meta.url), 'utf8');
+  // Fixed-duration easing instead of the open-ended lerp tail.
+  assert.match(source, /duration: seconds/);
+  // Re-aimed every tick at the section's live position; a wheel or key takeover ends the glide.
+  assert.match(source, /tick = time => \{ lenis\?\.raf\(time \* 1000\); follow\(\); \}/);
+  assert.match(source, /lenis\.animate\.to !== glide\.to/);
+  // The 3D destination scene waits for the glide (its setup blocks the main thread), with a cap.
+  assert.match(source, /glideStarted\(\)/);
+  assert.match(destination, /await scrollIdle\(\);\n\s+if \(canceled\) return;\n\s+const module = await import\('\.\/destination-runtime'\)/);
+  assert.match(idle, /setTimeout\(glideEnded, 3000\)/);
+});

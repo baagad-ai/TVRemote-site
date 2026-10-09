@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { glideStarted, glideEnded } from './scroll-idle';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,29 +40,49 @@ export default function SmoothScroll() {
     // Unconditional: Lenis' 400 ms velocity timer can report isScrolling false for a frame mid-glide.
     const onKey = event => { if (NATIVE_KEYS.has(event.key)) lenis?.reset(); };
     const onPointer = event => { if (event.clientX >= document.documentElement.clientWidth) lenis?.reset(); };
+    let glide = null; // the section-link glide in flight: { node, hash, to, end }
+    const aim = node => node.getBoundingClientRect().top + scrollY - px(getComputedStyle(node).scrollMarginTop) - px(getComputedStyle(document.documentElement).scrollPaddingTop);
+    const finish = () => { glide = null; glideEnded(); };
+    const glideTo = (to, seconds) => lenis.scrollTo(to, {
+      force: true,
+      // Fixed duration (Lenis' expo-out) instead of the open-ended lerp tail: the glide ends on time.
+      duration: seconds,
+      onComplete: instance => {
+        const { hash } = glide || {};
+        finish();
+        // Same-frame finish with the browser's own fragment navigation (same URL, no new history
+        // entry): exact native landing (at most a sub-2 px correction), :target and focus start point.
+        if (hash) location.replace(hash);
+        instance.reset();
+      },
+    });
+    // Re-aim at the section's live position each frame, so layout changes during the glide
+    // (late images, fonts, scenes) never leave a stale target.
+    const follow = () => {
+      if (!glide) return;
+      // Stopped (key, teardown) or replaced by a wheel glide: the user took over.
+      if (!lenis?.animate.isRunning || lenis.animate.to !== glide.to) { finish(); return; }
+      const to = aim(glide.node);
+      if (Math.abs(Math.max(0, Math.min(to, lenis.limit)) - glide.to) > 1) { lenis.resize(); glideTo(to, Math.max(0.15, (glide.end - performance.now()) / 1000)); glide.to = lenis.animate.to; }
+    };
     const onClick = event => {
       const target = lenis && anchorTarget(event);
       if (!target) return;
       event.preventDefault();
       const { node, hash } = target;
       sync();
-      // Same landing as the native jump: live document position minus scroll-margin/-padding.
-      const top = node.getBoundingClientRect().top + scrollY - px(getComputedStyle(node).scrollMarginTop) - px(getComputedStyle(document.documentElement).scrollPaddingTop);
       // URL updates at click time, like a native fragment link.
       if (location.hash !== hash) history.pushState(null, '', hash);
-      lenis.scrollTo(top, {
-        force: true,
-        onComplete: instance => {
-          // Finish with the browser's own fragment navigation (same URL, so no new history
-          // entry): exact native landing, :target and focus start point, as without Lenis.
-          location.replace(hash);
-          instance.reset();
-        },
-      });
+      const to = aim(node), seconds = Math.min(0.9, 0.45 + Math.abs(to - scrollY) / 8000);
+      glide = { node, hash, to: NaN, end: performance.now() + seconds * 1000 };
+      glideStarted();
+      glideTo(to, seconds);
+      if (glide) glide.to = lenis.animate.to;
+      if (glide && !lenis.animate.isRunning) finish(); // already there
     };
     const stop = () => {
       if (!lenis) return;
-      const dead = lenis; lenis = null;
+      const dead = lenis; lenis = null; finish();
       gsap.ticker.remove(tick); tick = null; gsap.ticker.lagSmoothing(500, 33);
       document.removeEventListener('click', onClick);
       document.removeEventListener('keydown', onKey, true);
@@ -77,7 +98,7 @@ export default function SmoothScroll() {
       if (lenis) return;
       lenis = new Lenis({ autoRaf: false, smoothWheel: true, syncTouch: false, lerp: 0.12, wheelMultiplier: 1, anchors: false });
       lenis.on('scroll', ScrollTrigger.update);
-      tick = time => lenis?.raf(time * 1000);
+      tick = time => { lenis?.raf(time * 1000); follow(); };
       gsap.ticker.add(tick); gsap.ticker.lagSmoothing(0);
       document.addEventListener('click', onClick);
       document.addEventListener('keydown', onKey, true);
