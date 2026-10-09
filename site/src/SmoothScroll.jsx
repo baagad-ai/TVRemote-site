@@ -7,6 +7,7 @@ import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { glideStarted, glideEnded } from './scroll-idle';
+import { createWatchdog } from './scroll-watchdog.mjs';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,10 +38,23 @@ export default function SmoothScroll() {
     // from scroll events, which arrive a frame late and are ignored while it animates.
     // Re-read the real position before anything that depends on it.
     const sync = () => { lenis?.reset(); lenis?.resize(); };
-    // Unconditional: Lenis' 400 ms velocity timer can report isScrolling false for a frame mid-glide.
-    const onKey = event => { if (NATIVE_KEYS.has(event.key)) lenis?.reset(); };
-    const onPointer = event => { if (event.clientX >= document.documentElement.clientWidth) lenis?.reset(); };
     let glide = null; // the section-link glide in flight: { node, hash, to, end }
+    // Stop all Lenis motion and resync it to the real position. reset() (never stop()) leaves
+    // Lenis running, so the next wheel input is smoothed again.
+    const quiet = () => { lenis.reset(); document.documentElement.classList.remove('lenis-scrolling', 'lenis-smooth'); };
+    // Native keys and the scrollbar always win: cancel any link glide and stand Lenis down,
+    // unconditionally (its flags can be stale). The key's default action is left alone.
+    const takeOver = () => { if (!lenis) return; if (glide) finish(); quiet(); };
+    const onKey = event => { if (NATIVE_KEYS.has(event.key)) takeOver(); };
+    const onPointer = event => { if (event.clientX >= document.documentElement.clientWidth) takeOver(); };
+    const stuck = createWatchdog();
+    const watchdog = () => {
+      if (!lenis || !stuck(performance.now(), lenis.isScrolling || document.documentElement.classList.contains('lenis-scrolling'), scrollY, lenis.animatedScroll, glide ? glide.end : -Infinity)) return;
+      const hash = glide?.hash;
+      if (glide) finish();
+      quiet();
+      if (hash) location.replace(hash); // a stuck link glide still lands natively
+    };
     const aim = node => node.getBoundingClientRect().top + scrollY - px(getComputedStyle(node).scrollMarginTop) - px(getComputedStyle(document.documentElement).scrollPaddingTop);
     const finish = () => { glide = null; glideEnded(); };
     const glideTo = (to, seconds) => lenis.scrollTo(to, {
@@ -98,7 +112,11 @@ export default function SmoothScroll() {
       if (lenis) return;
       lenis = new Lenis({ autoRaf: false, smoothWheel: true, syncTouch: false, lerp: 0.12, wheelMultiplier: 1, anchors: false });
       lenis.on('scroll', ScrollTrigger.update);
-      tick = time => { lenis?.raf(time * 1000); follow(); };
+      // Lenis 1.3.26 marks any native scroll event as 'native' scrolling but only arms its
+      // 400 ms clear-out timer when the event moved the page. The zero-delta echo of its own last
+      // write (delivered late after a stall or a reset) therefore left lenis-scrolling stuck.
+      lenis.on('scroll', instance => { if (instance.isScrolling === 'native' && !instance.velocity) instance.isScrolling = false; });
+      tick = time => { lenis?.raf(time * 1000); follow(); watchdog(); };
       gsap.ticker.add(tick); gsap.ticker.lagSmoothing(0);
       document.addEventListener('click', onClick);
       document.addEventListener('keydown', onKey, true);
