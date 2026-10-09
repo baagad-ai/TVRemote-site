@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect } from 'react';
 import { approvedRelease, recordDownloadClick, rememberSource } from './download-metrics.mjs';
 
 const Release = createContext(null);
+export function useRelease() { return useContext(Release); }
 export function DownloadProvider({ config, children }) {
   // Keep an allow-listed utm_source from the landing page so a later page in this tab can send it.
   useEffect(() => { rememberSource(); }, []);

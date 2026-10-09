@@ -2,7 +2,7 @@ const BUTTONS = new Set(['nav', 'hero', 'footer', 'guide', 'download']);
 const PLATFORMS = new Set(['android', 'ios', 'windows', 'macos', 'linux', 'other']);
 const RELEASE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
 // Only these campaign sources are kept; anything else (missing, other, junk) is stored as 'none'.
-export const SOURCES = new Set(['linkedin', 'x', 'instagram']);
+export const SOURCES = new Set(['linkedin', 'x', 'instagram', 'qr', 'qr_site']);
 export function allowedSource(value) {
   if (typeof value !== 'string' || value.length > 32) return 'none';
   const source = value.trim().toLowerCase();
@@ -11,7 +11,7 @@ export function allowedSource(value) {
 const BODY_LIMIT = 1024;
 
 // A single SQLite statement and trigger atomically enforce the shared UTC-day budget.
-// download_click_daily_v2 (migration 0002) adds the source tag; the beta.8 table is left untouched.
+// download_click_daily_v2 (migration 0002, rebuilt by 0003 to allow 'qr' and 'qr_site') adds the source tag; the beta.8 table is left untouched.
 export const RECORD_CLICK_SQL = `
 INSERT INTO download_click_daily_v2 (day, event, release, button, platform, source, clicks)
 SELECT ?, 'apk_download_click', ?, ?, ?, ?, 1

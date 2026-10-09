@@ -8,6 +8,7 @@ import Privacy from './Privacy';
 import NotFound from './NotFound';
 import { GuidesPage, GuidesPreview } from './Guides';
 import faq from './faq.json';
+import QrHint from './QrHint';
 
 export function Header({ privacy = false }) {
   return <header className="site-header page-width"><a className="brand" href={privacy ? '../' : '#top'} aria-label="The Remote, home"><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="32" height="32" /><span>The Remote<span className="brand-period">.</span></span></a><nav aria-label="Main navigation">{privacy ? <a href="../">Home ↗</a> : <><a href="#search-proof">How it works</a><a href="#inside">Your rooms</a><a href="#compatibility">Will it work?</a><a href="guides/">Guides</a></>}</nav>{!privacy && <DownloadLink button="nav" className="header-cta text-link" />}</header>;
@@ -22,7 +23,7 @@ function Questions() {
   return <section className="questions-section page-width" id="faq" aria-labelledby="faq-title"><div><p className="eyebrow">Questions, answered</p><h2 id="faq-title">Before the<br />first click.</h2></div><div className="faq-list">{faq.map(item => <details key={item.q}><summary>{item.q}</summary><p>{item.a}</p></details>)}</div></section>;
 }
 function Closing() {
-  return <section className="closing-section"><div className="page-width"><p className="eyebrow">Ready when you are</p><h2>A better remote.<br />Already in your pocket.</h2><DownloadLink button="footer" /><p className="fine-print">Free Android APK. No ads. No account.</p></div></section>;
+  return <section className="closing-section"><div className="page-width"><p className="eyebrow">Ready when you are</p><h2>A better remote.<br />Already in your pocket.</h2><DownloadLink button="footer" /><QrHint spot="closing" /><p className="fine-print">Free Android APK. No ads. No account.</p></div></section>;
 }
 function MobileCta() {
   const ref = useRef(null), [visible, setVisible] = useState(false), { ready } = useEnvironment();
