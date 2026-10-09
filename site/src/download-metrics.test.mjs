@@ -54,11 +54,17 @@ test('privacy signals suppress click telemetry without affecting the download', 
 });
 
 function memoryStorage() { const map = new Map(); return { getItem: k => map.get(k) ?? null, setItem: (k, v) => map.set(k, String(v)) }; }
-test('client source allow-list: linkedin, x, instagram in any case; junk and missing send nothing', () => {
+test('client source allow-list: linkedin, x, instagram, qr, qr_site in any case; junk and missing send nothing', () => {
   assert.equal(allowedSource('linkedin'), 'linkedin');
   assert.equal(allowedSource('X'), 'x');
   assert.equal(allowedSource('INSTAGRAM'), 'instagram');
-  for (const value of ['facebook', '', null, undefined, 42, 'linkedin.com', 'x'.repeat(40)]) assert.equal(allowedSource(value), null);
+  assert.equal(allowedSource('qr'), 'qr');
+  assert.equal(allowedSource('QR'), 'qr');
+  assert.equal(allowedSource(' Qr '), 'qr');
+  assert.equal(allowedSource('qr_site'), 'qr_site');
+  assert.equal(allowedSource('QR_SITE'), 'qr_site');
+  assert.equal(allowedSource(' Qr_Site '), 'qr_site');
+  for (const value of ['facebook', '', null, undefined, 42, 'linkedin.com', 'x'.repeat(40), 'qrcode', 'qr-code', 'q r', 'qr-site', 'qrsite', 'qr_site2']) assert.equal(allowedSource(value), null);
 });
 test('utm_source is kept for the tab and only an allow-listed value is sent', () => {
   const sessionStorage = memoryStorage();
@@ -73,6 +79,17 @@ test('utm_source is kept for the tab and only an allow-listed value is sent', ()
   assert.deepEqual(Object.keys(sent.at(-1)).sort(), ['button', 'event', 'platform', 'release', 'source']);
   assert.equal(sent.at(-1).source, 'linkedin');
   assert.equal(currentSource({ location: { search: '' }, sessionStorage: memoryStorage() }), null);
+  // A QR code landing (utm_source=QR) is kept and sent as qr, like the social sources.
+  const qrSent = [];
+  const qrEnv = (search, sessionStorage) => ({ location: { search }, sessionStorage, navigator: { platform: 'Linux armv8l', userAgent: 'Android 15' }, fetch: (url, init) => { qrSent.push(JSON.parse(init.body)); return Promise.resolve(); } });
+  const qrStorage = memoryStorage();
+  recordDownloadClick(release, 'hero', qrEnv('?utm_source=QR&utm_medium=print', qrStorage));
+  recordDownloadClick(release, 'download', qrEnv('', qrStorage));
+  assert.deepEqual(qrSent.map(event => event.source), ['qr', 'qr']);
+  // The website's own QR tile (utm_source=qr_site) stays separate from the film's qr.
+  const siteStorage = memoryStorage();
+  recordDownloadClick(release, 'hero', qrEnv('?utm_source=qr_site', siteStorage));
+  assert.equal(qrSent.at(-1).source, 'qr_site');
   // No storage or location at all: the click still goes out without a source.
   const bare = [];
   recordDownloadClick(release, 'hero', { navigator: {}, fetch: (u, init) => { bare.push(JSON.parse(init.body)); return Promise.resolve(); } });

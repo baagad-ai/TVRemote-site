@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import SplitText from './components/SplitText';
 import { useEnvironment } from './environment';
 import { DownloadLink } from './Download';
+import QrHint from './QrHint';
 
 const shots = [
   ['assets/showcase/remote-home.png', 'The Remote on an Android phone: Living Room TV connected, with a D-pad, volume keys and a Search YouTube button.', 'App screen · Living Room TV'],
@@ -37,7 +38,7 @@ export default function PhoneStory({ Destination, heroOnly = false }) {
     <div className="story-grid page-width">
       <div className="story-chapters">
         <section className="story-chapter hero" id="search-proof" data-chapter="0" aria-labelledby="hero-title">
-          <div className="chapter-copy"><div className="hero-heading"><p className="eyebrow"><span className="status-dot" />The phone remote for Android TV + Google TV</p><SplitText id="hero-title" tag="h1" text="Skip the TV keyboard on YouTube." className="hero-title" textAlign="left" splitType="words" enabled={motion} delay={70} duration={.75} from={{ opacity: 1, y: 20 }} to={{ opacity: 1, y: 0 }} rootMargin="0px" /><p className="hero-lede">Search YouTube on your phone.<br />Watch it on your TV.</p></div><div className="hero-followthrough"><p className="chapter-description">A full keyboard for YouTube searches. A quick way to share a link. Your TVs, organized by room.</p><div className="hero-actions"><StoryCta /><a className="text-link" href="#share-story">See how it works <span aria-hidden="true">↓</span></a></div><p className="hero-note">Free Android APK. No ads. No account.</p><a className="chapter-guide text-link" href="guides/search-youtube-tv-android-phone/">How YouTube search works ↗</a><p className="fine-print chapter-limit">Search support depends on your TV and its YouTube version.</p></div></div>
+          <div className="chapter-copy"><div className="hero-heading"><p className="eyebrow"><span className="status-dot" />The phone remote for Android TV + Google TV</p><SplitText id="hero-title" tag="h1" text="Skip the TV keyboard on YouTube." className="hero-title" textAlign="left" splitType="words" enabled={motion} delay={70} duration={.75} from={{ opacity: 1, y: 20 }} to={{ opacity: 1, y: 0 }} rootMargin="0px" /><p className="hero-lede">Search YouTube on your phone.<br />Watch it on your TV.</p></div><div className="hero-followthrough"><p className="chapter-description">A full keyboard for YouTube searches. A quick way to share a link. Your TVs, organized by room.</p><div className="hero-actions"><StoryCta /><QrHint spot="hero" /><a className="text-link" href="#share-story">See how it works <span aria-hidden="true">↓</span></a></div><p className="hero-note">Free Android APK. No ads. No account.</p><a className="chapter-guide text-link" href="guides/search-youtube-tv-android-phone/">How YouTube search works ↗</a><p className="fine-print chapter-limit">Search support depends on your TV and its YouTube version.</p></div></div>
           <NativePhone className="inline-proof" priority />
         </section>
         {!heroOnly && <><section className="story-chapter share-section" id="share-story" data-chapter="1" aria-labelledby="share-title">

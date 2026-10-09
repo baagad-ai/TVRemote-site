@@ -8,7 +8,8 @@
     "build:pages:production": "node site/build-pages.mjs --production",
     "build:github-transition": "node site/build-github-transition.mjs",
     "build:scene": "node site/build-react.mjs",
-    "test": "node --test --test-isolation=none site/deployment-config.test.mjs site/not-found.test.mjs site/smooth-scroll.test.mjs site/redirects.test.mjs site/src/download-metrics.test.mjs site/beta-request.test.mjs worker/test/*.test.mjs analytics/tests/*.test.mjs"
+    "build:qr": "node site/build-qr.mjs",
+    "test": "node --test --test-isolation=none site/deployment-config.test.mjs site/not-found.test.mjs site/smooth-scroll.test.mjs site/redirects.test.mjs site/src/download-metrics.test.mjs site/beta-request.test.mjs site/qr.test.mjs worker/test/*.test.mjs analytics/tests/*.test.mjs"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",
@@ -21,6 +22,8 @@
     "three": "0.186.1"
   },
   "devDependencies": {
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "jsqr": "1.4.0",
+    "qrcode": "1.5.4"
   }
 }
