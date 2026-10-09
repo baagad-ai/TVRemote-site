@@ -12,7 +12,7 @@ Pinned revision: `ca44b3f9ee180676a06d7de8ec6bea84cddff85b`. React Bits uses its
 - [SplitText.jsx](https://raw.githubusercontent.com/DavidHDev/react-bits/ca44b3f9ee180676a06d7de8ec6bea84cddff85b/src/content/TextAnimations/SplitText/SplitText.jsx), original SHA-256 `b772eacd09785760df08b9132414f7819a6aae2aa2a05c9e6c6df83491fd9e4c`.
 - [ScrollStack.jsx](https://raw.githubusercontent.com/DavidHDev/react-bits/ca44b3f9ee180676a06d7de8ec6bea84cddff85b/src/content/Components/ScrollStack/ScrollStack.jsx), original SHA-256 `400d3d98f5d09e118b1e24939924655a6ed2a9894a92b6deace3d3398d891933`.
 
-LightRays keeps the upstream shader and OGL renderer, with a shared GPU lease, visibility gates, owned cleanup and failure fallback. SplitText uses the upstream GSAP splitting and entrance, preserves the semantic H1, and restores unsplit text for reduced motion. ScrollStack retains upstream progress, scaling and pin-release behavior, uses native scrolling instead of Lenis, and switches to ordinary document flow on narrow or short viewports and keyboard focus.
+LightRays keeps the upstream shader and OGL renderer, with a shared GPU lease, visibility gates, owned cleanup and failure fallback. SplitText uses the upstream GSAP splitting and entrance, preserves the semantic H1, and restores unsplit text for reduced motion. ScrollStack retains upstream progress, scaling and pin-release behavior, reads the window scroll position that the site-wide Lenis drives on desktop (native scrolling elsewhere), and switches to ordinary document flow on narrow or short viewports and keyboard focus.
 
 ## Magic UI
 
@@ -40,3 +40,6 @@ Three.js loads the same-origin GLBs lazily, with an official RoomEnvironment/PMR
 ## Screenshots and articles
 
 The six native PNGs are unchanged from the published baseline; see [SHOWCASE-PROVENANCE.md](SHOWCASE-PROVENANCE.md). Six public article bodies and primary-source links came from The Remote Blog and Search Launch Kit. Internal keyword plans, editorial reviews and launch notes are excluded. Source-review dates are identified as such; the site does not invent a personal author, test date or TV playback result.
+
+
+Lenis 1.3.26 (MIT, darkroom.engineering) is bundled into `runtime/` from npm for desktop wheel and trackpad smoothing only. It is never created for touch-first devices or under reduced motion. Notice: `licenses/Lenis-LICENSE.txt`.

@@ -43,3 +43,6 @@ body:not([data-route=landing]) .site-header{border-bottom:1px solid var(--line)}
 .pair-detail-phone .native-phone-shell img{aspect-ratio:1080/1420}
 .not-found-main{min-height:min(62vh,640px)}.not-found-main .section-heading>p:not(.eyebrow){margin-top:24px;color:var(--muted)}.not-found-actions{margin-top:40px}
 @media(max-width:740px){.not-found-actions .download-cta{flex-basis:100%}}
+
+/* Lenis (MIT): desktop wheel smoothing only. */
+html.lenis,html.lenis body{height:auto}.lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}.lenis [data-lenis-prevent]{overscroll-behavior:contain}.lenis.lenis-smooth iframe{pointer-events:none}

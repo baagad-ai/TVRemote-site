@@ -8,11 +8,12 @@
     "build:pages:production": "node site/build-pages.mjs --production",
     "build:github-transition": "node site/build-github-transition.mjs",
     "build:scene": "node site/build-react.mjs",
-    "test": "node --test --test-isolation=none site/deployment-config.test.mjs site/not-found.test.mjs site/redirects.test.mjs site/src/download-metrics.test.mjs site/beta-request.test.mjs worker/test/*.test.mjs analytics/tests/*.test.mjs"
+    "test": "node --test --test-isolation=none site/deployment-config.test.mjs site/not-found.test.mjs site/smooth-scroll.test.mjs site/redirects.test.mjs site/src/download-metrics.test.mjs site/beta-request.test.mjs worker/test/*.test.mjs analytics/tests/*.test.mjs"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",
     "gsap": "3.15.0",
+    "lenis": "1.3.26",
     "motion": "14.0.0",
     "ogl": "1.0.11",
     "react": "19.3.0",

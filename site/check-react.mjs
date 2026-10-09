@@ -76,7 +76,7 @@ const contract=JSON.parse(read('assets/3d/room-destinations-contract.json'));
 const sizes=fs.readdirSync(path.join(root,'runtime')).map(name=>({name,gzip:gzipSync(fs.readFileSync(path.join(root,'runtime',name)),{level:9}).length}));
 assert(sizes.find(x=>x.name==='app.js').gzip<240000,'Initial runtime budget');
 assert(sizes.filter(x=>x.name!=='app.js').every(x=>x.gzip<240000),'Lazy runtime budget');
-for(const name of ['ReactBits-LICENSE.md','MagicUI-LICENSE.md','React-LICENSE.txt','ReactDOM-LICENSE.txt','Motion-LICENSE.md','Three-LICENSE.txt','OGL-LICENSE.txt','GSAP-LICENSE-NOTICE.txt'])assert(fs.existsSync(path.join(root,'licenses',name)));
+for(const name of ['ReactBits-LICENSE.md','MagicUI-LICENSE.md','React-LICENSE.txt','ReactDOM-LICENSE.txt','Motion-LICENSE.md','Three-LICENSE.txt','OGL-LICENSE.txt','GSAP-LICENSE-NOTICE.txt','Lenis-LICENSE.txt'])assert(fs.existsSync(path.join(root,'licenses',name)));
 assert.equal((read('sitemap.xml').match(/<loc>/g)||[]).length,9);
 assert(!read('sitemap.xml').includes('baagad-ai.github.io'));
 assert(read('robots.txt').includes(`Sitemap: ${canonical}sitemap.xml`));
