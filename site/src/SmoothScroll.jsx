@@ -36,8 +36,9 @@ export default function SmoothScroll() {
     // from scroll events, which arrive a frame late and are ignored while it animates.
     // Re-read the real position before anything that depends on it.
     const sync = () => { lenis?.reset(); lenis?.resize(); };
-    const onKey = event => { if (lenis?.isScrolling && NATIVE_KEYS.has(event.key)) lenis.reset(); };
-    const onPointer = event => { if (lenis?.isScrolling && event.clientX >= document.documentElement.clientWidth) lenis.reset(); };
+    // Unconditional: Lenis' 400 ms velocity timer can report isScrolling false for a frame mid-glide.
+    const onKey = event => { if (NATIVE_KEYS.has(event.key)) lenis?.reset(); };
+    const onPointer = event => { if (event.clientX >= document.documentElement.clientWidth) lenis?.reset(); };
     const onClick = event => {
       const target = lenis && anchorTarget(event);
       if (!target) return;

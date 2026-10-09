@@ -37,6 +37,8 @@ test('native keyboard, focus and scrollbar scrolling stop Lenis animation', () =
   for (const key of ['Tab', 'Home', 'End', 'PageUp', 'PageDown']) assert.ok(source.includes(`'${key}'`), key);
   assert.match(source, /addEventListener\('keydown', onKey, true\)/);
   assert.match(source, /removeEventListener\('keydown', onKey, true\)/);
+  // Not gated on lenis.isScrolling: Lenis' velocity timer can clear it for a frame mid-glide.
+  assert.match(source, /if \(NATIVE_KEYS\.has\(event\.key\)\) lenis\?\.reset\(\)/);
 });
 
 test('reduced-motion teardown cannot be undone by Lenis timers', () => {
