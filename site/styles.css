@@ -62,8 +62,8 @@ html.lenis,html.lenis body{height:auto}.lenis:not(.lenis-autoToggle).lenis-stopp
 
 /* Desktop-only QR tile (QrHint). Hidden by default; shown only on wide, fine-pointer, hover-capable screens, so phones and touch devices never see it and it needs no JS. */
 .qr-hint{display:none;flex-direction:column;align-items:center;gap:10px;text-align:center}
-.qr-hint-tile{display:block;flex:none;box-sizing:content-box;width:123px;height:123px;padding:6px 7px 7px 6px;border-radius:12px;background:#f1f4e9;image-rendering:pixelated;box-shadow:0 0 0 1px #0b0e0d38}
-.qr-hint p{margin:0;white-space:nowrap;font-family:Work Sans,system-ui,sans-serif;font-size:13px;line-height:1.4;color:#0b0e0db3}.qr-hint-hero p{white-space:normal;max-width:140px}
+.qr-hint-tile{display:block;flex:none;box-sizing:content-box;width:123px;height:123px;padding:6px 7px 7px 6px;background:none;image-rendering:pixelated}
+.qr-hint p{margin:0;white-space:nowrap;font-family:Work Sans,system-ui,sans-serif;font-size:13px;line-height:1.4;color:#0b0e0db3}.qr-hint-hero p{white-space:normal;max-width:150px}
 .qr-hint-closing{margin:30px auto 0;width:max-content;flex-direction:column;justify-content:center;gap:10px;text-align:center}
 @media (min-width:1024px) and (hover:hover) and (pointer:fine){
 .qr-hint{display:flex}

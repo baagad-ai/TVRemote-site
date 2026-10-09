@@ -10,7 +10,8 @@ import QRCode from 'qrcode';
 export const QR_URL = 'https://theremote-site.pages.dev/?utm_source=qr_site';
 export const QR_QUIET_ZONE = 4;
 export const QR_INK = '#0b0e0d';
-export const QR_PAPER = '#f1f4e9';
+// Transparent: modules sit directly on the hero background (#eeeee6); the quiet zone is empty space.
+export const QR_PAPER = '#eeeee6';
 export const QR_TILE_PX = 123;
 export const QR_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'assets/qr-download.svg');
 
@@ -28,7 +29,7 @@ export function qrSvg(url = QR_URL) {
       x += run - 1;
     }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" width="${QR_TILE_PX}" height="${QR_TILE_PX}" shape-rendering="crispEdges"><rect width="${total}" height="${total}" fill="${QR_PAPER}"/><path fill="${QR_INK}" d="${d}"/></svg>\n`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" width="${QR_TILE_PX}" height="${QR_TILE_PX}" shape-rendering="crispEdges"><path fill="${QR_INK}" d="${d}"/></svg>\n`;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
