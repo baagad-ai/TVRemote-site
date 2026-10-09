@@ -3,7 +3,7 @@ import { useRelease } from './Download';
 
 // Placement variants under review: A = hero only, B = hero + closing section, C = closing section only.
 // Change this one constant to pick the production placement.
-export const QR_DEFAULT_VARIANT = 'B';
+export const QR_DEFAULT_VARIANT = 'A';
 export const QR_VARIANTS = { A: ['hero'], B: ['hero', 'closing'], C: ['closing'] };
 
 // Preview/dev only: ?qrspot=A|B|C switches the variant after hydration on local or preview hosts.

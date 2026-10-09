@@ -10,7 +10,7 @@ const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
 // Rasterizes the committed SVG from its own markup (one paper rect, one path of axis-aligned module runs).
 function rasterize(text, outputPx) {
   const units = Number(text.match(/viewBox="0 0 (\d+) \1"/)[1]);
-  const paper = rgb(text.match(/<rect [^>]*fill="(#[0-9a-f]{6})"/)[1]);
+  const paper = rgb((text.match(/<rect [^>]*fill="(#[0-9a-f]{6})"/) || [, QR_PAPER])[1]);
   const ink = rgb(text.match(/<path fill="(#[0-9a-f]{6})"/)[1]);
   const dark = Array.from({ length: units }, () => new Uint8Array(units));
   for (const [, x, y, run] of text.match(/ d="([^"]+)"/)[1].matchAll(/M(\d+) (\d+)h(\d+)v1h-\3z/g)) {
@@ -29,7 +29,7 @@ test('committed QR SVG is exactly what the generator produces for QR_URL (error 
   assert.equal(QR_URL, 'https://theremote-site.pages.dev/?utm_source=qr_site');
   assert.doesNotMatch(svg, /<script|<image|href=|xlink|<text/i, 'static vector modules only');
   assert.equal(QR_INK, '#0b0e0d');
-  assert.equal(QR_PAPER, '#f1f4e9');
+  assert.equal(QR_PAPER, '#eeeee6'); assert.ok(!svg.includes('<rect'), 'transparent: no background rect');
 });
 
 test('QR decodes to QR_URL at a large raster and at the 136 px tile size, with a 4-module quiet zone', () => {
@@ -48,7 +48,7 @@ test('landing page prerenders the desktop QR tile with an empty alt and a text l
   const html = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
   const css = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
   const hints = [...html.matchAll(/<div class="qr-hint qr-hint-(\w+)" data-qr-spot="\1"><img class="qr-hint-tile" src="assets\/qr-download\.svg" alt="" aria-hidden="true" width="123" height="123"[^>]*\/><p>Scan to get it on your phone\.<\/p><\/div>/g)].map(m => m[1]);
-  assert.deepEqual(hints, ['hero', 'closing'], 'default variant B: hero and closing section');
+  assert.deepEqual(hints, ['hero'], 'Baagad picked A: hero only');
   assert.match(css, /\.qr-hint\{display:none;/);
   assert.match(css, /@media \(min-width:1024px\) and \(hover:hover\) and \(pointer:fine\)\{\n\.qr-hint\{display:flex\}/);
   for (const route of ['privacy/index.html', 'guides/index.html', '404.html']) {
