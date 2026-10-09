@@ -7,6 +7,7 @@ import Privacy from './Privacy';
 import NotFound from './NotFound';
 import { GuidesPage, GuidesPreview } from './Guides';
 import faq from './faq.json';
+import SmoothScroll from './SmoothScroll';
 
 export function Header({ privacy = false }) {
   return <header className="site-header page-width"><a className="brand" href={privacy ? '../' : '#top'} aria-label="The Remote, home"><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="32" height="32" /><span>The Remote<span className="brand-period">.</span></span></a><nav aria-label="Main navigation">{privacy ? <a href="../">Home ↗</a> : <><a href="#search-proof">How it works</a><a href="#inside">Your rooms</a><a href="#compatibility">Will it work?</a><a href="guides/">Guides</a></>}</nav>{!privacy && <DownloadLink button="nav" className="header-cta text-link" />}</header>;
@@ -46,4 +47,4 @@ function MobileCta() {
   return <div ref={ref} className={`mobile-cta-bar ${visible ? 'is-visible' : ''}`} data-mobile-cta-bar aria-hidden={!visible} inert={!visible}><DownloadLink button="footer" /><span>Free Android APK. No ads. No account.</span></div>;
 }
 function Landing({ config }) { return <><Header /><main id="main" tabIndex={-1}><PhoneStory Destination={Destination} /><ControlsProof /><Compatibility /><Download /><GuidesPreview /><Questions /><Closing /></main><Footer /><MobileCta /></>; }
-export default function App({ route = 'landing', config }) { return <EnvironmentProvider><DownloadProvider config={config}><a className="skip-link" href="#main">Skip to content</a>{route === 'not-found' ? <NotFound config={config} /> : route === 'privacy' ? <Privacy /> : route.startsWith('guides') ? <GuidesPage slug={route.split('/')[1]} /> : <Landing config={config} />}</DownloadProvider></EnvironmentProvider>; }
+export default function App({ route = 'landing', config }) { return <EnvironmentProvider><SmoothScroll /><DownloadProvider config={config}><a className="skip-link" href="#main">Skip to content</a>{route === 'not-found' ? <NotFound config={config} /> : route === 'privacy' ? <Privacy /> : route.startsWith('guides') ? <GuidesPage slug={route.split('/')[1]} /> : <Landing config={config} />}</DownloadProvider></EnvironmentProvider>; }

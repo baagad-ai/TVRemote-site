@@ -1,6 +1,8 @@
 // Website-specific adaptation of React Bits ScrollStack at ca44b3f.
 // Retains its progress, scale, pin/release and transform-cache algorithm;
-// replaces Lenis with native scrolling. Full notice: ../../licenses/ReactBits-LICENSE.md.
+// reads the window scroll position, which the site-wide Lenis (../SmoothScroll.jsx) drives
+// on desktop, so it follows smooth scrolling there and native scrolling elsewhere.
+// Full notice: ../../licenses/ReactBits-LICENSE.md.
 import { useEffect, useRef } from 'react';
 import { useEnvironment } from '../environment';
 
