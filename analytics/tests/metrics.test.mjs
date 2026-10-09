@@ -6,6 +6,7 @@ import { createMetricsHandler, RECORD_CLICK_SQL } from '../../functions/api/metr
 
 const migration = readFileSync(new URL('../migrations/0001_download_clicks.sql', import.meta.url), 'utf8');
 const sourceMigration = readFileSync(new URL('../migrations/0002_download_click_source.sql', import.meta.url), 'utf8');
+const qrMigration = readFileSync(new URL('../migrations/0003_download_click_source_qr.sql', import.meta.url), 'utf8');
 const origin = 'https://tvremote.pages.dev';
 const click = { event: 'apk_download_click', release: 'v1.2.3-security', button: 'hero', platform: 'android' };
 const initialTime = Date.parse('2026-10-07T12:00:00Z');
@@ -24,6 +25,7 @@ function fixture(overrides = {}) {
   const db = new DatabaseSync(':memory:');
   db.exec(migration);
   db.exec(sourceMigration);
+  db.exec(qrMigration);
   const calls = [];
   const env = {
     METRICS_ENABLED: 'true', METRICS_ALLOWED_ORIGINS: origin,
@@ -203,10 +205,10 @@ test('0002 migration is additive and keeps the remote trigger splitter happy', (
   assert.doesNotMatch(sourceMigration, /\b(DROP|ALTER|RENAME|DELETE|UPDATE\s+download_click_daily\b)/i);
 });
 
-test('source is allow-listed: linkedin, x, instagram (any case); everything else is none', async () => {
+test('source is allow-listed: linkedin, x, instagram, qr (any case); everything else is none', async () => {
   const f = fixture();
   const cases = [['linkedin', 'linkedin'], ['X', 'x'], ['Instagram', 'instagram'], [' LinkedIn ', 'linkedin'],
-    ['facebook', 'none'], ['', 'none'], ['x'.repeat(40), 'none'], [42, 'none'], [null, 'none'], [['x'], 'none'], [undefined, 'none']];
+    ['qr', 'qr'], ['QR', 'qr'], ['qrcode', 'none'], ['q r', 'none'], ['facebook', 'none'], ['', 'none'], ['x'.repeat(40), 'none'], [42, 'none'], [null, 'none'], [['x'], 'none'], [undefined, 'none']];
   for (const [value, expected] of cases) {
     const body = value === undefined ? click : { ...click, source: value };
     assert.equal(await status(f, request(body)), 204, String(value));
@@ -214,7 +216,7 @@ test('source is allow-listed: linkedin, x, instagram (any case); everything else
   }
   const rows = f.db.prepare('SELECT source, SUM(clicks) AS clicks FROM download_click_daily_v2 GROUP BY source ORDER BY source').all()
     .map(row => [row.source, Number(row.clicks)]);
-  assert.deepEqual(rows, [['instagram', 1], ['linkedin', 2], ['none', 7], ['x', 1]]);
+  assert.deepEqual(rows, [['instagram', 1], ['linkedin', 2], ['none', 9], ['qr', 2], ['x', 1]]);
   // Only source is new: other extra fields are still rejected without a write.
   const before = f.calls.length;
   assert.equal(await status(f, request({ ...click, source: 'x', utm_campaign: 'launch' })), 400);
@@ -238,4 +240,75 @@ DO UPDATE SET clicks = clicks + 1`;
   assert.equal(Number(db.prepare('SELECT clicks FROM download_click_daily_v2').get().clicks), 1);
   // Both tables draw on the one shared daily budget (seed row + legacy + v2).
   assert.equal(Number(db.prepare("SELECT accepted FROM metrics_daily_budget WHERE day = '2026-10-07'").get().accepted), 3);
+});
+
+test('0003 migration keeps the remote trigger splitter happy', () => {
+  assert.equal(qrMigration.includes('\r'), false, 'D1 migration SQL must use LF');
+  assert.match(qrMigration, /CREATE TRIGGER[^;]+\nBEGIN\n/);
+  assert.equal((qrMigration.match(/\bEND\b/g) || []).length, 1, 'Avoid nested CASE END in the trigger splitter');
+  assert.equal(qrMigration.split('\n').some(line => line.startsWith('--') && line.includes(';')), false,
+    'No semicolons in comments: the remote splitter cuts statements on them');
+  // Only the v2 table is rebuilt; the beta.8 table and the shared budget are never dropped or altered.
+  assert.doesNotMatch(qrMigration, /\b(DROP|ALTER)\s+TABLE\s+(download_click_daily|metrics_daily_budget)\b(?!_v2)/i);
+  assert.doesNotMatch(qrMigration, /\b(DELETE|UPDATE)\s+(FROM\s+)?download_click_daily/i);
+});
+
+test('0003 rebuild keeps every row, the key, the trigger and the budget, and only widens source to qr', () => {
+  const db = new DatabaseSync(':memory:');
+  db.exec(migration);
+  db.exec(sourceMigration);
+  const schemaOf = () => db.prepare("SELECT type, name, tbl_name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name").all()
+    .map(row => `${row.type}:${row.name}:${row.tbl_name}`);
+  const before = schemaOf();
+  const record = db.prepare(RECORD_CLICK_SQL);
+  for (const source of ['linkedin', 'x', 'instagram', 'none']) {
+    for (let i = 0; i < 3; i++) record.run('2026-10-08', 'r1', 'hero', 'android', source, '2026-10-08', 1000);
+    record.run('2026-10-09', 'r1', 'nav', 'ios', source, '2026-10-09', 1000);
+  }
+  // Before 0003 the database rejects qr.
+  assert.throws(() => record.run('2026-10-09', 'r1', 'hero', 'android', 'qr', '2026-10-09', 1000), /CHECK/);
+  const rowsSql = 'SELECT day, event, release, button, platform, source, clicks FROM download_click_daily_v2 ORDER BY day, event, release, button, platform, source';
+  const rows = JSON.stringify(db.prepare(rowsSql).all());
+  const budget = JSON.stringify(db.prepare('SELECT day, accepted FROM metrics_daily_budget ORDER BY day').all());
+  db.exec(qrMigration);
+  assert.equal(JSON.stringify(db.prepare(rowsSql).all()), rows, 'every row and count survives the rebuild');
+  assert.equal(JSON.stringify(db.prepare('SELECT day, accepted FROM metrics_daily_budget ORDER BY day').all()), budget,
+    'copying rows does not touch the daily budget');
+  assert.deepEqual(schemaOf(), before, 'same tables, triggers and indexes; no leftover _new table');
+  const sql = db.prepare("SELECT sql FROM sqlite_master WHERE name = 'download_click_daily_v2'").get().sql;
+  assert.match(sql, /WITHOUT ROWID/);
+  assert.match(sql, /PRIMARY KEY \(day, event, release, button, platform, source\)/);
+  assert.match(db.prepare("SELECT sql FROM sqlite_master WHERE name = 'download_click_v2_budget'").get().sql,
+    /BEFORE INSERT ON download_click_daily_v2/);
+  // qr is now stored; junk is still rejected by the database itself.
+  record.run('2026-10-09', 'r1', 'hero', 'android', 'qr', '2026-10-09', 1000);
+  record.run('2026-10-09', 'r1', 'hero', 'android', 'qr', '2026-10-09', 1000);
+  assert.equal(Number(db.prepare("SELECT clicks FROM download_click_daily_v2 WHERE source = 'qr'").get().clicks), 2);
+  assert.throws(() => record.run('2026-10-09', 'r1', 'hero', 'android', 'facebook', '2026-10-09', 1000), /CHECK/);
+  // The recreated trigger still draws on the shared budget and the 5000 hard ceiling.
+  assert.equal(Number(db.prepare("SELECT accepted FROM metrics_daily_budget WHERE day = '2026-10-09'").get().accepted), 6);
+  db.prepare("UPDATE metrics_daily_budget SET accepted = 5000 WHERE day = '2026-10-09'").run();
+  const result = record.run('2026-10-09', 'r1', 'hero', 'android', 'qr', '2026-10-09', 999999);
+  assert.equal(Number(result.changes), 0);
+  assert.equal(Number(db.prepare("SELECT clicks FROM download_click_daily_v2 WHERE source = 'qr'").get().clicks), 2);
+  db.close();
+});
+
+test('rollback safety after 0003: beta.8 and pre-qr statements still write', () => {
+  const db = new DatabaseSync(':memory:');
+  db.exec(migration);
+  db.exec(sourceMigration);
+  db.exec(qrMigration);
+  const legacy = `INSERT INTO download_click_daily (day, event, release, button, platform, clicks)
+SELECT ?, 'apk_download_click', ?, ?, ?, 1
+WHERE COALESCE((SELECT accepted FROM metrics_daily_budget WHERE day = ?), 0) < ?
+ON CONFLICT (day, event, release, button, platform)
+DO UPDATE SET clicks = clicks + 1`;
+  db.prepare(legacy).run('2026-10-09', 'r1', 'hero', 'android', '2026-10-09', 1000);
+  // The previous deployment's statement is byte-identical to RECORD_CLICK_SQL (same table name and conflict target).
+  db.prepare(RECORD_CLICK_SQL).run('2026-10-09', 'r1', 'hero', 'android', 'instagram', '2026-10-09', 1000);
+  assert.equal(Number(db.prepare('SELECT clicks FROM download_click_daily').get().clicks), 1);
+  assert.equal(Number(db.prepare('SELECT clicks FROM download_click_daily_v2').get().clicks), 1);
+  assert.equal(Number(db.prepare("SELECT accepted FROM metrics_daily_budget WHERE day = '2026-10-09'").get().accepted), 2);
+  db.close();
 });

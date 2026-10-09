@@ -1,6 +1,6 @@
 const buttons = new Set(['nav', 'hero', 'footer', 'guide', 'download']);
 // The only campaign sources sent with a click. Nothing else from the URL is read or kept.
-export const SOURCES = ['linkedin', 'x', 'instagram'];
+export const SOURCES = ['linkedin', 'x', 'instagram', 'qr'];
 const SOURCE_KEY = 'remote_source';
 
 /** The allow-listed source for this value, or null. */
