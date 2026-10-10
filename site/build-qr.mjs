@@ -9,9 +9,9 @@ import QRCode from 'qrcode';
 
 export const QR_URL = 'https://theremote-site.pages.dev/?utm_source=qr_site';
 export const QR_QUIET_ZONE = 4;
-export const QR_INK = '#0b0e0d';
-// Transparent: modules sit directly on the hero background (#eeeee6); the quiet zone is empty space.
-export const QR_PAPER = '#eeeee6';
+export const QR_INK = '#0d0f12';
+// Transparent: modules sit directly on the hero background (#f6f7fb); the quiet zone is empty space.
+export const QR_PAPER = '#f6f7fb';
 export const QR_TILE_PX = 123;
 export const QR_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'assets/qr-download.svg');
 

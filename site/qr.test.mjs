@@ -28,8 +28,8 @@ test('committed QR SVG is exactly what the generator produces for QR_URL (error 
   assert.equal(svg, qrSvg(QR_URL), 'Run `npm run build:qr` after changing QR_URL or the generator');
   assert.equal(QR_URL, 'https://theremote-site.pages.dev/?utm_source=qr_site');
   assert.doesNotMatch(svg, /<script|<image|href=|xlink|<text/i, 'static vector modules only');
-  assert.equal(QR_INK, '#0b0e0d');
-  assert.equal(QR_PAPER, '#eeeee6'); assert.ok(!svg.includes('<rect'), 'transparent: no background rect');
+  assert.equal(QR_INK, '#0d0f12');
+  assert.equal(QR_PAPER, '#f6f7fb'); assert.ok(!svg.includes('<rect'), 'transparent: no background rect');
 });
 
 test('QR decodes to QR_URL at a large raster and at the 136 px tile size, with a 4-module quiet zone', () => {
