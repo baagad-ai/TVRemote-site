@@ -7,6 +7,7 @@ import { createMetricsHandler, RECORD_CLICK_SQL } from '../../functions/api/metr
 const migration = readFileSync(new URL('../migrations/0001_download_clicks.sql', import.meta.url), 'utf8');
 const sourceMigration = readFileSync(new URL('../migrations/0002_download_click_source.sql', import.meta.url), 'utf8');
 const qrMigration = readFileSync(new URL('../migrations/0003_download_click_source_qr.sql', import.meta.url), 'utf8');
+const threadsMigration = readFileSync(new URL('../migrations/0004_download_click_source_threads.sql', import.meta.url), 'utf8');
 const origin = 'https://tvremote.pages.dev';
 const click = { event: 'apk_download_click', release: 'v1.2.3-security', button: 'hero', platform: 'android' };
 const initialTime = Date.parse('2026-10-07T12:00:00Z');
@@ -26,6 +27,7 @@ function fixture(overrides = {}) {
   db.exec(migration);
   db.exec(sourceMigration);
   db.exec(qrMigration);
+  db.exec(threadsMigration);
   const calls = [];
   const env = {
     METRICS_ENABLED: 'true', METRICS_ALLOWED_ORIGINS: origin,
@@ -205,10 +207,11 @@ test('0002 migration is additive and keeps the remote trigger splitter happy', (
   assert.doesNotMatch(sourceMigration, /\b(DROP|ALTER|RENAME|DELETE|UPDATE\s+download_click_daily\b)/i);
 });
 
-test('source is allow-listed: linkedin, x, instagram, qr, qr_site (any case); everything else is none', async () => {
+test('source is allow-listed: linkedin, x, instagram, qr, qr_site, threads (any case); everything else is none', async () => {
   const f = fixture({ METRICS_PER_MINUTE: '60' }); // more cases than the default 20-per-minute throttle
   const cases = [['linkedin', 'linkedin'], ['X', 'x'], ['Instagram', 'instagram'], [' LinkedIn ', 'linkedin'],
-    ['qr', 'qr'], ['QR', 'qr'], ['qr_site', 'qr_site'], [' QR_SITE ', 'qr_site'], ['Qr_Site', 'qr_site'],
+    ['qr', 'qr'], ['QR', 'qr'], ['qr_site', 'qr_site'], [' QR_SITE ', 'qr_site'], ['Qr_Site', 'qr_site'], ['threads', 'threads'], [' Threads ', 'threads'],
+    ['thread', 'none'], ['threads.net', 'none'],
     ['qrcode', 'none'], ['q r', 'none'], ['qr-site', 'none'], ['qrsite', 'none'], ['qr_site2', 'none'], ['facebook', 'none'], ['', 'none'], ['x'.repeat(40), 'none'], [42, 'none'], [null, 'none'], [['x'], 'none'], [undefined, 'none']];
   for (const [value, expected] of cases) {
     const body = value === undefined ? click : { ...click, source: value };
@@ -217,7 +220,7 @@ test('source is allow-listed: linkedin, x, instagram, qr, qr_site (any case); ev
   }
   const rows = f.db.prepare('SELECT source, SUM(clicks) AS clicks FROM download_click_daily_v2 GROUP BY source ORDER BY source').all()
     .map(row => [row.source, Number(row.clicks)]);
-  assert.deepEqual(rows, [['instagram', 1], ['linkedin', 2], ['none', 12], ['qr', 2], ['qr_site', 3], ['x', 1]]);
+  assert.deepEqual(rows, [['instagram', 1], ['linkedin', 2], ['none', 14], ['qr', 2], ['qr_site', 3], ['threads', 2], ['x', 1]]);
   // Only source is new: other extra fields are still rejected without a write.
   const before = f.calls.length;
   assert.equal(await status(f, request({ ...click, source: 'x', utm_campaign: 'launch' })), 400);
@@ -316,5 +319,57 @@ DO UPDATE SET clicks = clicks + 1`;
   assert.equal(Number(db.prepare('SELECT clicks FROM download_click_daily').get().clicks), 1);
   assert.equal(Number(db.prepare('SELECT clicks FROM download_click_daily_v2').get().clicks), 1);
   assert.equal(Number(db.prepare("SELECT accepted FROM metrics_daily_budget WHERE day = '2026-10-09'").get().accepted), 2);
+  db.close();
+});
+
+test('0004 migration keeps the remote trigger splitter happy', () => {
+  assert.equal(threadsMigration.includes('\r'), false, 'D1 migration SQL must use LF');
+  assert.match(threadsMigration, /CREATE TRIGGER[^;]+\nBEGIN\n/);
+  assert.equal((threadsMigration.match(/\bEND\b/g) || []).length, 1, 'Avoid nested CASE END in the trigger splitter');
+  assert.equal(threadsMigration.split('\n').some(line => line.startsWith('--') && line.includes(';')), false,
+    'No semicolons in comments: the remote splitter cuts statements on them');
+  assert.doesNotMatch(threadsMigration, /\b(DROP|ALTER)\s+TABLE\s+(download_click_daily|metrics_daily_budget)\b(?!_v2)/i);
+  assert.doesNotMatch(threadsMigration, /\b(DELETE|UPDATE)\s+(FROM\s+)?download_click_daily/i);
+});
+
+test('0004 rebuild keeps every row, the key, the trigger and the budget, and only widens source to threads', () => {
+  const db = new DatabaseSync(':memory:');
+  db.exec(migration);
+  db.exec(sourceMigration);
+  db.exec(qrMigration);
+  const schemaOf = () => db.prepare("SELECT type, name, tbl_name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name").all()
+    .map(row => `${row.type}:${row.name}:${row.tbl_name}`);
+  const before = schemaOf();
+  const record = db.prepare(RECORD_CLICK_SQL);
+  for (const source of ['linkedin', 'x', 'instagram', 'qr', 'qr_site', 'none']) {
+    for (let i = 0; i < 3; i++) record.run('2026-10-10', 'r1', 'hero', 'android', source, '2026-10-10', 1000);
+    record.run('2026-10-11', 'r1', 'nav', 'ios', source, '2026-10-11', 1000);
+  }
+  // Before 0004 the database rejects threads.
+  assert.throws(() => record.run('2026-10-11', 'r1', 'hero', 'android', 'threads', '2026-10-11', 1000), /CHECK/);
+  const rowsSql = 'SELECT day, event, release, button, platform, source, clicks FROM download_click_daily_v2 ORDER BY day, event, release, button, platform, source';
+  const rows = JSON.stringify(db.prepare(rowsSql).all());
+  const budget = JSON.stringify(db.prepare('SELECT day, accepted FROM metrics_daily_budget ORDER BY day').all());
+  db.exec(threadsMigration);
+  assert.equal(JSON.stringify(db.prepare(rowsSql).all()), rows, 'every row and count survives the rebuild');
+  assert.equal(JSON.stringify(db.prepare('SELECT day, accepted FROM metrics_daily_budget ORDER BY day').all()), budget,
+    'copying rows does not touch the daily budget');
+  assert.deepEqual(schemaOf(), before, 'same tables, triggers and indexes; no leftover _new table');
+  const sql = db.prepare("SELECT sql FROM sqlite_master WHERE name = 'download_click_daily_v2'").get().sql;
+  assert.match(sql, /WITHOUT ROWID/);
+  assert.match(sql, /PRIMARY KEY \(day, event, release, button, platform, source\)/);
+  assert.match(db.prepare("SELECT sql FROM sqlite_master WHERE name = 'download_click_v2_budget'").get().sql,
+    /BEFORE INSERT ON download_click_daily_v2/);
+  record.run('2026-10-11', 'r1', 'hero', 'android', 'threads', '2026-10-11', 1000);
+  record.run('2026-10-11', 'r1', 'hero', 'android', 'threads', '2026-10-11', 1000);
+  assert.equal(Number(db.prepare("SELECT clicks FROM download_click_daily_v2 WHERE source = 'threads'").get().clicks), 2);
+  for (const junk of ['facebook', 'thread', 'Threads', 'threads.net']) {
+    assert.throws(() => record.run('2026-10-11', 'r1', 'hero', 'android', junk, '2026-10-11', 1000), /CHECK/, junk);
+  }
+  assert.equal(Number(db.prepare("SELECT accepted FROM metrics_daily_budget WHERE day = '2026-10-11'").get().accepted), 8);
+  db.prepare("UPDATE metrics_daily_budget SET accepted = 5000 WHERE day = '2026-10-11'").run();
+  const result = record.run('2026-10-11', 'r1', 'hero', 'android', 'threads', '2026-10-11', 999999);
+  assert.equal(Number(result.changes), 0);
+  assert.equal(Number(db.prepare("SELECT clicks FROM download_click_daily_v2 WHERE source = 'threads'").get().clicks), 2);
   db.close();
 });
