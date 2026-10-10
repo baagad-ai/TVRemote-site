@@ -8,7 +8,7 @@ import { approvedRelease } from './src/download-metrics.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const canonical=siteUrl(process.env.SITE_URL);
 const articles=JSON.parse(fs.readFileSync(path.join(root,'src/guides.json'),'utf8'));
-assert.equal(articles.length,6);
+assert.equal(articles.length,16);
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const routes=['index.html','privacy/index.html','guides/index.html',...articles.map(a=>'guides/'+a.slug+'/index.html')];
 for(const article of articles)assert.equal(read('content/guides/'+article.slug+'.md').trim(),article.body.trim(),'Article body and metadata must stay in sync');
@@ -77,7 +77,7 @@ const sizes=fs.readdirSync(path.join(root,'runtime')).map(name=>({name,gzip:gzip
 assert(sizes.find(x=>x.name==='app.js').gzip<240000,'Initial runtime budget');
 assert(sizes.filter(x=>x.name!=='app.js').every(x=>x.gzip<240000),'Lazy runtime budget');
 for(const name of ['ReactBits-LICENSE.md','MagicUI-LICENSE.md','React-LICENSE.txt','ReactDOM-LICENSE.txt','Motion-LICENSE.md','Three-LICENSE.txt','OGL-LICENSE.txt','GSAP-LICENSE-NOTICE.txt'])assert(fs.existsSync(path.join(root,'licenses',name)));
-assert.equal((read('sitemap.xml').match(/<loc>/g)||[]).length,9);
+assert.equal((read('sitemap.xml').match(/<loc>/g)||[]).length,3+articles.length);
 assert(!read('sitemap.xml').includes('baagad-ai.github.io'));
 assert(read('robots.txt').includes(`Sitemap: ${canonical}sitemap.xml`));
 console.log('PASS: nine prerendered routes, host metadata/links, direct download semantics, embedded GLB contracts, licenses and runtime budgets.',JSON.stringify(sizes));
