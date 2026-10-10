@@ -68,3 +68,5 @@ body:not([data-route=landing]) .site-header{border-bottom:1px solid var(--line)}
 .hero-actions .qr-hint{align-self:flex-start}
 .hero-actions:has(>.qr-hint)>.text-link{align-self:flex-start;margin-top:19px}
 }
+
+@media(min-width:1100px){.hero-title{font-size:clamp(4.5rem,5.6vw,6.2rem);width:9em;max-width:9em;position:relative;z-index:1}}

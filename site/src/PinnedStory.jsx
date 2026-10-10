@@ -19,10 +19,10 @@ function bezier(x1, y1, x2, y2) {
 const push = bezier(0.65, 0, 0.35, 1);
 
 const beats = [
-  { id: 'share-story', eyebrow: '01 / Type it on your phone', title: <>Search YouTube<br /><em>from your phone.</em></>, text: 'Type the search on your phone keyboard. The results open on your TV.', shot: ['assets/showcase/youtube-search.png', 'The YouTube search sheet for Living Room TV, with lofi beats typed on the phone keyboard.', 2340] },
-  { eyebrow: '02 / Pass it over', title: <>Share a link.<br /><em>It plays on the TV.</em></>, text: 'Share a YouTube link to The Remote, check it, and open it on Living Room TV.', shot: ['assets/showcase/youtube-share.png', "The Remote's share sheet: a YouTube link, Living Room TV in Living room selected, and an Open on Living room button.", 2340] },
-  { eyebrow: '03 / Your TVs', title: <>Your TV,<br /><em>named by you.</em></>, text: 'Your saved TVs sit in one list, each with its room.', shot: ['assets/showcase/your-tvs.png', 'The Your TVs list in The Remote: Living Room TV, in Living room, connected.', 2340] },
-  { id: 'inside', eyebrow: '04 / Give it a room', title: <>Your TVs,<br /><em>by room.</em></>, text: 'Name the TV and pick its room when you pair it.', shot: ['assets/showcase/pair-rooms.png', 'Pairing a TV in The Remote: the name Living Room TV, with the Living room room chip selected next to Bedroom.', 560] }
+  { id: 'share-story', eyebrow: '01 / Type it on your phone', title: <>Search YouTube <br /><em>from your phone.</em></>, text: 'Type the search on your phone keyboard. The results open on your TV.', shot: ['assets/showcase/youtube-search.png', 'The YouTube search sheet for Living Room TV, with lofi beats typed on the phone keyboard.', 2340] },
+  { eyebrow: '02 / Pass it over', title: <>Share a link. <br /><em>It plays on the TV.</em></>, text: 'Share a YouTube link to The Remote, check it, and open it on Living Room TV.', shot: ['assets/showcase/youtube-share.png', "The Remote's share sheet: a YouTube link, Living Room TV in Living room selected, and an Open on Living room button.", 2340] },
+  { eyebrow: '03 / Your TVs', title: <>Name every TV <br /><em>and sort them by room.</em></>, text: 'Your saved TVs sit in one list, each with its room.', shot: ['assets/showcase/your-tvs.png', 'The Your TVs list in The Remote: Living Room TV, in Living room, connected.', 2340] },
+  { id: 'inside', eyebrow: '04 / Give it a room', title: <>Living Room TV or Bedroom: <br /><em>pick the TV first.</em></>, text: 'Name the TV and pick its room when you pair it.', shot: ['assets/showcase/pair-rooms.png', 'Pairing a TV in The Remote: the name Living Room TV, with the Living room room chip selected next to Bedroom.', 560] }
 ];
 
 // After Open: the sheet is gone and the remote shows Living Room TV.

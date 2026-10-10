@@ -54,7 +54,7 @@ test('privacy signals suppress click telemetry without affecting the download', 
 });
 
 function memoryStorage() { const map = new Map(); return { getItem: k => map.get(k) ?? null, setItem: (k, v) => map.set(k, String(v)) }; }
-test('client source allow-list: linkedin, x, instagram, qr, qr_site in any case; junk and missing send nothing', () => {
+test('client source allow-list: linkedin, x, instagram, qr, qr_site, threads in any case; junk and missing send nothing', () => {
   assert.equal(allowedSource('linkedin'), 'linkedin');
   assert.equal(allowedSource('X'), 'x');
   assert.equal(allowedSource('INSTAGRAM'), 'instagram');
@@ -64,7 +64,9 @@ test('client source allow-list: linkedin, x, instagram, qr, qr_site in any case;
   assert.equal(allowedSource('qr_site'), 'qr_site');
   assert.equal(allowedSource('QR_SITE'), 'qr_site');
   assert.equal(allowedSource(' Qr_Site '), 'qr_site');
-  for (const value of ['facebook', '', null, undefined, 42, 'linkedin.com', 'x'.repeat(40), 'qrcode', 'qr-code', 'q r', 'qr-site', 'qrsite', 'qr_site2']) assert.equal(allowedSource(value), null);
+  assert.equal(allowedSource('threads'), 'threads');
+  assert.equal(allowedSource(' THREADS '), 'threads');
+  for (const value of ['facebook', '', null, undefined, 42, 'linkedin.com', 'x'.repeat(40), 'qrcode', 'qr-code', 'q r', 'qr-site', 'qrsite', 'qr_site2', 'thread', 'threads.net']) assert.equal(allowedSource(value), null);
 });
 test('utm_source is kept for the tab and only an allow-listed value is sent', () => {
   const sessionStorage = memoryStorage();
