@@ -12,9 +12,9 @@ If no code appears, check that the TV you picked in the app is the one in front 
 
 Also check the TV is on and on the same home Wi-Fi as your phone.
 
-## With The Remote you pair once
+## In The Remote, you enter the code when you add a TV
 
-In The Remote, pick your TV and enter the code it shows. You only do this once per TV. After that, the TV stays in your list with the name and room you gave it.
+Pick your TV in The Remote and enter the code it shows. Then the TV is saved in your list with the name and room you gave it.
 
 ## After a TV update, you may be asked again
 
@@ -24,4 +24,4 @@ If a TV update resets the connection, The Remote may ask you to pair again. Let 
 
 You don't make it up and you don't need to remember it. There's no account behind it either: The Remote doesn't ask you to sign in.
 
-[Download the app](https://theremote-site.pages.dev/#download) on your Android phone (Android 8.0 or later). It works with Android TV and Google TV devices that support Android TV Remote Service v2.
+[Download the app](https://theremote-site.pages.dev/#download) on your Android phone (Android 8.0 or later). It works with Android TV and Google TV devices that support Android TV Remote Service v2. There's no iPhone version.

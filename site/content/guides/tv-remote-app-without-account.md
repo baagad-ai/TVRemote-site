@@ -1,6 +1,6 @@
 # Can I use a TV remote app without an account?
 
-Yes. The Remote doesn't ask you to create an account or sign in. Install it on your Android phone, pick your Android TV or Google TV, and pair once with the code the TV shows. That's the whole setup.
+Yes. The Remote is a free Android TV and Google TV remote with no account and no sign-in. Install it on your Android phone, pick your TV, and enter the code the TV shows. That's the whole setup.
 
 ## Nothing to sign in to: you pair with the TV, not with us
 

@@ -10,9 +10,9 @@ When you pair a phone, this service shows the pairing code on the TV and then ac
 
 It's preinstalled on Android TV and Google TV devices and updates like the TV's other system apps. You won't find it on the home screen. It's listed among system apps in Settings.
 
-## Why our site says "v2"
+## The Remote needs Android TV Remote Service v2
 
-The service has changed over the years, and newer TVs use a newer pairing and control method. The Remote is built for that newer one, which we call Android TV Remote Service v2. If your TV doesn't support it, The Remote won't be able to pair.
+The service has had more than one version. The Remote needs Android TV Remote Service v2. If your TV doesn't support it, The Remote can't pair with it. The Remote also works with Google TV devices that support the Android TV Remote Service, including Chromecast with Google TV and Google TV Streamer. [Google's streaming-device remote guide](https://support.google.com/chromecast/answer/11221499?hl=en)
 
 ## How to see it on your TV
 

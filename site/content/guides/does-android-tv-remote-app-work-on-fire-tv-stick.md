@@ -4,7 +4,7 @@ Remote apps built for Android TV and Google TV, including The Remote, don't work
 
 ## Fire TV runs Fire OS, not Google TV
 
-Fire OS is Amazon's own system. It doesn't have the Android TV Remote Service that Android TV and Google TV phone remotes connect to. So a remote app made for Google TV won't find a Fire TV Stick or pair with it.
+Fire OS is Amazon's own system. It doesn't have the Android TV Remote Service that Android TV and Google TV phone remotes connect to. So a remote app made for Google TV won't find a Fire TV Stick or pair with it. Home Assistant's Android TV Remote documentation makes the same point. [Home Assistant: Android TV Remote](https://www.home-assistant.io/integrations/androidtv_remote/)
 
 That includes TVs with Fire TV built in, sold under other brands. If the home screen says Fire TV, this applies.
 

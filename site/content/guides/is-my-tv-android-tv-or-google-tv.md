@@ -20,7 +20,7 @@ Many brands sell Google TV models next to models with other systems. Two TVs fro
 
 ## If a streaming box gives you the home screen, check the box
 
-If your home screen comes from a box or stick plugged into the TV, the box is what your phone remote talks to. A Fire TV Stick runs Fire OS, not Google TV: see [the Fire TV answer](https://theremote-site.pages.dev/guides/does-android-tv-remote-app-work-on-fire-tv-stick/).
+If your home screen comes from a box or stick plugged into the TV, the box is what your phone remote talks to. The Remote works with Google TV devices that support the Android TV Remote Service, including Chromecast with Google TV and Google TV Streamer. [Google's streaming-device remote guide](https://support.google.com/chromecast/answer/11221499?hl=en) A Fire TV Stick runs Fire OS, not Google TV: see [the Fire TV answer](https://theremote-site.pages.dev/guides/does-android-tv-remote-app-work-on-fire-tv-stick/).
 
 ## One more check for The Remote
 

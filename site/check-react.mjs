@@ -8,7 +8,7 @@ import { approvedRelease } from './src/download-metrics.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const canonical=siteUrl(process.env.SITE_URL);
 const articles=JSON.parse(fs.readFileSync(path.join(root,'src/guides.json'),'utf8'));
-assert.equal(articles.length,16);
+assert.equal(articles.length,25);
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const routes=['index.html','privacy/index.html','guides/index.html',...articles.map(a=>'guides/'+a.slug+'/index.html')];
 for(const article of articles)assert.equal(read('content/guides/'+article.slug+'.md').trim(),article.body.trim(),'Article body and metadata must stay in sync');

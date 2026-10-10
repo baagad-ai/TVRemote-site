@@ -1,6 +1,6 @@
 # Why won't my phone keyboard type in YouTube on Android TV?
 
-A phone remote types by sending letters to whichever text box is active on the TV. On some TVs, YouTube's search box doesn't accept that text, so you end up back on the on-screen letter grid. You can fix a wrong keyboard setting, or use a YouTube search that you type on your phone and that opens its results on the TV.
+A phone remote types by sending letters to whichever text box is active on the TV. On some TVs, YouTube's search box doesn't accept that text, so you end up back on the on-screen letter grid. Check the TV's keyboard setting first. Or use The Remote, a free Android app with its own YouTube search: you type on your phone, and the results open on the TV.
 
 ## Phone keyboards type into the box the TV has selected
 
@@ -26,11 +26,11 @@ Then:
 
 If you plugged in a USB keyboard or its receiver, unplug it. Some TVs hide the on-screen keyboard while one is connected. [Sony's keyboard note](https://www.sony.co.uk/electronics/support/articles/00133802)
 
-## The Remote sends your YouTube search from your phone, and the results open on the TV
+## The Remote has its own YouTube search, and the results open on the TV
 
-The Remote has its own YouTube search. Type the search on your phone keyboard, pick the TV, and the results open in YouTube on that TV. You don't need to put text into YouTube's search box.
+In The Remote, tap Search YouTube, type on your phone keyboard and send it to the TV you picked. The results open in YouTube on that TV.
 
-Search support depends on your TV and its YouTube version. If a search doesn't open, update YouTube on the TV and try again.
+Search support depends on your TV and its YouTube app version. If a search doesn't open, update YouTube on the TV and try again.
 
 ## Typing in other TV apps still needs another remote
 
@@ -38,4 +38,4 @@ The Remote's phone typing is for YouTube search only. For passwords, Wi-Fi or ot
 
 ## Where The Remote fits
 
-The Remote is a free phone remote for Android TV and Google TV. No ads, no account. You need an Android phone (Android 8.0 or later) and a TV with Android TV Remote Service v2, on the same home Wi-Fi. [Download the app](https://theremote-site.pages.dev/#download)
+The Remote is a free phone remote for Android TV and Google TV. No ads, no account. You need an Android phone (Android 8.0 or later; there's no iPhone version) and a TV with Android TV Remote Service v2, on the same home Wi-Fi. [Download the app](https://theremote-site.pages.dev/#download)

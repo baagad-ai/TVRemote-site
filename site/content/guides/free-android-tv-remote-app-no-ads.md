@@ -1,10 +1,10 @@
 # Is there a free Android TV remote app with no ads?
 
-Yes. The Remote is a free phone remote for Android TV and Google TV. It has no ads, no in-app purchases, no subscription and no account. Google's own Google TV app also includes a free remote, if you'd rather use that.
+Yes. The Remote is a free Android TV and Google TV remote for Android phones, with no ads, no sign-up and no account. There are no in-app purchases or subscriptions either. Google's own Google TV app also includes a free remote, if you'd rather use that.
 
 ## The Remote is free, with no ads and nothing to subscribe to
 
-There's no paid tier and no ad banner, and you don't need to sign up. You install it on your Android phone, pick your TV, and pair once with the code the TV shows.
+There's no paid tier and no ad banner, and you don't need to sign up. You install it on your Android phone, pick your TV, and pair with the code the TV shows.
 
 ## What you can do with it
 
@@ -13,8 +13,9 @@ There's no paid tier and no ad banner, and you don't need to sign up. You instal
 - Name your TVs and organise them by room, like Living Room TV or Bedroom.
 - Use the everyday controls: navigation and volume on one screen.
 - Find Larger controls, Easy remote, Guest mode, home-screen widgets and language options in the app.
+- Use Guest mode to limit the remote to navigation, play/pause and volume. Hold the TV name for 1 second to exit.
 
-Available controls vary by TV model and firmware. YouTube search and links depend on the TV's YouTube version.
+Available controls vary by TV model and firmware. YouTube search and links depend on the TV's YouTube app version.
 
 ## Google's Google TV app is the other free option
 
@@ -22,9 +23,9 @@ Google's Google TV app for Android includes a virtual remote for Android TV and 
 
 Pick by what you do most. If it's YouTube, The Remote's phone-typed YouTube search and link sharing are built for that.
 
-## Many other remote apps carry ads or paid upgrades
+## Check any remote app's listing for ads and upgrades
 
-Lots of third-party remote apps are free to download but show ads or ask you to pay to remove them. Check the listing before installing.
+Some third-party remote apps are free to download but show ads or offer a paid upgrade to remove them. The listing usually says so.
 
 ## What The Remote needs
 
