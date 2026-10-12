@@ -75,9 +75,6 @@ async function readEvent(request) {
   }
 }
 
-// Obvious automated agents are acknowledged but never recorded.
-export const BOT_UA = /bot|crawl|spider|slurp|headless|preview|facebookexternalhit|lighthouse|puppeteer|playwright|phantom|selenium|wget|curl/i;
-
 export function createMetricsHandler(now = () => Date.now()) {
   let minute = -1;
   let attempts = 0;
@@ -92,7 +89,6 @@ export function createMetricsHandler(now = () => Date.now()) {
     if (url.pathname !== '/api/metrics' || url.search || origin !== url.origin || !config.origins.includes(origin)) return reply(403);
     const site = request.headers.get('sec-fetch-site');
     if (site && site !== 'same-origin') return reply(403);
-    if (BOT_UA.test(request.headers.get('user-agent') || '')) return reply(204);
     if (request.headers.get('sec-gpc') === '1' || request.headers.get('dnt') === '1') return reply(204);
     if (!/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(request.headers.get('content-type') || '')) return reply(415);
 

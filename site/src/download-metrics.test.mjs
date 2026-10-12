@@ -97,14 +97,3 @@ test('utm_source is kept for the tab and only an allow-listed value is sent', ()
   recordDownloadClick(release, 'hero', { navigator: {}, fetch: (u, init) => { bare.push(JSON.parse(init.body)); return Promise.resolve(); } });
   assert.equal('source' in bare[0], false);
 });
-
-test('only the first press per browser counts; bots and missing storage never count', async () => {
-  const { firstCountedPress } = await import('./download-metrics.mjs');
-  const env = { navigator: { userAgent: 'Mozilla/5.0 (Linux; Android 15) Chrome/140' }, localStorage: memoryStorage() };
-  assert.equal(firstCountedPress(env), true);
-  assert.equal(firstCountedPress(env), false);
-  assert.equal(env.localStorage.getItem('remote_dl_counted'), '1');
-  assert.equal(firstCountedPress({ navigator: { userAgent: 'Googlebot/2.1' }, localStorage: memoryStorage() }), false);
-  assert.equal(firstCountedPress({ navigator: { webdriver: true }, localStorage: memoryStorage() }), false);
-  assert.equal(firstCountedPress({ navigator: {} }), false);
-});

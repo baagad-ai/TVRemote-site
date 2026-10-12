@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect } from 'react';
-import { approvedRelease, firstCountedPress, recordDownloadClick, rememberSource } from './download-metrics.mjs';
+import { approvedRelease, recordDownloadClick, rememberSource } from './download-metrics.mjs';
 import { bumpDownloadCount, DownloadCount } from './DownloadCount.jsx';
 
 const Release = createContext(null);
@@ -14,7 +14,7 @@ export function DownloadLink({ button = 'download', className = 'download-cta', 
   return <a className={className} href={release ? release.url : fallback}
     data-download-cta={release ? button : undefined} download={release ? '' : undefined}
     rel={release ? 'noreferrer' : undefined}
-    onClick={release ? () => { if (firstCountedPress()) { bumpDownloadCount(); recordDownloadClick(release, button); } } : undefined}>
+    onClick={release ? () => { bumpDownloadCount(); recordDownloadClick(release, button); } : undefined}>
     <span>{release ? children : 'Download status'}</span><span className="cta-arrow" aria-hidden="true">↗</span>
   </a>;
 }
