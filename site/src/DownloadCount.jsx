@@ -19,5 +19,5 @@ export function DownloadCount({ className = '' }) {
   const [count, setCount] = useState(total);
   useEffect(() => { listeners.add(setCount); load(); return () => { listeners.delete(setCount); }; }, []);
   if (count === null) return null;
-  return <p className={`download-count ${className}`.trim()} aria-live="polite"><span className="download-count-dot" aria-hidden="true" /><b>{count.toLocaleString('en-US')}</b> downloads already!</p>;
+  return <p className={`download-count ${className}`.trim()} aria-live="polite"><span className="download-count-dot" aria-hidden="true" /><span><b>{count.toLocaleString('en-US')}</b> downloads already!</span></p>;
 }
