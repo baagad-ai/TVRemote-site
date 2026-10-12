@@ -26,6 +26,21 @@ export function currentSource(environment = globalThis) {
   } catch { return null; }
 }
 
+// Obvious automated agents; their presses are never counted.
+export const BOT_UA = /bot|crawl|spider|slurp|headless|preview|facebookexternalhit|lighthouse|puppeteer|playwright|phantom|selenium|wget|curl/i;
+const COUNTED_KEY = 'remote_dl_counted';
+
+/** True only for this browser's first counted press (localStorage flag); bots and storage failures never count. */
+export function firstCountedPress(environment = globalThis) {
+  try {
+    if (BOT_UA.test(environment.navigator?.userAgent || '') || environment.navigator?.webdriver === true) return false;
+    const storage = environment.localStorage;
+    if (!storage || storage.getItem(COUNTED_KEY)) return false;
+    storage.setItem(COUNTED_KEY, '1');
+    return storage.getItem(COUNTED_KEY) === '1';
+  } catch { return false; }
+}
+
 export function approvedRelease(config) {
   const release = config?.apkRelease;
   if (!release || typeof release.id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(release.id) ||

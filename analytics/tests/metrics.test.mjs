@@ -373,3 +373,13 @@ test('0004 rebuild keeps every row, the key, the trigger and the budget, and onl
   assert.equal(Number(db.prepare("SELECT clicks FROM download_click_daily_v2 WHERE source = 'threads'").get().clicks), 2);
   db.close();
 });
+
+test('obvious bot user agents are acknowledged but never recorded', async () => {
+  const f = fixture();
+  for (const ua of ['Googlebot/2.1', 'Mozilla/5.0 HeadlessChrome/120', 'facebookexternalhit/1.1', 'Slurp', 'SomeCrawler']) {
+    assert.equal(await status(f, request(click, { headers: { 'User-Agent': ua } })), 204);
+  }
+  assert.equal(f.count(), 0);
+  assert.equal(await status(f, request(click, { headers: { 'User-Agent': 'Mozilla/5.0 (Linux; Android 15) Chrome/140 Mobile' } })), 204);
+  assert.equal(f.count(), 1);
+});
