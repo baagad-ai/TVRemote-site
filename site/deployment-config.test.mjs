@@ -22,7 +22,7 @@ test('production refuses inactive, invalid and unverified APK identities', () =>
 
 test('Pages only invokes private metrics endpoint; preview has no production database binding', () => {
   const routes = JSON.parse(fs.readFileSync(new URL('_routes.json', import.meta.url)));
-  assert.deepEqual(routes, { version: 1, include: ['/api/metrics'], exclude: [] });
+  assert.deepEqual(routes, { version: 1, include: ['/api/metrics', '/api/download-count'], exclude: [] });
   const config = JSON.parse(fs.readFileSync(new URL('../wrangler.jsonc', import.meta.url)));
   assert.equal(config.d1_databases[0].binding, 'METRICS_DB');
   assert.equal(config.env.preview.vars.METRICS_ENABLED, 'false');
