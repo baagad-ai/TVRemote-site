@@ -13,7 +13,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SplitText from '../components/SplitText';
 import { PIN } from './media';
 import { useEnvironment } from '../environment';
-import { useGpuLease, useInView, lowEnd } from './lease';
+import { useGpuLease, lowEnd } from './lease';
 import { PhoneLoop, phoneScreenUrl } from './slots';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -60,9 +60,15 @@ export default function PinStory() {
   const { ready, motion, gpu } = useEnvironment(), root = useRef(null), stage = useRef(null);
   const [fits, setFits] = useState(false), [focusMode, setFocusMode] = useState(false), [v, setV] = useState(1), [idx, setIdx] = useState(1);
   const pinned = ready && motion && fits && !focusMode;
-  const near = useInView(root, { rootMargin: '50% 0px' }), sceneRef = useRef(null), host = useRef(null), live = useRef(null), vRef = useRef(1), idxRef = useRef(1);
+  const [near, setNear] = useState(false), sceneRef = useRef(null), host = useRef(null), live = useRef(null), vRef = useRef(1), idxRef = useRef(1);
   const lease = useGpuLease(pinned && near && gpu && !lowEnd() && Boolean(PIN.model), 'pin');
   const [is3d, setIs3d] = useState(false);
+  // "Near" = the pin's top has come up past 60% of the viewport (never at load: the hero's Grainient owns the slot).
+  useEffect(() => {
+    if (!pinned) { setNear(false); return; }
+    const st = ScrollTrigger.create({ trigger: root.current, start: 'top 60%', end: 'bottom top', refreshPriority: -1, invalidateOnRefresh: true, onToggle: self => setNear(self.isActive) });
+    requestAnimationFrame(() => { ScrollTrigger.refresh(); setNear(st.isActive); }); return () => st.kill();
+  }, [pinned]);
   // Our 3D (pin-tv-phone.glb): loaded only while the 'pin' GPU lease is held; DOM boxes give the board composition.
   useEffect(() => {
     if (!lease) return;
