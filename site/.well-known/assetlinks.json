@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.theremote.app",
+    "sha256_cert_fingerprints": ["5E:38:D0:4F:C5:2F:48:6D:06:E9:6F:04:3E:E6:8B:44:EE:A3:DE:59:F9:9C:6F:DD:CE:D3:27:25:89:56:34:45"]
+  }
+}]

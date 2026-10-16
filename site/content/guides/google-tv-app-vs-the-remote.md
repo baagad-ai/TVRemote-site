@@ -1,6 +1,6 @@
 # Google TV app vs The Remote: which phone remote should I use?
 
-Both are free phone remotes for Android TV and Google TV, and both pair with the code your TV shows. Use Google's Google TV app if you want Google's official remote, with phone typing in any text box that accepts it. Use The Remote if you want a remote with no account and no ads, plus YouTube search from your phone, YouTube links that play on the TV, TVs organised by room and a Guest mode. Many people keep both.
+Both are free phone remotes for Android TV and Google TV, and both pair with the code your TV shows. Use Google's Google TV app if you want Google's official remote, with phone typing in any text box that accepts it. Use The Remote if you want a remote with no account and no ads, plus YouTube search from your phone, YouTube links that play on the TV, TVs organised by room and Guest access. Many people keep both.
 
 ## What Google's Google TV app does
 
@@ -12,7 +12,7 @@ According to Google, the Google TV app's remote can play and control media, turn
 - **YouTube search from your phone.** Type the search on your phone, and the results open in YouTube on the TV.
 - **YouTube links that play on the TV.** Share a link to The Remote, pick the TV, and it plays there.
 - **TVs organised by room.** Name each TV and give it a room, like Living Room TV or Bedroom.
-- **Guest mode.** Limits the remote to navigation, play/pause and volume. Hold the TV name for 1 second to exit.
+- **Guest access.** Invite guests from your phone. They control the TV from their own Android phones, even when your phone is put away.
 - **Layout options.** Larger controls, Easy remote, home-screen widgets and app language options.
 
 ## Side by side
@@ -22,6 +22,7 @@ According to Google, the Google TV app's remote can play and control media, turn
 - **Typing:** Google's app enters text in text boxes that accept it, including logins. The Remote's phone typing is for YouTube search only.
 - **YouTube:** in Google's app, you type into YouTube's search box on the TV. The Remote has its own YouTube search and YouTube link sharing.
 - **Several TVs:** The Remote names TVs and sorts them by room.
+- **Guests:** The Remote lets you invite guests on your home Wi-Fi to use their own Android phones as the remote.
 - **Phones:** Google's app runs on Android and iPhone. The Remote is Android only (Android 8.0 or later).
 - **How you get it:** Google's app comes from app stores. The Remote installs from our website.
 

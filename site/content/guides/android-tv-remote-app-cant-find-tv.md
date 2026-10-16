@@ -55,6 +55,8 @@ Seeing a device in a Cast menu or seeing media controls in Google Home isn't eno
 
 Try moving the selection, then Back or Home. Watch whether the TV responds.
 
+If The Remote worked before and stopped after time away, update to the latest version. It finds your TV again after days away, even if its address changed. A TV that was reset or updated may ask for the code shown on the TV again, and it keeps its name and room.
+
 If navigation works, write down the action that fails. Test typing in the intended search field with a harmless phrase. If it fails only in one TV app, report that app and field rather than describing the entire connection as broken.
 
 For volume, note whether sound comes from the TV, a receiver, or a soundbar. Google's guidance explains that the streaming device and external audio equipment can have separate volume settings. A working navigation control doesn't settle the audio path. [Google's volume-control guidance](https://support.google.com/chromecast/answer/10094150?hl=en)

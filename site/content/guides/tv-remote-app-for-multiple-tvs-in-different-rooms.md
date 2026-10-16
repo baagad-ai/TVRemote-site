@@ -22,7 +22,11 @@ A YouTube search typed on your phone opens its results on the TV you picked. A Y
 
 ## Every TV needs to be on your home Wi-Fi
 
-Your phone talks to each TV over your home network. A TV on a guest network, or one that still remembers an old Wi-Fi, won't show up until it's on the same network as your phone. If a TV goes missing, the [can't-find-your-TV guide](https://theremote-site.pages.dev/guides/android-tv-remote-app-cant-find-tv/) helps.
+Your phone talks to each TV over your home network. A TV on a guest network, or one that still remembers an old Wi-Fi, won't show up until it's on the same network as your phone. The Remote finds your TV again after days away, even if its address changed. If a TV goes missing, the [can't-find-your-TV guide](https://theremote-site.pages.dev/guides/android-tv-remote-app-cant-find-tv/) helps.
+
+## Other people at home can use their own phones too
+
+Anyone who pairs their phone with the TV's code becomes a Primary remote for that TV. One phone can be a Primary remote for several TVs, and a TV can have several Primary remotes. Every Primary remote can invite guests and remove them. Friends who visit can be invited as guests instead. See [how Guest access works](https://theremote-site.pages.dev/guides/guests-control-google-tv-without-google-account/).
 
 ## Which TVs work
 

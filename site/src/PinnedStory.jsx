@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEnvironment } from './environment';
-import { StoryCta } from './PhoneStory';
+import { StoryCta, yourTvs } from './PhoneStory';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,16 +21,16 @@ const push = bezier(0.65, 0, 0.35, 1);
 const beats = [
   { id: 'share-story', eyebrow: '01 / Type it on your phone', title: <>Search YouTube <br /><em>from your phone.</em></>, text: 'Type the search on your phone keyboard. The results open on your TV.', shot: ['assets/showcase/youtube-search.png', 'The YouTube search sheet for Living Room TV, with lofi beats typed on the phone keyboard.', 2340] },
   { eyebrow: '02 / Pass it over', title: <>Share a link. <br /><em>It plays on the TV.</em></>, text: 'Share a YouTube link to The Remote, check it, and open it on Living Room TV.', shot: ['assets/showcase/youtube-share.png', "The Remote's share sheet: a YouTube link, Living Room TV in Living room selected, and an Open on Living room button.", 2340] },
-  { eyebrow: '03 / Your TVs', title: <>Name every TV <br /><em>and sort them by room.</em></>, text: 'Your saved TVs sit in one list, each with its room.', shot: ['assets/showcase/your-tvs.png', 'The Your TVs list in The Remote: Living Room TV, in Living room, connected.', 2340] },
-  { id: 'inside', eyebrow: '04 / Give it a room', title: <>Living Room TV or Bedroom: <br /><em>pick the TV first.</em></>, text: 'Name the TV and pick its room when you pair it.', shot: ['assets/showcase/pair-rooms.png', 'Pairing a TV in The Remote: the name Living Room TV, with the Living room room chip selected next to Bedroom.', 560] }
+  { eyebrow: '03 / Your TVs', title: <>Name every TV <br /><em>and sort them by room.</em></>, text: 'Your saved TVs sit in one list, each with its room.', shot: [yourTvs[0], 'The Your TVs list in The Remote: Living Room TV, in Living room, connected.', yourTvs[1]] },
+  { id: 'inside', eyebrow: '04 / Give it a room', title: <>Living Room TV or Bedroom: <br /><em>pick the TV first.</em></>, text: 'Name the TV and pick its room when you pair it.', shot: ['assets/showcase/pair-rooms.png', 'Pairing a TV in The Remote: the name Living Room TV, with the Living room room chip selected next to Bedroom.', 2340] }
 ];
 
 // After Open: the sheet is gone and the remote shows Living Room TV.
 const afterShare = ['assets/showcase/remote-home.png', '', 2340];
 
-function Shot({ shot, eager }) {
+function Shot({ shot }) {
   const [src, alt, height] = shot;
-  return <img src={src} alt={alt} width="1080" height={height} loading={eager ? 'eager' : 'lazy'} decoding="async" />;
+  return <img className={height < 2340 && height > 1000 ? 'is-short' : undefined} src={src} alt={alt} width="1080" height={height} loading="lazy" decoding="async" />;
 }
 
 export default function PinnedStory() {
@@ -72,16 +72,16 @@ export default function PinnedStory() {
         <div className="pin-copies">
           {beats.map((b, i) => <div className="pin-beat" key={i} id={pinned ? undefined : b.id}>
             <div className="pin-copy" aria-hidden={pinned && active !== i ? true : undefined}><p className="eyebrow">{b.eyebrow}</p><h2>{b.title}</h2><p className="pin-text">{b.text}</p>{i === 3 && <div className="pin-actions"><StoryCta /></div>}</div>
-            {!pinned && <figure className={`pin-static-phone ${i === 3 ? 'is-card' : ''}`}><Shot shot={b.shot} /></figure>}
+            {!pinned && <figure className="pin-static-phone"><Shot shot={b.shot} /></figure>}
           </div>)}
         </div>
         {pinned && <div className="pin-phone" aria-hidden="true">
           <div className="pin-phone-shell">{beats.slice(0, 3).map((b, i) => <div className="pin-screen" key={i}>{i === 1
               ? <><div className="pin-layer"><Shot shot={afterShare} /></div><div className="pin-layer pin-dim"><Shot shot={b.shot} /></div><div className="pin-layer pin-sheet"><Shot shot={b.shot} /></div></>
-              : <Shot shot={b.shot} eager={i === 0} />}</div>)}
+              : <Shot shot={b.shot} />}</div>)}
             <div className="pin-check"><span>✓</span>Sent to Living Room TV</div>
           </div>
-          <div className="pin-room-card"><Shot shot={beats[3].shot} eager /></div>
+          <div className="pin-room-card"><Shot shot={beats[3].shot} /></div>
           <p className="pin-progress"><span>0{active + 1}</span> / 04</p>
         </div>}
       </div>

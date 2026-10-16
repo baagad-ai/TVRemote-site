@@ -23,6 +23,7 @@ Amazon's Fire TV app, for example, says on its listing that it needs an Amazon a
 - Search YouTube by typing on your phone. The results open on the TV.
 - Share a YouTube link to The Remote and it plays on the TV.
 - Name your TVs and organise them by room.
+- Invite guests on your home Wi-Fi to use their own Android phones as the remote, with no account for them either. [How Guest access works](https://theremote-site.pages.dev/guides/guests-control-google-tv-without-google-account/)
 
 It's free, with no ads. You need an Android phone (Android 8.0 or later) and an Android TV or Google TV with Android TV Remote Service v2, on the same home Wi-Fi.
 

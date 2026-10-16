@@ -16,9 +16,11 @@ Also check the TV is on and on the same home Wi-Fi as your phone.
 
 Pick your TV in The Remote and enter the code it shows. Then the TV is saved in your list with the name and room you gave it.
 
-## After a TV update, you may be asked again
+Guests you invite join with an invite from your phone instead. If a TV doesn't accept the shared guest key, The Remote switches just that guest to their own TV code, which the TV shows once. See [how Guest access works](https://theremote-site.pages.dev/guides/guests-control-google-tv-without-google-account/).
 
-If a TV update resets the connection, The Remote may ask you to pair again. Let the update finish, turn the TV on, check it's on the same Wi-Fi, then enter the new code shown on the TV.
+## After a TV reset or update, you may be asked again
+
+The Remote finds your TV again after days away, even if its address changed. If the TV was reset or updated, it may ask for the code shown on the TV again. Let the update finish, turn the TV on, check it's on the same Wi-Fi, then enter the new code shown on the TV. The TV keeps its name and room in The Remote.
 
 ## It's a code, not a password
 

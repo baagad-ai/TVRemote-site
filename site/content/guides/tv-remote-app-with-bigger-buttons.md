@@ -14,10 +14,6 @@ In the same section, Settings describes **Easy remote** as "Label the essentials
 
 The language screen includes हिन्दी, ಕನ್ನಡ, বাংলা, தமிழ், తెలుగు and मराठी, alongside English.
 
-## Guest mode limits the remote to the basics
-
-Guest mode limits the remote to navigation, play/pause and volume. To exit, hold the TV name for 1 second.
-
 ## What you need
 
 The Remote is free, with no ads and no account. It runs on Android phones with Android 8.0 or later (no iPhone version). Your TV needs Android TV Remote Service v2, on the same home Wi-Fi.

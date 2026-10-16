@@ -18,10 +18,15 @@ function inline(text, key = '') {
   pieces.push(text.slice(position)); return pieces;
 }
 function ArticleBody({ body }) {
-  const blocks = body.trim().replace(/^# [^\r\n]+\r?\n/, '').trim().split(/\r?\n\s*\r?\n/);
+  // <!-- CONDITIONAL: … --> markers flag unconfirmed claims in the Markdown source; they never render.
+  const blocks = body.trim().replace(/<!--[\s\S]*?-->/g, '').replace(/^# [^\r\n]+\r?\n/, '').trim().split(/\r?\n\s*\r?\n/);
   return blocks.map((block, index) => {
     const heading = block.match(/^(#{2,3})\s+(.+)$/), lines = block.split(/\r?\n/);
     if (heading) { const Tag = heading[1].length === 2 ? 'h2' : 'h3'; return <Tag key={index} id={`section-${index}`}>{inline(heading[2], String(index))}</Tag>; }
+    if (lines.length > 2 && lines.every(line => /^\|.*\|$/.test(line)) && /^\|[\s:|-]+\|$/.test(lines[1])) {
+      const cells = line => line.slice(1, -1).split('|').map(cell => cell.trim());
+      return <div className="article-table" key={index}><table><thead><tr>{cells(lines[0]).map((cell, i) => <th key={i} scope="col">{inline(cell, `${index}-h${i}`)}</th>)}</tr></thead><tbody>{lines.slice(2).map((line, r) => <tr key={r}>{cells(line).map((cell, i) => i === 0 ? <th key={i} scope="row">{inline(cell, `${index}-${r}-${i}`)}</th> : <td key={i}>{inline(cell, `${index}-${r}-${i}`)}</td>)}</tr>)}</tbody></table></div>;
+    }
     if (lines.every(line => /^\d+\. /.test(line))) return <ol key={index}>{lines.map((line, i) => <li key={i}>{inline(line.replace(/^\d+\. /, ''), `${index}-${i}`)}</li>)}</ol>;
     if (lines.every(line => /^- /.test(line))) return <ul key={index}>{lines.map((line, i) => <li key={i}>{inline(line.slice(2), `${index}-${i}`)}</li>)}</ul>;
     return <p key={index}>{inline(lines.join(' '), String(index))}</p>;

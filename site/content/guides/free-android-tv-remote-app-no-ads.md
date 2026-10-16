@@ -12,8 +12,8 @@ There's no paid tier and no ad banner, and you don't need to sign up. You instal
 - Share a YouTube link to The Remote and it plays on the TV.
 - Name your TVs and organise them by room, like Living Room TV or Bedroom.
 - Use the everyday controls: navigation and volume on one screen.
-- Find Larger controls, Easy remote, Guest mode, home-screen widgets and language options in the app.
-- Use Guest mode to limit the remote to navigation, play/pause and volume. Hold the TV name for 1 second to exit.
+- Find Larger controls, Easy remote, home-screen widgets and language options in the app.
+- Invite guests on your home Wi-Fi to control the TV from their own Android phones. [See how Guest access works](https://theremote-site.pages.dev/guides/guests-control-google-tv-without-google-account/).
 
 Available controls vary by TV model and firmware. YouTube search and links depend on the TV's YouTube app version.
 
