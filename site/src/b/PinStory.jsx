@@ -133,7 +133,7 @@ export default function PinStory() {
   }, [pinned]);
   // 390 / stacked (PM 21:44): the stills are a plain scroll list, so the active step follows the reader. It is the last
   // step whose top has passed 55% of the viewport (01 until then); scrolling back up walks it back down.
-  const [stackIdx, setStackIdx] = useState(0);
+  const [stackIdx, setStackIdx] = useState(0), [seen, setSeen] = useState(0);
   useEffect(() => {
     if (pinned) return;
     let raf = 0;
@@ -142,7 +142,8 @@ export default function PinStory() {
     read(); addEventListener('scroll', queue, { passive: true }); addEventListener('resize', queue);
     // Each stacked step plays its entrance once as it scrolls in (IntersectionObserver, no ScrollTrigger, no pin).
     const items = [...root.current.querySelectorAll('.b-pin-step')];
-    const io = new IntersectionObserver(list => { for (const e of list) if (e.isIntersecting) { e.target.classList.add('is-seen'); io.unobserve(e.target); } }, { threshold: .2 });
+    // Seen steps live in React state (a classList.add would be wiped by the next render of the step's className).
+    const io = new IntersectionObserver(list => { for (const e of list) if (e.isIntersecting) { const k = items.indexOf(e.target); setSeen(m => m | (1 << k)); io.unobserve(e.target); } }, { threshold: .2 });
     items.forEach(li => io.observe(li));
     return () => { cancelAnimationFrame(raf); removeEventListener('scroll', queue); removeEventListener('resize', queue); io.disconnect(); };
   }, [pinned]);
@@ -157,7 +158,7 @@ export default function PinStory() {
           <p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />01 / YouTube search</p>
           <h2 id="pin-title"><span className="b-h2-desk">Search YouTube <em>from your phone.</em></span><span className="b-h2-m">Type on your phone. <em>Results on the TV.</em></span></h2>
           <p className="b-lede">Type the search on your phone keyboard. The results open on your TV.</p>
-          <ol className="b-pin-steps">{STEPS.map((s, i) => <li key={s.id} className={`b-pin-step ${step === i ? 'is-on' : ''}`} aria-current={step === i ? 'step' : undefined}>
+          <ol className="b-pin-steps">{STEPS.map((s, i) => <li key={s.id} className={`b-pin-step${step === i ? ' is-on' : ''}${seen & (1 << i) ? ' is-seen' : ''}`} aria-current={step === i ? 'step' : undefined}>
             <span className="b-step-no">0{i + 1}</span>
             <SplitText tag="span" text={s.title} className="b-step-title" textAlign="left" splitType="lines" enabled={motion} delay={40} duration={.6} ease="power3.out" from={{ opacity: 0, y: 18 }} to={{ opacity: 1, y: 0 }} />
             <span className="b-step-bar" aria-hidden="true" />
