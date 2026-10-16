@@ -8,3 +8,6 @@ export const AnimatedList = wrap(() => import('./AnimatedList'));
 export const ScrollReveal = wrap(() => import('./ScrollReveal'));
 export const CircularGallery = wrap(() => import('./CircularGallery'));
 export const PixelTransition = wrap(() => import('./PixelTransition'));
+export const CountUp = wrap(() => import('./CountUp'));
+export const Stepper = wrap(() => import('./Stepper'));
+export { Step } from './Stepper';
