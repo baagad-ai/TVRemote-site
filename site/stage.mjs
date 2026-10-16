@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import articles from './src/guides.json' with { type: 'json' };
 import { loadConfig, verifyApkAsset } from './deployment-config.mjs';
+import { publicFiles } from './stage-files.mjs';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const config = loadConfig();
 const apkAsset = config?.apkRelease ? verifyApkAsset(config) : null;
@@ -11,18 +12,8 @@ const relativeTarget = path.relative(path.dirname(root), target);
 if (!relativeTarget || relativeTarget.startsWith('..') || path.isAbsolute(relativeTarget) || target === root) throw Error('Choose a separate staging directory');
 await fs.mkdir(target, { recursive: true });
 if ((await fs.readdir(target)).length) throw Error('Staging directory must be empty to prevent publishing stale files');
-const files = ['index.html', '404.html', 'join/index.html', '.well-known/assetlinks.json', 'privacy/index.html', 'guides/index.html', 'styles.css', 'config.js', 'analytics.js', 'sitemap.xml', 'robots.txt', '_headers', '_redirects', '_routes.json', ...articles.map(a => `guides/${a.slug}/index.html`)];
-for (const folder of ['runtime', 'licenses', 'assets/3d', 'assets/showcase', 'assets/licenses', 'assets/b', 'assets/gallery', 'assets/3d-prod', 'assets/3d-prod/textures']) {
-  for (const entry of await fs.readdir(path.join(root, folder), { withFileTypes: true })) {
-    if (entry.name.startsWith('.') || (folder === 'assets/3d-prod' && /\.md$/i.test(entry.name))) continue;
-    if (folder === 'assets/3d-prod' && entry.isDirectory() && entry.name === 'textures') continue; // staged as its own folder (pin screen textures)
-    if (!entry.isFile()) throw Error('Unexpected nested public asset');
-    if (folder === 'assets/3d' && !/^(?:remote-hero\.glb|room-(?:destinations(?:-(?:living|bedroom)-(?:1440|720)\.webp|-contract\.json|\.glb)|(?:living|bedroom)-mobile\.webp))$/.test(entry.name)) continue; // remote-hero.glb: Concept B pin placeholder
-    if (!/\.(js|json|glb|webp|png|txt|md)$/i.test(entry.name) && !(/^assets\/(?:b|3d-prod)$/.test(folder) && /\.(?:webm|mp4)$/i.test(entry.name)) && !(folder === 'assets/showcase' && /\.svg$/i.test(entry.name))) throw Error('Unexpected public asset type');
-    files.push(folder + '/' + entry.name);
-  }
-}
-files.push('assets/focus-key.svg', 'assets/qr-download.svg', 'assets/og-preview.png', 'assets/work-sans-variable.ttf', 'assets/outfit-variable.ttf');
+const files = await publicFiles(root, articles);
+if (!files.includes('404.html')) throw Error('404.html must be staged at the root of _site');
 for (const relative of files) {
   const output = path.join(target, relative); await fs.mkdir(path.dirname(output), { recursive: true }); await fs.copyFile(path.join(root, relative), output);
 }
