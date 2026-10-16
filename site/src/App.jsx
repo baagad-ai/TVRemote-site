@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { EnvironmentProvider, useEnvironment } from './environment';
-import PhoneStory, { ControlsProof } from './PhoneStory';
-import Destination from './Destination';
-import PinnedStory from './PinnedStory';
-import Download, { DownloadLink, DownloadProvider } from './Download';
+import { DownloadLink, DownloadProvider } from './Download';
+import DownloadFinale from './b/Download';
 import Privacy from './Privacy';
 import NotFound from './NotFound';
 import { GuidesPage, GuidesPreview } from './Guides';
 import faq from './faq.json';
-import QrHint from './QrHint';
-import GuestsSection from './Guests';
-import TrackpadSection from './Trackpad';
 import SmoothScroll from './SmoothScroll';
 import Hero from './b/Hero';
 import PinStory from './b/PinStory';
@@ -18,19 +13,13 @@ import BTrackpad from './b/Trackpad';
 import { Rooms, Guests as BGuests, Gallery, Proof, TypeSplit, Closing as BClosing, TRADEMARK } from './b/Sections';
 
 export function Header({ privacy = false }) {
-  return <header className="site-header page-width"><a className="brand" href={privacy ? '../' : '#top'} aria-label="The Remote, home"><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="32" height="32" /><span>The Remote<span className="brand-period">.</span></span></a><nav aria-label="Main navigation">{privacy ? <a data-track="nav" href="../">Home ↗</a> : <><a data-track="nav" href="#search-proof">How it works</a><a data-track="nav" href="#trackpad">Trackpad</a><a data-track="nav" href="#inside">Your rooms</a><a data-track="nav" href="#guests">Guests</a><a data-track="nav" href="#compatibility">Will it work?</a><a data-track="nav" href="guides/">Guides</a></>}</nav>{!privacy && <DownloadLink button="nav" className="header-cta text-link" />}</header>;
+  return <header className="site-header page-width"><a className="brand" href={privacy ? '../' : '#top'} aria-label="The Remote, home"><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="32" height="32" /><span>The Remote<span className="brand-period">.</span></span></a><nav aria-label="Main navigation">{privacy ? <a data-track="nav" href="../">Home ↗</a> : <><a data-track="nav" href="#search-proof">How it works</a><a data-track="nav" href="#inside">Your rooms</a><a data-track="nav" href="#guests">Guests</a><a data-track="nav" href="#trackpad">Trackpad</a><a data-track="nav" href="#compatibility">Will it work?</a><a data-track="nav" href="guides/">Guides</a></>}</nav>{!privacy && <DownloadLink button="nav" className="header-cta b-pill" />}</header>;
 }
 export function Footer({ privacy = false }) {
   return <footer className="site-footer page-width"><a className="brand" href={privacy ? '../' : '#top'}><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="28" height="28" loading="lazy" decoding="async" /><span>The Remote.</span></a><a href={privacy ? '../' : 'privacy/'}>{privacy ? 'Back to home' : 'Privacy policy'} ↗</a><a href="#top">Back to top ↑</a><p className="footer-trademark">{TRADEMARK}</p></footer>;
 }
-function Compatibility() {
-  return <section className="compatibility-section page-width" id="compatibility" aria-labelledby="compatibility-title"><div><p className="eyebrow">Will it work?</p><h2 id="compatibility-title">Works with Android{'\u00a0'}TV <br /><em>and Google TV.</em></h2></div><div className="compatibility-copy"><p>The Remote works with Android TV and Google TV devices that support Android TV Remote Service v2. Your phone needs Android 8.0 or later. There's no iPhone version.</p><p>Your phone and TV pair over your home Wi-Fi. D-pad controls are the default; available controls vary by TV model and firmware. YouTube search and links depend on the TV's YouTube version. Guests join on the same home Wi-Fi, from their own Android phones.</p><div className="privacy-note"><span aria-hidden="true">⌁</span><p>Remote commands go to your paired TV over the local network, without a developer cloud relay. The Remote doesn't keep a search history.</p></div><a className="text-link" href="privacy/">How your data is handled ↗</a></div></section>;
-}
 function Questions() {
-  return <section className="questions-section page-width" id="faq" aria-labelledby="faq-title"><div><p className="eyebrow">Questions, answered</p><h2 id="faq-title">Free, no account, <br />installs from this site.</h2></div><div className="faq-list">{faq.map((item, i) => <details key={item.q} data-track="faq-open" data-track-item={`faq-${String(i + 1).padStart(2, '0')}`}><summary>{item.q}</summary><p>{item.a}</p></details>)}</div></section>;
-}
-function Closing() {
-  return <section className="closing-section"><div className="page-width"><p className="eyebrow">Ready when you are</p><h2>A better remote.<br />Already in your pocket.</h2><DownloadLink button="footer" /><QrHint spot="closing" /><p className="fine-print">Free Android APK. No ads. No account.</p></div></section>;
+  return <section className="questions-section page-width" id="faq" aria-labelledby="faq-title"><div><p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />Questions, answered</p><h2 id="faq-title">Free, no account, <em>installs from this site.</em></h2></div><div className="faq-list">{faq.map((item, i) => <details key={item.q} data-track="faq-open" data-track-item={`faq-${String(i + 1).padStart(2, '0')}`}><summary>{item.q}</summary><p>{item.a}</p></details>)}</div></section>;
 }
 function MobileCta() {
   const ref = useRef(null), [visible, setVisible] = useState(false), { ready } = useEnvironment();
@@ -57,5 +46,5 @@ function MobileCta() {
 // Concept B "Living Room" (approved 16 Oct 2026): hero -> the single pin -> trackpad bento -> rooms -> guests ->
 // gallery -> proof band -> type split -> download, guides, FAQ, lime close. The earlier landing sections stay in
 // the repo (PhoneStory, PinnedStory, Guests, Trackpad, ControlsProof) but are not rendered.
-function Landing({ config }) { return <><Header /><main id="main" tabIndex={-1}><Hero /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><Download /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
+function Landing({ config }) { return <><Header /><main id="main" tabIndex={-1}><Hero /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><DownloadFinale /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
 export default function App({ route = 'landing', config }) { return <EnvironmentProvider><SmoothScroll /><DownloadProvider config={config}><a className="skip-link" href="#main">Skip to content</a>{route === 'not-found' ? <NotFound config={config} /> : route === 'privacy' ? <Privacy /> : route.startsWith('guides') ? <GuidesPage slug={route.split('/')[1]} /> : <Landing config={config} />}</DownloadProvider></EnvironmentProvider>; }

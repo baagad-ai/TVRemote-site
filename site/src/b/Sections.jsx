@@ -1,112 +1,120 @@
-// Concept B sections 4-9: rooms moment, guests stack, gallery, proof band, type split, lime close, footer.
+// Concept B sections 4-9 and the lime close (CONCEPT-B-GUIDE.md §4-9, board gen.py:115-124, 193-268).
 import { useEffect, useRef, useState } from 'react';
 import PixelTransition from '../components/rb/PixelTransition';
 import CircularGallery from '../components/rb/CircularGallery';
+import AnimatedList from '../components/rb/AnimatedList';
+import ScrollReveal from '../components/rb/ScrollReveal';
 import ScrollStack, { ScrollStackItem } from '../components/ScrollStack';
-import { DownloadCount } from '../DownloadCount.jsx';
+import { LiveCount } from './counter';
 import { DownloadLink } from '../Download';
-import QrHint from '../QrHint';
 import { useEnvironment } from '../environment';
 import { useGpuLease, useInView, lowEnd } from './lease';
 import { ROOMS } from './media';
 
-// 4 · Full-bleed rooms moment. Chips swap the lit room with PixelTransition (instant under reduced motion); only the
-// selected room's loop is loaded and playing (Build's loops; posters until they land).
-function RoomMedia({ room, play }) {
-  // Build's room loops are seamless 8-10 s loops; the section's Pause control stops them.
-  const r = ROOMS[room], video = useRef(null);
-  useEffect(() => { const v = video.current; if (!v) return; if (play) v.play().catch(() => {}); else v.pause(); }, [play]);
-  const alt = room === 'living' ? 'Illustrated rooms: the Living room is lit in lime, the Bedroom is dark.' : 'Illustrated rooms: the Bedroom is lit in lime, the Living room is dark.';
-  return <div className="room-media"><picture><source media="(max-width: 899px)" srcSet={r.crop} /><img src={r.poster} width="1440" height="810" alt={alt} loading="lazy" decoding="async" /></picture>
-    {play && r.mp4 && <video ref={video} data-track-loop={`rooms-${room}`} muted playsInline loop preload="metadata" poster={r.poster} aria-hidden="true">{r.webm && <source src={r.webm} type="video/webm" />}<source src={r.mp4} type="video/mp4" /></video>}</div>;
+const Eyebrow = ({ children, className = '' }) => <p className={`b-eyebrow ${className}`}><span className="b-dot" aria-hidden="true" />{children}</p>;
+const Frame = ({ src, alt, w = 342, h = 706, className = '' }) => <div className={`b-frame ${className}`}><img src={src} alt={alt} width={w} height={h} loading="lazy" decoding="async" /></div>;
+
+// 4 · Rooms: the isometric rooms render bleeds off the right and top under a radial vignette; chips swap the lit
+// room with React Bits PixelTransition (0.5 s; instant under reduced motion). Slots per room in media.js
+// (Build's loops/posters once whitelisted; the board render until then). Only the selected room's loop plays.
+const ROOM_LIST = [['living', 'Living room'], ['bedroom', 'Bedroom'], ['kitchen', 'Kitchen']];
+function RoomMedia({ id, play }) {
+  const r = ROOMS[id], video = useRef(null);
+  useEffect(() => { const v = video.current; if (!v) return; v.playbackRate = 1; if (play) v.play().catch(() => {}); else v.pause(); }, [play]);
+  return <div className="room-media"><img src={r.poster} width="1200" height="936" alt={r.board ? 'Illustrated rooms: a living room lit in lime and a bedroom beside it.' : `Illustrated rooms with the ${id} lit in lime.`} loading="lazy" decoding="async" />
+    {play && r.mp4 && <video ref={video} data-track-loop={`rooms-${id}`} muted playsInline loop preload="metadata" poster={r.poster} aria-hidden="true">{r.webm && <source src={r.webm} type="video/webm" />}<source src={r.mp4} type="video/mp4" /></video>}</div>;
 }
 export function Rooms() {
-  const { ready, motion } = useEnvironment(), [room, setRoom] = useState('living'), [paused, setPaused] = useState(false), wrap = useRef(null), inView = useInView(wrap, { threshold: .4 });
-  const loops = Boolean(ROOMS.living.mp4 || ROOMS.bedroom.mp4), playing = motion && inView && !paused;
-  useEffect(() => { const card = wrap.current?.querySelector('.pixelated-image-card'); if (card) { card.setAttribute('tabindex', '-1'); card.removeAttribute('role'); } }, [ready]);
-  return <section className="b-rooms" id="inside" aria-labelledby="rooms-title">
-    <div ref={wrap} className="b-rooms-media">
-      <PixelTransition firstContent={<RoomMedia room="living" play={playing && room === 'living'} />} secondContent={<RoomMedia room="bedroom" play={playing && room === 'bedroom'} />} active={room === 'bedroom'} trigger="click" gridSize={10} pixelColor="#0b0e0d" animationStepDuration={.4} aspectRatio="auto" className="b-rooms-pixels" />
+  const { motion } = useEnvironment(), [room, setRoom] = useState('living'), [swap, setSwap] = useState({ from: 'living', to: 'living', n: 0, on: false });
+  const wrap = useRef(null), inView = useInView(wrap, { threshold: .4 });
+  const pick = id => { if (id === room) return; setRoom(id); setSwap(s => ({ from: s.to, to: id, n: s.n + 1, on: false })); };
+  useEffect(() => { if (swap.n && !swap.on) { const t = requestAnimationFrame(() => setSwap(s => ({ ...s, on: true }))); return () => cancelAnimationFrame(t); } }, [swap]);
+  const playing = motion && inView;
+  return <section ref={wrap} className="b-rooms" id="inside" aria-labelledby="rooms-title">
+    <div className="b-rooms-media">
+      {motion ? <div inert className="b-rooms-pixwrap"><PixelTransition key={swap.n} firstContent={<RoomMedia id={swap.from} play={playing && !swap.on && swap.from === room} />} secondContent={<RoomMedia id={swap.to} play={playing && swap.on} />} active={swap.on} trigger="click" gridSize={10} pixelColor="#0b0e0d" animationStepDuration={.5} aspectRatio="auto" className="b-rooms-pixels" /></div>
+        : <RoomMedia id={room} play={false} />}
     </div>
-    <div className="b-rooms-copy b-wrap">
-      <p className="b-eyebrow">Rooms</p>
+    <div className="b-rooms-vignette" aria-hidden="true" />
+    <div className="b-wrap b-rooms-copy">
+      <Eyebrow>Rooms</Eyebrow>
       <h2 id="rooms-title">The right TV. <em>The right room.</em></h2>
-      <p className="b-body">Name each TV and pick its room when you pair it. Your saved TVs sit in one list, each with its room, so the search goes to the screen you meant.</p>
-      <div className="b-chips" role="group" aria-label="Choose an illustrated room">{[['living', 'Living room'], ['bedroom', 'Bedroom']].map(([id, name]) => <button key={id} type="button" className="b-chip" aria-pressed={room === id} onClick={() => setRoom(id)}><span className="room-dot" aria-hidden="true" />{name}</button>)}{loops && motion && <button type="button" className="b-chip" aria-pressed={paused} onClick={() => setPaused(p => !p)}>{paused ? 'Play' : 'Pause'} animation</button>}</div>
-      <p className="b-small" role="status">{room === 'living' ? 'Living room' : 'Bedroom'} lit in this illustration.</p>
-      <figure className="b-rooms-inset"><div className="b-phone-shell"><img src="assets/showcase/pair-name-and-room.png" width="1080" height="2340" loading="lazy" decoding="async" alt="Pairing a TV in The Remote: the name Living Room TV, with the Living room chip selected." /></div></figure>
+      <p className="b-lede">Name each TV and pick its room when you pair it. Your saved TVs sit in one list, each with its room.</p>
+      <div className="b-chips" role="group" aria-label="Rooms">{ROOM_LIST.map(([id, name]) => <button key={id} type="button" className="b-chip" aria-pressed={room === id} onClick={() => pick(id)}>{room === id && <span className="room-dot" aria-hidden="true" />}{name}</button>)}</div>
+      <div className="b-rooms-inset"><Frame src="assets/board/pair-rooms-540.webp" w={540} h={1170} alt="Pairing a TV in The Remote: the code from the TV screen, the name Living Room TV and the room chips Living room, Bedroom and Kitchen." /><p className="b-small">Real pairing screen: name the TV, pick the room.</p></div>
     </div>
   </section>;
 }
-// 5 · Guests: the repo's ScrollStack (native scroll; plain list on narrow screens, reduced motion and focus).
+// 5 · Guests: the repo's ScrollStack (native scroll), cards settle at 0/70/140 px with scale .92/.96/1 and release
+// before the gallery; a plain list on narrow screens, under reduced motion and with focus inside.
 const GUESTS = [
-  ['Invite', 'Invite a guest from The Remote on your phone. Invites work on your home Wi-Fi only, and unused invite codes expire after 2 minutes.', 'assets/showcase/guests-invite.png', 'Inviting a guest to Living Room TV in The Remote: the name My phone, a QR code and an invite code, waiting for the guest.'],
-  ['Their phone', "They scan the QR code with their own phone's camera, or type the code, then control the TV from their own Android phone, even when yours is put away.", 'assets/showcase/guests-guest-remote.png', "A guest's own phone with The Remote connected to Living Room TV."],
-  ['Your list', 'Remove guests any time, or limit one to Media and volume only. Every Primary remote can invite and remove guests.', 'assets/showcase/guests-primary-guest-list.png', 'The guest list for Living Room TV on a Primary remote: two guests with Remove buttons, an Invite a guest button, and This phone, My phone, connected.']
+  ['Invite a guest', 'Guests scan the QR with their phone camera, or type the code. Codes expire after 2 minutes.', 'assets/board/guests-invite-540.webp', 'Inviting a guest to Living Room TV in The Remote: the name My phone, a QR code and an invite code, waiting for the guest.'],
+  ['Their phone, full remote', 'Arrows, media, volume, YouTube search and links, on their own Android phone.', 'assets/board/guests-guest-remote-540.webp', "A guest's own phone with The Remote connected to Living Room TV."],
+  ['Your list', 'Remove guests any time, or limit one to Media and volume only.', 'assets/board/guests-primary-guest-list-540.webp', 'The guest list for Living Room TV on a Primary remote: two guests on their guest phones with Remove buttons, an Invite a guest button, and This phone, My phone, connected.']
 ];
 export function Guests() {
   return <section className="b-section b-guests" id="guests" data-track-section="guests" aria-labelledby="guests-title">
     <div className="b-wrap b-guests-grid">
-      <div className="b-guests-head"><p className="b-eyebrow">Friends over</p><h2 id="guests-title">Hand out the remote, <em>not your phone.</em></h2>
-        <p className="b-body">Invite a guest from The Remote. They join on your home Wi-Fi from their own Android phone. No server stores guest data.</p>
-        <p className="b-small">Guests need The Remote on an Android phone (Android 8.0 or later). There&rsquo;s no iPhone version. Guests join your home Wi-Fi, not a separate guest network.</p>
-        <a className="b-link" data-track="guide" href="guides/guests-control-google-tv-without-google-account/">How Guest access works ↗</a></div>
-      <div className="b-guests-stack"><ScrollStack itemScale={.04} baseScale={.92} itemStackDistance={28}>{GUESTS.map(([label, text, src, alt], i) => <ScrollStackItem key={label} itemClassName="b-guest-card">
-        <div><p className="b-step-tag">Step {i + 1}</p><h3 className="b-h3">{label}</h3><p className="b-body">{text}</p></div>
-        <div className="b-phone-shell"><img src={src} alt={alt} width="1080" height="2340" loading="lazy" decoding="async" /></div>
-      </ScrollStackItem>)}<div className="scroll-stack-end" aria-hidden="true" /></ScrollStack></div>
+      <div className="b-guests-head"><Eyebrow>Friends over</Eyebrow><h2 id="guests-title">Hand out the remote, <em>not your phone.</em></h2>
+        <p className="b-lede">Invite a guest from The Remote. They join on your home Wi-Fi from their own Android phone.</p></div>
+      <div className="b-guests-stack"><ScrollStack itemScale={.04} baseScale={.92} itemStackDistance={70}>{GUESTS.map(([title, text, src, alt], i) => <ScrollStackItem key={title} itemClassName="b-guest-card">
+        <div><span className="b-tag">Step {i + 1}</span><h3>{title}</h3><p className="b-lede">{text}</p></div>
+        <Frame src={src} alt={alt} w={540} h={1170} />
+      </ScrollStackItem>)}</ScrollStack></div>
     </div>
   </section>;
 }
-// 6 · Real screenshots. CircularGallery (WebGL) only on a fine-pointer desktop holding the GPU lease; otherwise a
-// flat scroll-snap row of the same images (also the reduced-motion view).
+// 6 · Gallery: React Bits CircularGallery (OGL; GPU lease 'circular-gallery') on a fine-pointer desktop, with the
+// board's 7 framed phones; drag / wheel / arrow keys turn the arc, no autoplay. Elsewhere (touch, reduced motion, no
+// WebGL, before the lease) the same 7 phones sit on the board's static arc (390: a swipe row).
 const SHOTS = [
   ['remote-home', 'Remote', 'The remote for Living Room TV: D-pad, OK, Back, Home, Play and volume, with a Search YouTube button.'],
   ['youtube-search', 'YouTube search', 'The YouTube search sheet for Living Room TV, with lofi beats typed on the phone keyboard.'],
-  ['youtube-share', 'Share a link', "The share sheet: a YouTube link, Living Room TV selected, and an Open on Living room button."],
+  ['youtube-share', 'Share a link', 'The share sheet: a YouTube link, Living Room TV selected, and an Open on Living room button.'],
   ['your-tvs-g1', 'Your TVs', 'The Your TVs list: Living Room TV in Living room, connected.'],
-  ['pair-rooms', 'Pair and pick a room', 'Pairing a TV: the code from the TV screen, the name Living Room TV and the Living room chip.'],
-  ['guests-primary-guest-list', 'Guests', 'The guest list for Living Room TV, with This phone shown as My phone.']
+  ['pair-name-and-room', 'Name and room', 'Pairing a TV: the name Living Room TV and the Living room chip selected.'],
+  ['guests-guest-remote', 'Guest remote', "A guest's own phone with The Remote connected to Living Room TV."],
+  ['trackpad-pad', 'Trackpad', 'The trackpad for Living Room TV: the whole screen is a pad.']
 ];
 export function Gallery() {
-  const { ready, gpu } = useEnvironment(), ref = useRef(null), inView = useInView(ref, { threshold: .3 }), [desktop, setDesktop] = useState(false);
+  const { ready, gpu, motion } = useEnvironment(), ref = useRef(null), inView = useInView(ref, { threshold: .3 }), [desktop, setDesktop] = useState(false);
   useEffect(() => { if (!ready) return; const q = matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)'), u = () => setDesktop(q.matches && !lowEnd()); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
-  const lease = useGpuLease(ready && gpu && desktop && inView, 'circular-gallery');
+  const lease = useGpuLease(ready && gpu && motion && desktop && inView, 'circular-gallery');
   return <section className="b-section b-gallery" id="screens" aria-labelledby="gallery-title">
-    <div className="b-wrap"><p className="b-eyebrow">The real app</p><h2 id="gallery-title">Every screen, <em>as it ships.</em></h2>
-      <p className="b-body">Real captures from The Remote on an Android phone. {lease ? 'Drag, scroll or use the arrow keys to turn the row.' : 'Swipe or scroll the row.'}</p></div>
+    <div className="b-wrap"><Eyebrow>The real app</Eyebrow><h2 id="gallery-title">Every screen, <em>as it ships.</em></h2></div>
     <div ref={ref} className={`b-gallery-box ${lease ? 'is-live' : ''}`}>
-      {lease ? <CircularGallery items={SHOTS.map(([n, text, alt]) => ({ image: `assets/gallery/${n}-720.webp`, text, alt }))} bend={2} textColor="#eeeee6" borderRadius={.06} scrollEase={.05} autoScroll={0} openOnClick={false} font="500 16px Outfit, system-ui, sans-serif" dpr={1.5} className="b-circular" />
-        : <ul className="b-shot-row">{SHOTS.map(([n, text, alt]) => <li key={n}><figure><div className="b-phone-shell"><img src={`assets/gallery/${n}-720.webp`} alt={alt} width="720" height="1560" loading="lazy" decoding="async" /></div><figcaption>{text}</figcaption></figure></li>)}</ul>}
+      {lease ? <CircularGallery items={SHOTS.map(([n, text, alt]) => ({ image: `assets/board/gallery-${n}.webp`, text, alt }))} bend={1.4} itemSize={.62} itemAspect={440 / 953} gap={.1} showTitles={false} shadow={0} fadeEdges={0} textColor="#eeeee6" borderRadius={.07} scrollEase={.05} autoScroll={0} openOnClick={false} snap={false} intro={false} dpr={1.5} className="b-circular" />
+        : <ul className="b-arc">{SHOTS.map(([n, , alt], i) => <li key={n} style={{ '--i': i - 3 }}><img src={`assets/board/gallery-${n}.webp`} alt={alt} width="440" height="953" loading="lazy" decoding="async" /></li>)}</ul>}
     </div>
   </section>;
 }
-// 7 · Proof band: facts that spring in once (70 ms stagger) + the live counter, unchanged. No other numbers.
+// 7 · Proof: React Bits AnimatedList rows (spring in once, 70 ms stagger) + the live counter, unchanged.
 const FACTS = ['Free', 'No ads', 'No account', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
+const LIST_VARS = { '--al-tile': '#151b16', '--al-tile-edge': '#354032', '--al-tile-highlight': 'transparent', '--al-tile-shadow': 'none', '--al-ink': '#eeeee6', '--al-muted': '#b0b9a2', '--al-ring': 'transparent', '--al-ring-fill': 'transparent', '--al-hover': 'none', '--al-press': 'none', '--al-active': 'none' };
 export function Proof() {
-  const ref = useRef(null), seen = useInView(ref, { threshold: .3 }), [shown, setShown] = useState(false), { motion } = useEnvironment();
-  useEffect(() => { if (seen) setShown(true); }, [seen]);
+  const { ready, motion } = useEnvironment();
   return <section className="b-section b-proof" aria-labelledby="proof-title"><div className="b-wrap b-proof-grid">
-    <div><p className="b-eyebrow">Straight facts</p><h2 id="proof-title">No catch. <em>Just a remote.</em></h2><div className="b-count-slot"><DownloadCount className="proof-count" /></div></div>
-    <ul ref={ref} className={`b-facts ${shown || !motion ? 'is-in' : ''}`}>{FACTS.map((f, i) => <li key={f} style={{ transitionDelay: `${i * 70}ms` }}><span className="b-fact-dot" aria-hidden="true" />{f}</li>)}</ul>
+    <div><Eyebrow>Straight facts</Eyebrow><h2 id="proof-title">No catch. <em>Just a remote.</em></h2><LiveCount className="is-proof" /><p className="b-small b-note">The live counter is the only number on the page.</p></div>
+    {ready && motion ? <AnimatedList className="b-facts-list" items={FACTS} renderItem={f => <><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></>} frame={false} showGradients={false} displayScrollbar={false} selectOnHover={false} enableArrowNavigation={false} animation="pop" animateOnce stagger={.07} radius={28} gap={12} width={520} maxHeight="none" style={LIST_VARS} />
+      : <ul className="b-facts">{FACTS.map(f => <li key={f}><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></li>)}</ul>}
   </div></section>;
 }
-// 8 · Typographic split: compatibility + privacy, a 1 px lime line draws once (phone -> home Wi-Fi -> TV, no cloud).
+// 8 · Compatibility split: the Phone -> Home Wi-Fi -> Living Room TV line draws once (0.8 s); React Bits ScrollReveal
+// on the paragraph. The privacy sentence is the approved one, verbatim.
 export function TypeSplit() {
-  const ref = useRef(null), seen = useInView(ref, { threshold: .4 }), [drawn, setDrawn] = useState(false);
+  const ref = useRef(null), seen = useInView(ref, { threshold: .4 }), [drawn, setDrawn] = useState(false), { ready, motion } = useEnvironment();
   useEffect(() => { if (seen) setDrawn(true); }, [seen]);
+  const LEDE = "The Remote works with Android TV and Google TV devices that support Android TV Remote Service v2. Your phone needs Android 8.0 or later. There's no iPhone version.";
   return <section ref={ref} className={`b-section b-split ${drawn ? 'is-drawn' : ''}`} id="compatibility" aria-labelledby="compatibility-title"><div className="b-wrap b-split-grid">
-    <div><p className="b-eyebrow">Will it work?</p><h2 id="compatibility-title">Works with Android{'\u00a0'}TV <em>and Google{'\u00a0'}TV.</em></h2>
-      <div className="b-line" aria-hidden="true"><span className="b-node is-lime">Phone</span><svg viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-node">Home Wi-Fi</span><svg viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-node">Living Room TV</span></div></div>
-    <div className="b-split-copy"><p className="b-body">The Remote works with Android{'\u00a0'}TV and Google{'\u00a0'}TV devices that support Android{'\u00a0'}TV Remote Service v2. Your phone needs Android 8.0 or later. There&rsquo;s no iPhone version.</p>
-      <p className="b-body">Your phone and TV pair over your home Wi-Fi. Available controls vary by TV model and firmware. YouTube search and links depend on the TV&rsquo;s YouTube version.</p>
-      <p className="b-small">Remote commands go to your paired TV over the local network, without a developer cloud relay. The Remote doesn&rsquo;t keep a search history.</p>
-      <a className="b-link" href="privacy/">How your data is handled ↗</a></div>
+    <div><Eyebrow>Will it work?</Eyebrow><h2 id="compatibility-title">Works with Android{'\u00a0'}TV <em>and Google{'\u00a0'}TV.</em></h2>
+      <div className="b-line" aria-hidden="true"><span className="b-chip is-on">Phone</span><svg viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip">Home Wi-Fi</span><svg className="is-fade" viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip">Living Room TV</span></div></div>
+    <div className="b-split-copy">{ready && motion ? <ScrollReveal as="p" baseOpacity={.2} enableBlur={false} baseRotation={0} containerClassName="b-reveal" textClassName="b-lede">{LEDE}</ScrollReveal> : <p className="b-lede">{LEDE}</p>}
+      <p className="b-small">Remote commands go to your paired TV over the local network, without a developer cloud relay. The Remote doesn&rsquo;t keep a search history.</p><a className="b-text-link" href="privacy/">How your data is handled ↗</a></div>
   </div></section>;
 }
-// 9 · Lime close band with the room still. CTA, QR and fine print as today.
+// 9c · Lime close band: copy left, the approved room still 640x460 r28 on the right.
 export function Closing() {
-  return <section className="closing-section b-closing"><div className="b-wrap b-closing-grid"><div><p className="b-eyebrow">Ready when you are</p><h2>A better remote. Already in your pocket.</h2><div className="b-closing-cta"><DownloadLink button="footer" /></div><QrHint spot="closing" /><p className="fine-print">Free Android APK. No ads. No account.</p></div>
-    <figure className="b-closing-still"><img src="assets/b/hero-placeholder-960.webp" width="960" height="540" loading="lazy" decoding="async" alt="The illustrated living room again: the phone with The Remote in front of the drawn TV." /></figure></div></section>;
+  return <section className="b-closing"><div className="b-wrap b-closing-grid"><div><Eyebrow className="on-lime">Ready when you are</Eyebrow><h2>A better remote. Already in your pocket.</h2><div className="b-closing-cta"><DownloadLink button="footer" /></div><p className="b-closing-fine">Free Android APK. No ads. No account.</p></div>
+    <figure className="b-closing-still"><img src="assets/board/band-1280.webp" width="1280" height="920" loading="lazy" decoding="async" alt="The illustrated living room: the phone with The Remote in front of the drawn TV, lit by a lime light under the console." /></figure></div></section>;
 }
 export const TRADEMARK = 'YouTube is a trademark of Google LLC. The Remote is not affiliated with or endorsed by Google or YouTube.';

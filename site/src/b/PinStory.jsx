@@ -1,54 +1,65 @@
-// 2 · The single pinned section: YouTube search -> results on the TV -> a shared link playing (3 steps, 300vh).
-// One ScrollTrigger (pin + pinSpacing, end +=300%, scrub .5, snap 0/.5/1) that releases with the last step frozen.
-// Off below 900 px wide or 640 px tall, under reduced motion, and while keyboard focus is inside: then the three
-// steps stack with a still each. The live three.js scene (pin-runtime.js) loads only when the pin nears view, while
-// this section holds the page's one GPU lease; otherwise, and until it is ready, the DOM stills show in the same box.
+// 2 · The single pinned section (CONCEPT-B-GUIDE.md §2, board gen.py:173-188): media LEFT (the drawn TV 720px wide,
+// bleeding off the left edge with the lime glow, the phone overlapping it, the "sent" bubble), copy RIGHT.
+// Owner ruling 16 Oct: until Build's re-render matches the board, the 3-step story is driven by the board's own 2D
+// frames instead of the GLB (3d-prod is whitelisted per slot in media.js; empty now). One ScrollTrigger pin
+// (pinSpacing, end +=400%, scrub 1, no snap) maps scroll to a progress with held plateaus: step 1 holds 0-.22, eases
+// to step 2 (.22-.39), step 2 holds .39-.61 (mid-scroll), eases to step 3 (.61-.78), step 3 holds to the release.
+// Each move is a slow sine in-out dolly of the whole scene plus crossfades of the TV and phone screens.
+// Off below 900 px wide or 640 px tall, under reduced motion, and while keyboard focus is inside: then three stacked
+// stills (phone over a TV crop). Analytics: remote:loop k='pin' when the pin becomes active.
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SplitText from '../components/SplitText';
-import DrawnTV from './DrawnTV';
 import { useEnvironment } from '../environment';
-import { useGpuLease, useInView, lowEnd } from './lease';
-import { scrollIdle } from '../scroll-idle';
-import { PIN } from './media';
 
 gsap.registerPlugin(ScrollTrigger);
 const SENT = 'YouTube search action sent. Check the TV.';
 export const STEPS = [
-  { id: 'search', title: 'Type a YouTube search on your phone.', text: 'The Remote opens a YouTube search sheet for the TV you picked. You type on your phone keyboard, not the TV\u2019s letter grid.', tv: { state: 'home' }, phone: 'assets/showcase/youtube-search.png', phoneAlt: 'The YouTube search sheet in The Remote for Living Room TV, with lofi beats typed on the phone keyboard.', tvAlt: 'The drawn TV on its home row, before anything is sent.' },
-  { id: 'results', title: 'Send, and the results open on the TV.', text: `Tap search and the app confirms: \u201c${SENT}\u201d The TV opens YouTube with the results.`, tv: { state: 'results', focus: 0 }, phone: 'assets/showcase/youtube-search.png', phoneAlt: 'The YouTube search sheet in The Remote with lofi beats typed, ready to send to Living Room TV.', tvAlt: 'The drawn TV showing YouTube results for lofi beats, with the first result highlighted.', chip: SENT },
-  { id: 'link', title: 'Share a YouTube link from your phone. It plays on the TV.', text: 'Share a YouTube link to The Remote, check it, pick the TV and open it. Search and links depend on the TV\u2019s YouTube version.', tv: { state: 'playing' }, phone: 'assets/showcase/youtube-share.png', phoneAlt: "The Remote's share sheet: a YouTube link, Living Room TV in Living room selected, and an Open on Living room button.", tvAlt: 'The drawn TV playing the shared YouTube video.' }
+  { id: 'search', title: 'Type a YouTube search on your phone keyboard.', tv: 'assets/board/tv-home-1440.webp', tvAlt: 'The drawn TV with YouTube open and an empty search box.', phone: 'assets/board/loop1-typing-keyframe-2.webp', phoneAlt: 'The Remote on a phone: the YouTube search sheet for Living Room TV, with lofi hip being typed on the phone keyboard.' },
+  { id: 'results', title: `Send it. \u201c${SENT}\u201d`, tv: 'assets/board/tv-results-f0-1440.webp', tvAlt: 'The drawn TV showing YouTube results for lofi beats, with the first result highlighted.', phone: 'assets/board/loop1-typing-keyframe-4.webp', phoneAlt: `The Remote's remote screen for Living Room TV with the line \u201c${SENT}\u201d`, chip: SENT },
+  { id: 'link', title: 'Share a YouTube link. Review it, pick the TV, open it.', tv: 'assets/board/tv-playing-1440.webp', tvAlt: 'The drawn TV playing the shared YouTube video.', phone: 'assets/board/youtube-share-540.webp', phoneAlt: "The Remote's share sheet: a YouTube link, Living Room TV selected, and an Open on Living room button." }
 ];
-const SWAPS = [0, .43, .79]; // placeholder swap points (pin-runtime PLACEHOLDER); Build's pin-contract.json replaces them
-const stepFor = (p, swaps) => swaps.reduce((i, at, j) => p >= at ? j : i, 0);
+// Held plateaus (step index while holding) and eased moves between them.
+const HOLD = [[0, .22], [.39, .61], [.78, 1]];
+const sine = t => -(Math.cos(Math.PI * t) - 1) / 2;
+export function stepValue(p) { // continuous 0..2 with plateaus
+  if (p <= HOLD[0][1]) return 0;
+  if (p < HOLD[1][0]) return sine((p - HOLD[0][1]) / (HOLD[1][0] - HOLD[0][1]));
+  if (p <= HOLD[1][1]) return 1;
+  if (p < HOLD[2][0]) return 1 + sine((p - HOLD[1][1]) / (HOLD[2][0] - HOLD[1][1]));
+  return 2;
+}
+// "Camera dolly" per step (board frame = step 2 at scale 1): close on the phone, the board frame, a slight pull-back.
+const CAM = [{ s: 1.06, x: 14, y: -10 }, { s: 1, x: 0, y: 0 }, { s: .97, x: -8, y: 6 }];
+const lerp = (a, b, t) => a + (b - a) * t;
 
-export function PinStill({ index, eager = false }) {
-  const s = STEPS[index], still = PIN.stills[index], crop = PIN.stills4x5[index];
-  // Build's stills: 16:10 renders (1080x675) on desktop, 4:5 phone-over-TV (624x780) below 900px. Boxes are reserved by aspect-ratio.
-  if (still) return <figure className="pin-still is-render"><picture>{crop && <source media="(max-width: 899px)" srcSet={crop} width="624" height="780" />}<img src={still} alt={`${s.tvAlt} ${s.phoneAlt}`} width="1080" height="675" loading={eager ? 'eager' : 'lazy'} decoding="async" /></picture></figure>;
-  return <figure className="pin-still is-drawn">
-    <div className="pin-still-tv"><DrawnTV {...s.tv} idPrefix={`pin${index}`} title={s.tvAlt} /></div>
-    <div className="pin-still-phone"><img src={s.phone} alt={s.phoneAlt} width="1080" height="2340" loading="lazy" decoding="async" /></div>
-    {s.chip && <p className="pin-chip">{s.chip}</p>}
+function Scene({ v, eager = false }) {
+  const i = Math.min(1, Math.floor(v)), t = v - i, a = CAM[i], b = CAM[Math.min(2, i + 1)];
+  const cam = { s: lerp(a.s, b.s, t), x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t) };
+  const op = k => Math.max(0, 1 - Math.abs(v - k));
+  return <div className="pin-scene" style={{ '--cam-s': cam.s.toFixed(4), '--cam-x': `${cam.x.toFixed(2)}px`, '--cam-y': `${cam.y.toFixed(2)}px` }}>
+    <div className="pin-tv">{STEPS.map((s, k) => <img key={s.id} src={s.tv} alt="" width="1440" height="810" loading={eager ? 'eager' : 'lazy'} decoding="async" style={{ opacity: k === 0 ? 1 : op(k) }} />)}</div>
+    <div className="pin-phone b-frame">{STEPS.map((s, k) => <img key={s.id} src={s.phone} alt="" width="342" height="706" loading="lazy" decoding="async" style={{ opacity: k === 0 ? 1 : op(k) }} />)}</div>
+    <p className="pin-bubble" style={{ opacity: op(1) }}>{SENT}</p>
+  </div>;
+}
+export function PinStill({ index }) {
+  const s = STEPS[index];
+  return <figure className="pin-still">
+    <div className="pin-still-tv"><img src={s.tv} alt={s.tvAlt} width="1440" height="810" loading="lazy" decoding="async" /></div>
+    <div className="pin-still-phone b-frame"><img src={s.phone} alt={s.phoneAlt} width="342" height="706" loading="lazy" decoding="async" /></div>
   </figure>;
 }
-function svgUrl(node) {
-  const markup = new XMLSerializer().serializeToString(node);
-  return URL.createObjectURL(new Blob([markup], { type: 'image/svg+xml' }));
-}
 export default function PinStory() {
-  const { ready, motion, gpu } = useEnvironment(), root = useRef(null), stage = useRef(null), canvasHost = useRef(null), runtime = useRef(null);
-  const [fits, setFits] = useState(false), [focusMode, setFocusMode] = useState(false), [step, setStep] = useState(0), [live, setLive] = useState(false);
+  const { ready, motion } = useEnvironment(), root = useRef(null), stage = useRef(null);
+  const [fits, setFits] = useState(false), [focusMode, setFocusMode] = useState(false), [v, setV] = useState(1);
   const pinned = ready && motion && fits && !focusMode;
-  const near = useInView(root, { rootMargin: '50% 0px 50% 0px' });
-  const lease = useGpuLease(pinned && gpu && near && !lowEnd(), 'tv-scene');
   useEffect(() => {
     if (!ready) return;
     const update = () => setFits(innerWidth >= 900 && innerHeight >= 640); update();
     addEventListener('resize', update); return () => removeEventListener('resize', update);
   }, [ready]);
-  // Keyboard focus inside the section turns the pin off (stacked steps); it comes back once focus has left.
   useEffect(() => {
     const node = root.current;
     const enter = event => { if (event.target.matches(':focus-visible')) setFocusMode(true); };
@@ -56,59 +67,35 @@ export default function PinStory() {
     node.addEventListener('focusin', enter); node.addEventListener('focusout', leave);
     return () => { node.removeEventListener('focusin', enter); node.removeEventListener('focusout', leave); };
   }, []);
-  // The pin. Keeps the reader's place when it switches on or off above the viewport.
   useEffect(() => {
-    if (!pinned) return;
+    if (!pinned) { setV(1); return; }
     const node = root.current, before = node.getBoundingClientRect(), wasAbove = before.bottom < 0;
-    const proxy = { p: 0 }, swaps = () => runtime.current?.contract?.steps?.map(s => s.swapAt) || SWAPS;
-    const tl = gsap.timeline({ scrollTrigger: { trigger: stage.current, pin: true, pinSpacing: true, start: 'top top', end: '+=300%', scrub: .5, anticipatePin: 1, snap: { snapTo: [0, .5, 1], duration: .35, ease: 'power2.out' }, invalidateOnRefresh: true,
-      // Analytics (INTEGRATION.md §4): the pin animation is running on screen -> loop_play k=pin (deduped by analytics.js).
-      onToggle: self => { if (self.isActive) document.dispatchEvent(new CustomEvent('remote:loop', { detail: { k: 'pin', el: node } })); } } });
-    tl.to(proxy, { p: 1, ease: 'none', duration: 1, onUpdate: () => { const s = stepFor(proxy.p, swaps()); setStep(s); runtime.current?.setProgress(proxy.p); } });
+    setV(0);
+    const st = ScrollTrigger.create({ trigger: stage.current, pin: true, pinSpacing: true, start: 'top top', end: '+=400%', scrub: 1, anticipatePin: 1, invalidateOnRefresh: true,
+      onUpdate: self => setV(stepValue(self.progress)),
+      onToggle: self => { if (self.isActive) document.dispatchEvent(new CustomEvent('remote:loop', { detail: { k: 'pin', el: node } })); } });
+    setV(stepValue(st.progress));
     if (wasAbove) { const delta = node.getBoundingClientRect().height - before.height; if (delta) scrollBy(0, delta); }
-    const refresh = () => ScrollTrigger.refresh(); document.fonts.ready.then(refresh);
-    return () => { const h = node.getBoundingClientRect(), above = h.bottom < 0, height = h.height; tl.scrollTrigger?.kill(true); tl.kill(); setStep(0); if (above) { const delta = node.getBoundingClientRect().height - height; if (delta) scrollBy(0, delta); } };
+    document.fonts.ready.then(() => ScrollTrigger.refresh());
+    return () => { const h = node.getBoundingClientRect(), above = h.bottom < 0, height = h.height; st.kill(true); if (above) { const delta = node.getBoundingClientRect().height - height; if (delta) scrollBy(0, delta); } };
   }, [pinned]);
-  // Live scene while this section holds the GPU lease.
-  useEffect(() => {
-    if (!lease) return;
-    let canceled = false; const controller = new AbortController(), urls = [];
-    (async () => {
-      try {
-        await scrollIdle(); if (canceled) return;
-        const { createPinScene } = await import('./pin-runtime.js'); if (canceled) return;
-        const tvs = [...root.current.querySelectorAll('.pin-layers .drawn-tv')].map(svgUrl); urls.push(...tvs);
-        const scene = await createPinScene(canvasHost.current, { contractUrl: PIN.contract, modelUrl: PIN.model || 'assets/3d/remote-hero.glb', tvTextures: tvs, phoneTextures: STEPS.map(s => s.phone), signal: controller.signal });
-        if (canceled) { scene.dispose(); return; }
-        runtime.current = scene; const st = ScrollTrigger.getAll().find(t => t.pin === stage.current);
-        scene.setProgress(st ? st.progress : 0); setLive(true); ScrollTrigger.refresh();
-      } catch (error) { if (!canceled && canvasHost.current) { canvasHost.current.dataset.sceneStatus = 'fallback'; canvasHost.current.dataset.sceneError = String(error?.message || error).slice(0, 120); } }
-    })();
-    return () => { canceled = true; controller.abort(); runtime.current?.dispose(); runtime.current = null; setLive(false); urls.forEach(u => URL.revokeObjectURL(u)); };
-  }, [lease]);
+  const step = Math.round(v);
   return <section ref={root} className={`b-pin ${pinned ? 'is-pinned' : 'is-stacked'}`} id="search-proof" data-track-section="search" aria-labelledby="pin-title">
     <span id="share-story" className="b-anchor" aria-hidden="true" />
     <div ref={stage} className="b-pin-stage">
       <div className="b-wrap b-pin-grid">
+        {pinned && <div className="b-pin-media" aria-hidden="true"><Scene v={v} eager /></div>}
         <div className="b-pin-copy">
-          <p className="b-eyebrow">01 / YouTube search</p>
-          <h2 id="pin-title">Search on the phone. <em>Results on the TV.</em></h2>
-          <ol className="b-pin-steps">{STEPS.map((s, i) => <li key={s.id} className={`b-pin-step ${pinned && step !== i ? 'is-dim' : 'is-on'}`} aria-current={pinned && step === i ? 'step' : undefined}>
+          <p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />01 / YouTube search</p>
+          <h2 id="pin-title"><span className="b-h2-desk">Search YouTube <em>from your phone.</em></span><span className="b-h2-m">Type on your phone. <em>Results on the TV.</em></span></h2>
+          <p className="b-lede">Type the search on your phone keyboard. The results open on your TV.</p>
+          <ol className="b-pin-steps">{STEPS.map((s, i) => <li key={s.id} className={`b-pin-step ${(pinned ? step : 1) === i ? 'is-on' : ''}`} aria-current={pinned && step === i ? 'step' : undefined}>
             <span className="b-step-no">0{i + 1}</span>
-            <div><SplitText tag="h3" text={s.title} className="b-h3" textAlign="left" splitType="lines" enabled={motion} delay={40} duration={.6} ease="power3.out" from={{ opacity: 0, y: 18 }} to={{ opacity: 1, y: 0 }} />
-              <p className="b-body">{s.text}</p>
-              {!pinned && <div className="b-pin-stacked-still"><PinStill index={i} /></div>}</div>
+            <SplitText tag="span" text={s.title} className="b-step-title" textAlign="left" splitType="lines" enabled={motion} delay={40} duration={.6} ease="power3.out" from={{ opacity: 0, y: 18 }} to={{ opacity: 1, y: 0 }} />
+            <span className="b-step-bar" aria-hidden="true" />
+            {!pinned && <div className="b-pin-stacked-still"><PinStill index={i} /></div>}
           </li>)}</ol>
-          <a className="b-link" data-track="guide" href="guides/search-youtube-tv-android-phone/">How YouTube search works ↗</a>
         </div>
-        {pinned && <div className="b-pin-media" aria-hidden={live ? 'true' : undefined}>
-          <div className="pin-box">
-            <div className={`pin-layers ${live ? 'is-hidden' : ''}`}>{STEPS.map((s, i) => <div key={s.id} className={`pin-layer ${step === i ? 'is-on' : ''}`}><PinStill index={i} /></div>)}</div>
-            <div ref={canvasHost} className={`pin-canvas-host ${live ? 'is-live' : ''}`} />
-            {live && !PIN.contract && STEPS[step].chip && <p className="pin-chip pin-chip-live">{STEPS[step].chip}</p>}
-          </div>
-          <p className="b-pin-progress" aria-hidden="true"><span>0{step + 1}</span> / 03</p>
-        </div>}
       </div>
     </div>
   </section>;

@@ -12,22 +12,24 @@ export const PROD_NAMES = {
   pinSearch: 'pin-step-1-16x10.webp', pinResults: 'pin-step-2-16x10.webp', pinLink: 'pin-step-3-16x10.webp',
   pinSearch4x5: 'pin-step-1.webp', pinResults4x5: 'pin-step-2.webp', pinLink4x5: 'pin-step-3.webp',
   livingWebm: 'rooms-living.webm', livingMp4: 'rooms-living.mp4', living1440: 'rooms-living-1440.webp', living4x5: 'rooms-living-4x5.webp',
-  bedroomWebm: 'rooms-bedroom.webm', bedroomMp4: 'rooms-bedroom.mp4', bedroom1440: 'rooms-bedroom-1440.webp', bedroom4x5: 'rooms-bedroom-4x5.webp'
+  bedroomWebm: 'rooms-bedroom.webm', bedroomMp4: 'rooms-bedroom.mp4', bedroom1440: 'rooms-bedroom-1440.webp', bedroom4x5: 'rooms-bedroom-4x5.webp',
+  kitchenWebm: 'rooms-kitchen.webm', kitchenMp4: 'rooms-kitchen.mp4', kitchen1440: 'rooms-kitchen-1440.webp', kitchen4x5: 'rooms-kitchen-4x5.webp' // Build, due ~21:15 IST 16 Oct
 };
 // Build's current 3d-prod renders are off-board and being re-rendered (16 Oct). A 3d-prod file is used ONLY when its
 // slot key is listed here AND the file exists. Add a key (e.g. hero1600: true) once Design has checked that file
 // against the approved board. Empty = every slot uses Design's approved assets / placeholders.
 export const PROD_WHITELIST = {};
 export const prod = key => PROD_WHITELIST[key] === true && present[PROD_NAMES[key]] ? `assets/3d-prod/${PROD_NAMES[key]}` : null;
-// Placeholders used until Build's files land (existing site assets and Design's approved concept render).
+// Design's approved board assets (assets/board/, exported from concepts/img and concepts/render) until a whitelisted
+// Build file replaces a slot. Rooms: the board's one rooms render serves every chip until Build's matching room
+// loops/posters pass their side-by-side (no off-board stand-ins).
 export const HERO = {
-  srcset: prod('hero1600') ? `${prod('hero1600')} 1600w, ${prod('hero960') || prod('hero1600')} 960w, ${prod('hero640') || prod('hero1600')} 640w` : 'assets/b/hero-placeholder-1600.webp 1600w, assets/b/hero-placeholder-960.webp 960w, assets/b/hero-placeholder-640.webp 640w',
-  src: prod('hero1600') || 'assets/b/hero-placeholder-1600.webp',
-  crop: prod('hero4x5') || 'assets/b/hero-placeholder-4x5.webp',
+  srcset: prod('hero1600') ? `${prod('hero1600')} 1600w, ${prod('hero960') || prod('hero1600')} 960w, ${prod('hero640') || prod('hero1600')} 640w` : 'assets/board/hero-1920.webp 1920w, assets/board/hero-1600.webp 1600w, assets/board/hero-1280.webp 1280w, assets/board/hero-960.webp 960w, assets/board/hero-640.webp 640w',
+  src: prod('hero1600') || 'assets/board/hero-1600.webp',
+  crop: prod('hero4x5') || 'assets/board/hero-390.webp',
   webm: prod('heroWebm'), mp4: prod('heroMp4')
 };
-export const PIN = { model: prod('pinModel'), contract: prod('pinContract'), stills: [prod('pinSearch'), prod('pinResults'), prod('pinLink')], stills4x5: [prod('pinSearch4x5'), prod('pinResults4x5'), prod('pinLink4x5')] };
-export const ROOMS = {
-  living: { poster: prod('living1440') || 'assets/b/rooms-placeholder-living-1440.webp', crop: prod('living4x5') || 'assets/b/rooms-placeholder-living-4x5.webp', webm: prod('livingWebm'), mp4: prod('livingMp4') },
-  bedroom: { poster: prod('bedroom1440') || 'assets/b/rooms-placeholder-bedroom-1440.webp', crop: prod('bedroom4x5') || 'assets/b/rooms-placeholder-bedroom-4x5.webp', webm: prod('bedroomWebm'), mp4: prod('bedroomMp4') }
-};
+export const PIN = { model: prod('pinModel'), contract: prod('pinContract') };
+const BOARD_ROOMS = 'assets/board/remote-rooms-1200.webp';
+const room = k => ({ poster: prod(`${k}1440`) || BOARD_ROOMS, crop: prod(`${k}4x5`) || BOARD_ROOMS, webm: prod(`${k}Webm`), mp4: prod(`${k}Mp4`), board: !prod(`${k}1440`) });
+export const ROOMS = { living: room('living'), bedroom: room('bedroom'), kitchen: room('kitchen') };
