@@ -51,5 +51,27 @@ function MobileCta() {
 // Concept B "Living Room" (approved 16 Oct 2026): hero -> the single pin -> trackpad bento -> rooms -> guests ->
 // gallery -> proof band -> type split -> download, guides, FAQ, lime close. The earlier landing sections stay in
 // the repo (PhoneStory, PinnedStory, Guests, Trackpad, ControlsProof) but are not rendered.
-function Landing({ config }) { return <><Header /><main id="main" tabIndex={-1}><Hero /><ProofMarquee /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><DownloadFinale /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
+// Design 22:41 (mobile plan §8, under 900 px): every section heading gets a word-split reveal and every paragraph a
+// ScrollReveal-style rise (opacity .2 -> 1), once on entry; the footer fades up. Headings that already animate (hero
+// BlurText, "Will it work?" BlurText, the pin's SplitText titles) and copy inside ScrollReveal / the guest cards are
+// skipped. Static text nodes only (React never re-renders them). Reduced motion / Save-Data: nothing changes.
+function useEntryReveal() {
+  const { ready, motion } = useEnvironment();
+  useEffect(() => {
+    const save = Boolean(navigator.connection?.saveData); document.documentElement.classList.toggle('is-save-data', save);
+    if (!ready || !motion || save || !matchMedia('(max-width: 899px)').matches) return;
+    const io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('is-rv-in'); io.unobserve(e.target); } }, { threshold: .2, rootMargin: '0px 0px -8% 0px' });
+    for (const h of document.querySelectorAll('main h2:not([style]):not([data-rv])')) {
+      h.dataset.rv = '1'; let i = 0;
+      const walk = n => { for (const c of [...n.childNodes]) { if (c.nodeType === 3 && c.textContent.trim()) { const f = document.createDocumentFragment(); for (const part of c.textContent.split(/(\s+)/)) { if (!part) continue; if (/^\s+$/.test(part)) f.append(part); else { const w = document.createElement('span'); w.className = 'rv-w'; w.style.setProperty('--i', i++); w.textContent = part; f.append(w); } } c.replaceWith(f); } else if (c.nodeType === 1 && !c.classList.contains('sr-only')) walk(c); } };
+      walk(h); io.observe(h);
+    }
+    for (const p of document.querySelectorAll('main .b-lede, main .b-small, main .b-closing-fine, main .questions-section > div > p:not(.b-eyebrow), main .download-intro p')) {
+      if (p.closest('.b-reveal, .b-guest-card, .b-hero, .b-closing, details') || p.dataset.rv) continue; p.dataset.rv = '1'; p.classList.add('rv-p'); io.observe(p);
+    }
+    const f = document.querySelector('.site-footer'); if (f) { f.classList.add('rv-f'); io.observe(f); }
+    return () => io.disconnect();
+  }, [ready, motion]);
+}
+function Landing({ config }) { useEntryReveal(); return <><Header /><main id="main" tabIndex={-1}><Hero /><ProofMarquee /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><DownloadFinale /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
 export default function App({ route = 'landing', config }) { return <EnvironmentProvider><SmoothScroll /><DownloadProvider config={config}><a className="skip-link" href="#main">Skip to content</a>{route === 'not-found' ? <NotFound config={config} /> : route === 'privacy' ? <Privacy /> : route.startsWith('guides') ? <GuidesPage slug={route.split('/')[1]} /> : <Landing config={config} />}</DownloadProvider></EnvironmentProvider>; }

@@ -110,7 +110,7 @@ export default function SmoothScroll() {
     };
     const start = () => {
       if (lenis) return;
-      lenis = new Lenis({ autoRaf: false, smoothWheel: true, syncTouch: false, lerp: 0.1, wheelMultiplier: 1, anchors: false });
+      lenis = new Lenis({ autoRaf: false, smoothWheel: true, syncTouch: false, lerp: 0.1, wheelMultiplier: 1, anchors: false, prevent: node => !!node.closest?.('#screens .b-circular') }); // QA 22:44: Shift+wheel over the gallery stays with the gallery
       lenis.on('scroll', ScrollTrigger.update);
       // Lenis 1.3.26 marks any native scroll event as 'native' scrolling but only arms its
       // 400 ms clear-out timer when the event moved the page. The zero-delta echo of its own last

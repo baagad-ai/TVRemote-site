@@ -53,7 +53,8 @@ export async function createPinScene(host, { modelUrl, tvTextures, phoneTextures
   const loader = new THREE.TextureLoader(), disposeList = [BEZEL];
   const prep = t => { t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 4; disposeList.push(t); return t; };
   // A phone screen given as an SVG string (phoneScreenSvg) is rasterized with Work Sans embedded (screen-texture.js).
-  const load = src => src.startsWith('<svg') ? rasterizeScreen(src).then(c => prep(new THREE.CanvasTexture(c)))
+  // A canvas (the touch loop's live composited screens) becomes a CanvasTexture; api.refresh() re-uploads it on change.
+  const load = src => typeof src !== 'string' ? Promise.resolve(prep(new THREE.CanvasTexture(src))) : src.startsWith('<svg') ? rasterizeScreen(src).then(c => prep(new THREE.CanvasTexture(c)))
     : new Promise((res, rej) => loader.load(src, t => res(prep(t)), undefined, rej));
   const tvMaps = await Promise.all(tvTextures.map(load)), phoneMaps = await Promise.all(phoneTextures.map(load));
   if (signal?.aborted) { disposeList.forEach(x => x.dispose()); throw Error('aborted'); }
@@ -105,6 +106,7 @@ export async function createPinScene(host, { modelUrl, tvTextures, phoneTextures
   host.append(canvas); resize();
   const api = {
     update(v, idx, phoneIdx, tvRect, phoneRect) { state = { v, idx, phoneIdx, tvRect, phoneRect }; invalidate(); },
+    refresh() { for (const t of [...tvMaps, ...phoneMaps]) if (t.isCanvasTexture) t.needsUpdate = true; invalidate(); },
     dispose() { if (disposed) return; disposed = true; cancelAnimationFrame(frame); ro.disconnect(); canvas.removeEventListener('webglcontextlost', lost); root.traverse(n => { n.geometry?.dispose(); [].concat(n.material || []).forEach(m => m.dispose?.()); }); disposeList.forEach(x => x.dispose()); env.dispose(); pmrem.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove(); }
   };
   return api;

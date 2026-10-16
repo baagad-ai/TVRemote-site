@@ -21,9 +21,13 @@ export const PROD_NAMES = {
   // Rooms diorama (PM 16 Oct: the diorama replaces the rejected single-room renders): one 10 s loop per room
   // (webm + mp4), its 1440 poster and a 390 4:5 poster, plus the diorama still that stands in for any room without
   // its own poster yet.
-  livingWebm: 'rooms-living.webm', livingMp4: 'rooms-living.mp4', living1440: 'rooms-living-1440.webp', living4x5: 'rooms-living-390-4x5.webp',
-  bedroomWebm: 'rooms-bedroom.webm', bedroomMp4: 'rooms-bedroom.mp4', bedroom1440: 'rooms-bedroom-1440.webp', bedroom4x5: 'rooms-bedroom-390-4x5.webp',
-  kitchenWebm: 'rooms-kitchen.webm', kitchenMp4: 'rooms-kitchen.mp4', kitchen1440: 'rooms-kitchen-1440.webp', kitchen4x5: 'rooms-kitchen-390-4x5.webp'
+  livingWebm: 'rooms-living.webm', livingMp4: 'rooms-living.mp4', living1440: 'rooms-living-1440.webp', living4x5: 'rooms-living-390-4x5.webp', livingWebm4x5: 'rooms-living-390-4x5.webm', livingMp44x5: 'rooms-living-390-4x5.mp4',
+  bedroomWebm: 'rooms-bedroom.webm', bedroomMp4: 'rooms-bedroom.mp4', bedroom1440: 'rooms-bedroom-1440.webp', bedroom4x5: 'rooms-bedroom-390-4x5.webp', bedroomWebm4x5: 'rooms-bedroom-390-4x5.webm', bedroomMp44x5: 'rooms-bedroom-390-4x5.mp4',
+  // Rooms v2 under 900 px (PM 22:36): one 4:5 10 s loop per room from loops-incoming/rooms-v2/ (copy only after PM's pass).
+  // Closing band (Design 22:41): Build's 10 s loop, 16:9 + 4:5, over band-1280.webp (copy only after PM's pass).
+  closingWebm: 'band-loop.webm', closingMp4: 'band-loop.mp4', closingWebm4x5: 'band-loop-390-4x5.webm', closingMp44x5: 'band-loop-390-4x5.mp4', // 1280x920 + 780x975 (loops-incoming/band-v2/)
+  closingPoster: 'band-1280.webp', closingPoster4x5: 'band-390-4x5.webp',
+  kitchenWebm: 'rooms-kitchen.webm', kitchenMp4: 'rooms-kitchen.mp4', kitchen1440: 'rooms-kitchen-1440.webp', kitchen4x5: 'rooms-kitchen-390-4x5.webp', kitchenWebm4x5: 'rooms-kitchen-390-4x5.webm', kitchenMp44x5: 'rooms-kitchen-390-4x5.mp4'
 };
 // A 3d-prod file is used ONLY when its slot key is listed here AND the file exists in site/assets/3d-prod/.
 // Baagad 16 Oct 19:32 IST: the pin is our live 3D scene (Build's pin-tv-phone.glb). PM 19:44: the pin fallback / 390
@@ -32,7 +36,8 @@ export const PROD_NAMES = {
 // Copy only files Build has marked final (never a partial encode, never the rejected single-room renders).
 export const PROD_WHITELIST = Object.fromEntries(['pinModel', 'pinFallback', 'pinWide2', 'pinWide3', 'pinStill1', 'pinStill2', 'pinStill3',
   'heroWebm', 'heroMp4', 'heroWebm4x5', 'heroMp44x5', 'hero1920', 'hero1600', 'hero960', 'hero640', 'hero4x5',
-  ...['living', 'bedroom', 'kitchen'].flatMap(k => [`${k}Webm`, `${k}Mp4`, `${k}1440`, `${k}4x5`])].map(k => [k, true]));
+  'closingWebm', 'closingMp4', 'closingWebm4x5', 'closingMp44x5', 'closingPoster', 'closingPoster4x5',
+  ...['living', 'bedroom', 'kitchen'].flatMap(k => [`${k}Webm`, `${k}Mp4`, `${k}1440`, `${k}4x5`, `${k}Webm4x5`, `${k}Mp44x5`])].map(k => [k, true]));
 export const prod = key => PROD_WHITELIST[key] === true && present[PROD_NAMES[key]] ? `assets/3d-prod/${PROD_NAMES[key]}` : null;
 // Design's approved board assets (assets/board/, exported from concepts/img and concepts/render) until a whitelisted
 // Build file replaces a slot. Rooms: the board's one rooms render serves every chip until Build's matching room
@@ -53,6 +58,7 @@ const BOARD_ROOMS = 'assets/board/remote-rooms-1200.webp';
 // Build's FINAL room loops (16 Oct 21:05 IST): 1440x760 10 s loop + 1440 poster + 390 4:5 poster (780x975) per room.
 const room = k => {
   const own = prod(`${k}1440`);
-  return { poster: own || BOARD_ROOMS, crop: prod(`${k}4x5`) || own || BOARD_ROOMS, webm: own && prod(`${k}Webm`), mp4: own && prod(`${k}Mp4`), board: !own, own: Boolean(own) };
+  return { poster: own || BOARD_ROOMS, crop: prod(`${k}4x5`) || own || BOARD_ROOMS, webm: own && prod(`${k}Webm`), mp4: own && prod(`${k}Mp4`), webm4x5: prod(`${k}Webm4x5`), mp44x5: prod(`${k}Mp44x5`), board: !own, own: Boolean(own) };
 };
 export const ROOMS = { living: room('living'), bedroom: room('bedroom'), kitchen: room('kitchen') };
+export const CLOSING = { poster: prod('closingPoster') || 'assets/board/band-1280.webp', poster4x5: prod('closingPoster4x5'), webm: prod('closingWebm'), mp4: prod('closingMp4'), webm4x5: prod('closingWebm4x5'), mp44x5: prod('closingMp44x5') };

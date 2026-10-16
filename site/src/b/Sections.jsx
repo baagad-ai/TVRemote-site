@@ -1,12 +1,13 @@
 // Concept B sections 4-9 and the lime close (CONCEPT-B-GUIDE.md §4-9, board gen.py:115-124, 193-268).
 import { useEffect, useRef, useState } from 'react';
-import { PixelTransition, CircularGallery, ScrollReveal } from '../components/rb/lazy';
+import { PixelTransition, CircularGallery, ScrollReveal, BlurText } from '../components/rb/lazy';
 import ScrollStack, { ScrollStackItem } from '../components/ScrollStack';
 import { LiveCount } from './counter';
 import { DownloadLink } from '../Download';
 import { useEnvironment } from '../environment';
 import { useGpuLease, useInView, lowEnd } from './lease';
-import { ROOMS } from './media';
+import { ROOMS, CLOSING } from './media';
+import { StarCta } from './Hero';
 import { PhoneLoop, GuestCard } from './slots';
 
 const Eyebrow = ({ children, className = '' }) => <p className={`b-eyebrow ${className}`}><span className="b-dot" aria-hidden="true" />{children}</p>;
@@ -24,16 +25,17 @@ function RoomMedia({ id, play }) {
   const r = ROOMS[id], video = useRef(null), narrow = useNarrow();
   useEffect(() => { const v = video.current; if (!v) return; v.playbackRate = 1; if (play) v.play().catch(() => {}); else v.pause(); }, [play]);
   return <div className="room-media"><picture>{r.crop !== r.poster && <source media="(max-width: 899px)" srcSet={r.crop} />}<img src={r.poster} width={r.own ? 1440 : 1200} height={r.own ? 760 : 936} alt={r.own ? `Illustrated rooms with the ${NAMES[id].toLowerCase()} lit in lime.` : 'Illustrated rooms: a living room lit in lime and a bedroom beside it.'} loading="lazy" decoding="async" /></picture>
-    {play && !narrow && r.mp4 && <video ref={video} data-track-loop={`rooms-${id}`} muted playsInline loop preload="metadata" poster={r.poster} aria-hidden="true">{r.webm && <source src={r.webm} type="video/webm" />}<source src={r.mp4} type="video/mp4" /></video>}</div>;
+    {play && !narrow && r.mp4 && <video ref={video} data-track-loop={`rooms-${id}`} muted playsInline loop preload="metadata" poster={r.poster} aria-hidden="true">{r.webm && <source src={r.webm} type="video/webm" />}<source src={r.mp4} type="video/mp4" /></video>}
+    {play && narrow && r.mp44x5 && <video ref={video} data-track-loop={`rooms-${id}-4x5`} muted playsInline loop autoPlay preload="metadata" poster={r.crop} aria-hidden="true">{r.webm4x5 && <source src={r.webm4x5} type="video/webm" />}<source src={r.mp44x5} type="video/mp4" /></video>}</div>;
 }
 export function Rooms() {
   const { motion } = useEnvironment(), [room, setRoom] = useState('living'), [swap, setSwap] = useState({ from: 'living', to: 'living', n: 0, on: false });
-  const wrap = useRef(null), inView = useInView(wrap, { threshold: .4 });
+  const wrap = useRef(null), sw = useRef(null), inView = useInView(wrap, { threshold: .4 });
   const pick = id => { if (id === room) return; setRoom(id); setSwap(s => ({ from: s.to, to: id, n: s.n + 1, on: false })); };
   useEffect(() => { if (swap.n && !swap.on) { const t = requestAnimationFrame(() => setSwap(s => ({ ...s, on: true }))); return () => cancelAnimationFrame(t); } }, [swap]);
   const playing = motion && inView;
   return <section ref={wrap} className="b-rooms" id="inside" aria-labelledby="rooms-title">
-    <div className="b-rooms-media">
+    <div className="b-rooms-media" onPointerDown={e => { sw.current = [e.clientX, e.clientY]; }} onPointerUp={e => { const [x, y] = sw.current || [], dx = e.clientX - x; sw.current = null; if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - y)) { const i = ROOM_LIST.findIndex(([k]) => k === room); pick(ROOM_LIST[(i + (dx < 0 ? 1 : ROOM_LIST.length - 1)) % ROOM_LIST.length][0]); } }}>
       {motion ? <div inert className="b-rooms-pixwrap"><PixelTransition fallback={<RoomMedia id={room} play={false} />} key={swap.n} firstContent={<RoomMedia id={swap.from} play={playing && !swap.on && swap.from === room} />} secondContent={<RoomMedia id={swap.to} play={playing && swap.on} />} active={swap.on} trigger="click" gridSize={10} pixelColor="#0b0e0d" animationStepDuration={.5} aspectRatio="auto" className="b-rooms-pixels" /></div>
         : <RoomMedia id={room} play={false} />}
     </div>
@@ -60,15 +62,23 @@ const GUESTS = [
   ['Your list', "The Remote removes a guest by itself only when they're off your Wi-Fi and haven't connected for 7 days in a row. You can remove a guest any time; if they're away, it takes effect next time they're on your Wi-Fi. You can also limit a guest to media and volume only."]
 ];
 const guestStackTop = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header')) || 84) + 32;
+function useCardEntry(ref, on) { // batch-staggered entry for the unpinned guest cards (see guests.css)
+  useEffect(() => {
+    const root = ref.current; if (!on || !root) return;
+    const io = new IntersectionObserver(es => { let n = 0; for (const e of es) if (e.isIntersecting) { e.target.style.setProperty('--d', `${n++ * 120}ms`); e.target.classList.add('is-in'); io.unobserve(e.target); } }, { threshold: .15 });
+    root.querySelectorAll('.b-guest-card').forEach(c => io.observe(c));
+    return () => io.disconnect();
+  }, [on]);
+}
 export function Guests() {
-  const { ready, motion } = useEnvironment();
-  return <section className="b-section b-guests" id="guests" data-track-section="guests" aria-labelledby="guests-title">
+  const { ready, motion } = useEnvironment(), sec = useRef(null), anim = ready && motion; useCardEntry(sec, anim);
+  return <section ref={sec} className={`b-section b-guests ${anim ? 'is-anim' : ''}`} id="guests" data-track-section="guests" aria-labelledby="guests-title">
     <div className="b-wrap b-guests-grid">
       <div className="b-guests-head"><Eyebrow>Friends over</Eyebrow><h2 id="guests-title">Hand out the remote, <em>not your phone.</em></h2>
         <p className="b-lede">Invite a guest from The Remote. They join on your home Wi-Fi from their own Android phone.</p></div>
       <div className="b-guests-stack"><ScrollStack itemScale={.04} baseScale={.92} itemStackDistance={70} stackTop={guestStackTop}>{GUESTS.map(([title, text], i) => <ScrollStackItem key={title} itemClassName="b-guest-card">
         <div className="b-guest-copy"><span className="b-tag">Step {i + 1}</span><h3>{title}</h3><p className="b-lede">{text}</p></div>
-        <div className="b-guest-phone">{i === 0 && ready && motion ? <PhoneLoop name="invite" /> : <GuestCard i={i} />}</div>
+        <div className="b-guest-phone">{ready && motion && !navigator.connection?.saveData ? <PhoneLoop name={['guestjoin', 'guestremote', 'guestlist'][i]} /> : <GuestCard i={i} />}</div>
       </ScrollStackItem>)}</ScrollStack></div>
     </div>
   </section>;
@@ -140,8 +150,8 @@ export function Gallery() {
 // 1b · Proof marquee (Baagad 16 Oct; Concept A §2 .marq): directly below the hero, a full-width text ticker of the six
 // true facts, ✦ between them. Two identical copies of the list sit in one track (the second aria-hidden); each copy
 // ends with its own ✦ and the same gap after it (padding-right = gap), so translating the track by -50% lands exactly
-// on the next "Free". ~40 px/s: the duration is the measured copy width / 40. Transform only. Paused on hover, on
-// focus-within and off-screen (IntersectionObserver). Reduced motion: one static row that wraps, no copy, no trailing ✦.
+// on the next "Free". ~40 px/s: the duration is the measured copy width / 40. Transform only. Paused on hover and
+// off-screen (IntersectionObserver); the Pause/Play button handles keyboard pausing (no focus-within pause, QA 22:37). Reduced motion: one static row that wraps, no copy, no trailing ✦.
 const MARQ = ['Free', 'No ads', 'No account', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
 const MarqCopy = ({ hidden }) => <ul className="b-marq-copy" aria-hidden={hidden || undefined}>{MARQ.map(f => <li key={f}><span>{f}</span><span className="b-marq-sep" aria-hidden="true">✦</span></li>)}</ul>;
 export function ProofMarquee() {
@@ -184,20 +194,29 @@ export function Proof() {
 // 8 · Compatibility split: the Phone -> Home Wi-Fi -> Living Room TV line draws once (0.8 s), then one lime pulse runs
 // the line every 10 s and each chip brightens as it arrives (CSS, transform/opacity/stroke only); React Bits ScrollReveal
 // on the paragraph. The privacy sentence is the approved one, verbatim.
+// The headline reuses the hero's React Bits BlurText reveal (words, from top): plays once on entry; static under reduced motion.
+const H2_TEXT = 'Works with Android\u00a0TV and Google\u00a0TV.';
+const H2_STATIC = <h2 id="compatibility-title"><span className="b-h2-l1">Works with Android{'\u00a0'}TV</span> <em>and Google{'\u00a0'}TV.</em></h2>;
 export function TypeSplit() {
   const ref = useRef(null), seen = useInView(ref, { threshold: .4 }), [drawn, setDrawn] = useState(false), { ready, motion } = useEnvironment();
   useEffect(() => { if (seen) setDrawn(true); }, [seen]);
   const LEDE = "The Remote works with Android TV and Google TV devices that support Android TV Remote Service v2. Your phone needs Android 8.0 or later. There's no iPhone version.";
   return <section ref={ref} className={`b-section b-split ${drawn ? 'is-drawn' : ''}`} id="compatibility" aria-labelledby="compatibility-title"><div className="b-wrap b-split-grid">
-    <div><Eyebrow>Will it work?</Eyebrow><h2 id="compatibility-title"><span className="b-h2-l1">Works with Android{'\u00a0'}TV</span> <em>and Google{'\u00a0'}TV.</em></h2>
+    <div><Eyebrow>Will it work?</Eyebrow>{ready && motion ? <BlurText fallback={H2_STATIC} as="h2" id="compatibility-title" text={H2_TEXT} animateBy="words" direction="top" delay={60} stepDuration={.4} trigger="view" threshold={.4} wordClassName={[, , , 'is-lime', 'is-lime']} breakAfter={[2]} /> : H2_STATIC}
       <div className="b-line" aria-hidden="true"><span className="b-chip is-on b-hop-1">Phone</span><svg viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /><line className="b-pulse" x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip b-hop-2">Home Wi-Fi</span><svg className="is-fade" viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /><line className="b-pulse is-2" x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip b-hop-3">Living Room TV</span></div></div>
     <div className="b-split-copy">{ready && motion ? <ScrollReveal fallback={<p className="b-lede">{LEDE}</p>} as="p" baseOpacity={.2} enableBlur={false} baseRotation={0} containerClassName="b-reveal" textClassName="b-lede">{LEDE}</ScrollReveal> : <p className="b-lede">{LEDE}</p>}
       <p className="b-small">Remote commands go to your paired TV over the local network, without a developer cloud relay. The Remote doesn&rsquo;t keep a search history.</p></div>
   </div></section>;
 }
 // 9c · Lime close band: copy left, the approved room still 640x460 r28 on the right.
+// 9 · Closing lime band: an entry reveal (y 24 -> 0 + fade, once), the CSS stepped grain (no WebGL: the mobile budget
+// keeps one context), the React Bits Star Border on the CTA, and Build's 10 s band loop over the still once PM passes it
+// (16:9, 4:5 under 900 px). Reduced motion / Save-Data: the still, no grain motion, no reveal.
 export function Closing() {
-  return <section className="b-closing"><div className="b-wrap b-closing-grid"><div><Eyebrow className="on-lime">Ready when you are</Eyebrow><h2>A better remote. Already in your pocket.</h2><div className="b-closing-cta"><DownloadLink button="footer" /></div><p className="b-closing-fine">Free Android APK. No ads. No account.</p></div>
-    <figure className="b-closing-still"><img src="assets/board/band-1280.webp" width="1280" height="920" loading="lazy" decoding="async" alt="The illustrated living room: the phone with The Remote in front of the drawn TV, lit by a lime light under the console." /></figure></div></section>;
+  const { ready, motion } = useEnvironment(), ref = useRef(null), vid = useRef(null), inView = useInView(ref, { threshold: .25 }), [seen, setSeen] = useState(false), narrow = useNarrow();
+  const live = ready && motion && !navigator.connection?.saveData, src = narrow ? [CLOSING.webm4x5, CLOSING.mp44x5] : [CLOSING.webm, CLOSING.mp4];
+  useEffect(() => { if (inView) setSeen(true); const v = vid.current; if (v) { if (inView) v.play().catch(() => {}); else v.pause(); } }, [inView]);
+  return <section ref={ref} className={`b-closing ${live ? 'is-anim' : ''} ${seen ? 'is-seen' : ''}`}><div className="b-grain is-band" aria-hidden="true" /><div className="b-wrap b-closing-grid"><div className="b-closing-copy"><Eyebrow className="on-lime">Ready when you are</Eyebrow><h2>A better remote. Already in your pocket.</h2><div className="b-closing-cta">{live ? <StarCta button="footer" inView={inView} color="#0b0e0d" /> : <DownloadLink button="footer" />}</div><p className="b-closing-fine">Free Android APK. No ads. No account.</p></div>
+    <figure className="b-closing-still"><picture>{CLOSING.poster4x5 && <source media="(max-width: 899px)" srcSet={CLOSING.poster4x5} />}<img src={CLOSING.poster} width="1280" height="920" loading="lazy" decoding="async" alt="The illustrated living room: the phone with The Remote in front of the drawn TV, lit by a lime light under the console." /></picture>{live && src[1] && <video ref={vid} muted playsInline loop preload="metadata" aria-hidden="true">{src[0] && <source src={src[0]} type="video/webm" />}<source src={src[1]} type="video/mp4" /></video>}</figure></div></section>;
 }
 export const TRADEMARK = 'YouTube is a trademark of Google LLC. The Remote is not affiliated with or endorsed by Google or YouTube.';

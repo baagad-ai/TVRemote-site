@@ -85,7 +85,20 @@ function invite(t) {
     {k < 1 && <g transform={`translate(${-90 * k} 0)`}><GuestList inviteLit={bump(t, 1.5, .15, .15, .4)} />{k > 0 && <rect width={W} height={H} fill={INK} opacity={.6 * k} />}</g>}
     {k > 0 && <g transform={`translate(${W * (1 - k)} 0)`}><rect width={W} height={H} fill={INK} /><InviteScreen copyLit={bump(t, 3.9, .15, .15, .4)} copied={seg(t, 3.95, .4) * (1 - seg(t, 5.5, .5))} doneLit={bump(t, 6.2, .15, .15, .4)} spin={(t * 288) % 360} /></g>}</> };
 }
-const SCENES = { typing: [typing, 7.2, 'Type a YouTube search on your phone and send it; the results open on the TV.'], trackpad: [trackpad, 4.15, 'The trackpad: swipe to move the TV focus, tap for OK.'], invite: [invite, 3, 'Invite a guest: a QR code and a short code for their phone.'] };
+// Design's mobile plan (16 Oct 22:41), the Guests cards: guestjoin = the invite screen, "Waiting for guest…" spinner
+// turning (8 whole turns per 10 s, seamless), 5.0 the guest joins (✓), hard cut back at 9.5 s. guestremote = the guest's
+// remote: 2.0 d-pad Right, 4.5 OK, 7.0 Back, each pressed + lit lime; rest to 10 s.
+function guestjoin(t) {
+  return { phone: <InviteScreen spin={(t * 288) % 360} joined={t < 9.5 ? seg(t, 5, .4) : 0} doneLit={bump(t, 8.6, .15, .15, .4)} /> };
+}
+function guestlist(t) { // your list: the connected guest lights (1.5), the away guest (3.5), then Invite a guest (6.0)
+  const ring = (y, h, k) => k > 0 && <rect x="18" y={y} width="324" height={h} rx="16" fill={LIME} fillOpacity={.08 * k} stroke={LIME} strokeOpacity={k} strokeWidth="1.5" />;
+  return { phone: <><GuestList inviteLit={bump(t, 6, .15, .15, .4)} />{ring(170, 68, bump(t, 1.5, .2, .6, .5))}{ring(250, 100, bump(t, 3.5, .2, .6, .5))}</> };
+}
+function guestremote(t) {
+  return { phone: <RemoteHome guest lit={{ right: bump(t, 2, .15, .15, .4), ok: bump(t, 4.5, .15, .15, .4), back: bump(t, 7, .15, .15, .4) }} /> };
+}
+const SCENES = { guestlist: [guestlist, 0, 'Your guest list: a connected guest phone and one away, with Invite a guest.'], guestjoin: [guestjoin, 6, 'Invite a guest: the QR code and code, waiting for the guest, then the guest phone joined.'], guestremote: [guestremote, 4.6, "A guest's phone with the full remote: a d-pad press, OK, then Back."], typing: [typing, 7.2, 'Type a YouTube search on your phone and send it; the results open on the TV.'], trackpad: [trackpad, 4.15, 'The trackpad: swipe to move the TV focus, tap for OK.'], invite: [invite, 3, 'Invite a guest: a QR code and a short code for their phone.'] };
 // Marketing patch (16 Oct, §3 bento): optional `t` = an external clock (seconds in [0, 10)), so the bento's TV focus and
 // this phone render from ONE timeline in the same frame. Without `t` the component runs its own clock, as Design shipped it.
 export default function PhoneLoop({ name = 'typing', step, playing, tv = false, frame = false, className = '', t: tExt }) {

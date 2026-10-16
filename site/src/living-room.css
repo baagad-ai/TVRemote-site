@@ -165,7 +165,7 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 /* ---------- 8 · Will it work? (board mock_trust: bg 70%; grid 1fr 1fr gap 80; line draws once 0.8 s). ---------- */
 .b-split{background:var(--panel)}
 .b-split-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px}
-body[data-route=landing] main .b-split h2{max-width:none}.b-split h2 .b-h2-l1{display:block;white-space:nowrap}@media (max-width:740px){.b-split h2 .b-h2-l1{white-space:normal}}
+body[data-route=landing] main .b-split h2{max-width:none}.b-split h2 .b-h2-l1{display:block;white-space:nowrap}.b-split h2 .is-lime{color:var(--lime)}@media (min-width:741px){.b-split h2[style]{margin-right:-24px}}@media (max-width:740px){.b-split h2 .b-h2-l1{white-space:normal}}
 .b-split-copy .b-lede{margin-top:0}
 .b-split-copy .b-small{margin-top:18px}
 .b-line{display:flex;align-items:center;margin-top:40px;max-width:100%;min-width:0}
@@ -986,7 +986,7 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 .b-marq-copy{display:flex;align-items:center;gap:var(--marq-gap);padding:0 var(--marq-gap) 0 0;margin:0;list-style:none;white-space:nowrap}
 .b-marq-copy li{display:flex;align-items:center;gap:var(--marq-gap)}
 .b-marq-sep{color:var(--lime);font-size:.62em}
-.b-marq:hover .b-marq-track,.b-marq:focus-within .b-marq-track,.b-marq.is-off .b-marq-track{animation-play-state:paused}
+.b-marq:hover .b-marq-track,.b-marq.is-off .b-marq-track{animation-play-state:paused}
 @keyframes b-marq{to{transform:translate3d(-50%,0,0)}}
 .b-marq.is-still .b-marq-track{animation:none;width:auto;will-change:auto}
 .b-marq.is-still .b-marq-copy{flex-wrap:wrap;white-space:normal;row-gap:10px;padding:0 max(20px,calc((100% - var(--wrap))/2))}
@@ -1062,3 +1062,73 @@ body[data-route=landing] main .b-pin.is-loop h2{font-size:clamp(34px,4.2vw,48px)
 .b-pin.is-loop .b-lede{margin:0}
 .b-pin.is-loop .b-pin-steps{margin-top:18px}
 .b-pin.is-loop .b-pin-step{padding:10px 0}
+
+/* ---- PM / Design 22:36-22:41: mobile motion (transform / opacity only; reduced motion and Save-Data stay static) ---- */
+/* Hero + closing grain under 900 px / touch (no WebGL): a noise tile translated in 6 steps (~8 fps). */
+.b-grain{overflow:hidden}
+.b-grain::after{content:"";position:absolute;inset:-60px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .93 0 0 0 0 .93 0 0 0 0 .9 0 0 0 1.6 -.55'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");opacity:0;will-change:transform}
+@media (prefers-reduced-motion:no-preference) and ((pointer:coarse) or (max-width:899px)){
+  .b-grain{opacity:.5;background-image:none}
+  .b-grain::after{opacity:1;animation:bGrain .75s steps(6) infinite}
+}
+@keyframes bGrain{0%{transform:translate(0,0)}17%{transform:translate(-23px,14px)}33%{transform:translate(17px,-31px)}50%{transform:translate(-37px,-9px)}67%{transform:translate(29px,25px)}83%{transform:translate(-11px,38px)}100%{transform:translate(0,0)}}
+html.is-save-data .b-grain::after{animation:none}
+.b-closing{position:relative}
+.b-closing .b-grain.is-band{opacity:0;mix-blend-mode:multiply}
+.b-closing.is-anim .b-grain.is-band{opacity:.35}
+.b-closing .b-grain.is-band::after{filter:invert(1)}
+.b-closing-grid{position:relative}
+.b-closing-still{position:relative}
+.b-closing-still video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:28px}
+.b-closing.is-anim .b-closing-copy>*,.b-closing.is-anim .b-closing-still{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+.b-closing.is-anim.is-seen .b-closing-copy>*,.b-closing.is-anim.is-seen .b-closing-still{opacity:1;transform:none}
+.b-closing.is-anim .b-closing-copy>:nth-child(2){transition-delay:.08s}.b-closing.is-anim .b-closing-copy>:nth-child(3){transition-delay:.16s}.b-closing.is-anim .b-closing-copy>:nth-child(4){transition-delay:.24s}.b-closing.is-anim .b-closing-still{transition-delay:.2s}
+.b-closing .star-cta .download-cta{background:var(--ink);color:var(--lime)}
+/* FAQ: animated open / close (height via interpolate-size where supported, the answer fades and rises). */
+@media (prefers-reduced-motion:no-preference){
+  :root{interpolate-size:allow-keywords}
+  body[data-route=landing] .faq-list details::details-content{height:0;overflow:clip;transition:height .35s cubic-bezier(.2,.7,.2,1),content-visibility .35s allow-discrete}
+  body[data-route=landing] .faq-list details[open]::details-content{height:auto}
+  body[data-route=landing] .faq-list details p{opacity:0;transform:translateY(-6px);transition:opacity .3s ease .05s,transform .3s ease .05s}
+  body[data-route=landing] .faq-list details[open] p{opacity:1;transform:none}
+  body[data-route=landing] .faq-list summary::after{display:inline-block;transition:transform .3s ease}
+  body[data-route=landing] .faq-list details[open] summary::after{transform:rotate(180deg)}
+}
+/* Generic entry reveals (App useEntryReveal): headings split by word, paragraphs ScrollReveal-style. */
+.rv-w{display:inline-block;opacity:0;transform:translateY(.4em);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0) * 45ms)}
+.is-rv-in .rv-w{opacity:1;transform:none}
+.rv-p{opacity:.2;transform:translateY(12px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.rv-p.is-rv-in{opacity:1;transform:none}
+.site-footer.rv-f{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}.site-footer.rv-f.is-rv-in{opacity:1;transform:none}
+/* ---- Design 22:44: 390 composition, applied under 900 px (site tokens only) ---- */
+@media (max-width:899px){
+  body[data-route=landing] .b-hero h1,body[data-route=landing] .b-h1{font-size:clamp(44px,12vw,56px);line-height:.95;letter-spacing:-.03em}
+  body[data-route=landing] main h2{font-size:clamp(34px,9vw,44px)!important;line-height:.95!important;letter-spacing:-.03em!important}
+  body[data-route=landing] main .b-lede,body[data-route=landing] main p{font-size:17px}
+  .b-section{padding-block:72px 0}
+  .b-section:last-of-type{padding-bottom:72px}
+  /* Hero: the 4:5 loop edge to edge; the headline over its bottom third on an ink gradient; CTA above the fold at 390x844. */
+  .b-hero-scrim{background:linear-gradient(180deg,#0b0e0d 0,rgb(11 14 13/.6) 24px,transparent 60px),linear-gradient(180deg,transparent 0,transparent 55%,#0b0e0d 85%)}
+  .b-hero-copy{margin-top:-36vw;padding-top:0}
+  /* Search: the glb canvas full width, no card or border; the step captions sit underneath. */
+  .pin-loop{width:100vw;margin-inline:calc(50% - 50vw);border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+  /* Rooms: the 4:5 loop full-bleed first, the room copy over its bottom third like the hero. */
+  .b-rooms-media{order:1;margin-top:0}
+  .b-rooms-vignette{display:none}
+  .b-rooms-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,#0b0e0d 92%);pointer-events:none;z-index:1}
+  .b-rooms-copy{order:2;margin-top:-30vw;padding-top:0;z-index:2}
+  /* Closing band: the band image full-bleed, the headline over its bottom on a lime gradient. */
+  .b-closing-grid{display:flex;flex-direction:column-reverse;padding:0!important;min-height:0;gap:0}
+  .b-closing-still{width:100%;height:auto;aspect-ratio:4/5;position:relative}
+  .b-closing-still img,.b-closing-still video{border-radius:0;box-shadow:none}
+  .b-closing-still::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,var(--lime) 92%);z-index:1}
+  .b-closing-copy{position:relative;z-index:2;margin-top:-34vw;padding:0 20px 72px}
+  body[data-route=landing] main .b-closing h2{font-size:clamp(34px,9vw,44px)!important}
+  /* Guests: copy on top, the live phone (220 px) below, bleeding off the card's bottom edge. */
+  .b-guest-card{padding-bottom:0;overflow:hidden}
+  .b-guest-phone{width:220px;margin-bottom:-64px}
+  /* Tap targets >= 44 px. */
+  .b-marq-btn,.b-pause-btn,.b-tp-pause{width:44px!important;height:44px!important;min-width:44px;min-height:44px}
+  body[data-route=landing] .brand{min-height:44px;display:inline-flex;align-items:center}
+  main .text-link,.site-footer a{display:inline-flex;align-items:center;min-height:44px}
+}

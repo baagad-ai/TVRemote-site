@@ -67,34 +67,74 @@ export function PinStill({ index }) {
     <div className="pin-still-phone" role="img" aria-label={s.phoneAlt}><PhoneLoop name="typing" step={index} /></div>
   </figure>;
 }
-// PM 22:13 (touch / under 1200 px): no pin. The SAME three.js scene (pin-tv-phone.glb, PhoneScreen / TVScreen) plays one
-// 10 s seamless loop while on screen, with Build's pin-design textures: typed search | 1.5 s Send (phone "sent", the TV
-// shows the results 2 frames later) | 3.5 s Share a YouTube link (share sheet) | 5.5 s Open (the TV plays it 2 frames
-// later) | hold | 9.0 s back to the typed search | rest to 10 s (t = 10 renders as t = 0). Three presses, 2 s apart.
+// PM 22:13 / 22:36 / 22:37 (touch / under 1200 px): no pin. The SAME three.js scene (pin-tv-phone.glb, PhoneScreen /
+// TVScreen) plays one 10 s seamless loop while on screen. Both screens are live CanvasTextures composited from Build's
+// pin-design PNGs plus overlays drawn here, re-uploaded only when the frame's state changes. PM's 4 beats (the TV
+// reacts 1 frame after each phone press, no cursor or caret on the TV, every state change is hard; no cross-fade):
+//  1.0-2.2 "lofi" types letter by letter into the TV's YouTube search bar, mirrored in the phone field (keys flash lime)
+//  3.5     Send: the phone's Send button lights lime; the TV shows the results (tv-results-f0, tile 1 focused)
+//  6.0     OK: the phone's OK lights; tile 1 plays on the TV (tv-playing)
+//  8.0     Back: the phone's Back lights; the TV returns to the EMPTY search (frame 0) | 9-10 hold on frame 0
 // One renderer (the 'pin' GPU lease), DPR <= 1.5, demand rendering, paused off-screen (useLoopClock + the lease).
-// No WebGL / the scene fails: Design's 2D <PhoneLoop name="typing" tv /> (same clock idea). Reduced motion / Save-Data:
-// the stills (the caller). The poster (Build's step-1 still) shows until the first 3D frame has rendered.
-const LOOP_TEX = { tv: ['search-typing-1440', 'results-f0-1440', 'playing-1440'].map(n => `assets/3d-prod/textures/loop-tv-${n}.png`), phone: ['1-typed', '2-sent', '3-share'].map(n => `assets/3d-prod/textures/loop-phone-${n}.png`) };
-const L_SEND = 1.5, L_SHARE = 3.5, L_OPEN = 5.5, L_BACK = 9, TV_LAG = .033;
-export const loopState = t => ({ phone: t >= L_BACK ? 0 : t >= L_SHARE ? 2 : t >= L_SEND ? 1 : 0, tv: t >= L_BACK ? 0 : t >= L_OPEN + TV_LAG ? 2 : t >= L_SEND + TV_LAG ? 1 : 0 });
+// No WebGL / the scene fails: Design's 2D <PhoneLoop name="typing" tv />. Reduced motion / Save-Data: the stills.
+const TEX = n => `assets/3d-prod/textures/loop-${n}.png`;
+const LOOP_SRC = { p1: TEX('phone-1-typed'), p2: TEX('phone-2-sent'), t1: TEX('tv-search-typing-1440'), t2: TEX('tv-results-f0-1440'), t3: TEX('tv-playing-1440') };
+const L_KEYS = [['l', 1.0], ['o', 1.4], ['f', 1.8], ['i', 2.2]], L_SEND = 3.5, L_OK = 6.0, L_BACK = 8.0, TV_LAG = 1 / 30;
+// Key centres on phone-1-typed (1080 x 2340): row 1 q..p at x 54 + 108k, y 1644; row 2 a..l at x 108 + 108k, y 1793.
+const KEY_XY = { l: [972, 1793], o: [918, 1644], f: [432, 1793], i: [810, 1644] };
+const flash = (t, a, d = .45) => { const x = t - a; return x < 0 || x > d ? 0 : x < .06 ? x / .06 : 1 - (x - .06) / (d - .06); };
+export function loopFrame(t) {
+  const n = lag => (t >= L_BACK + lag ? 0 : L_KEYS.filter(([, a]) => t >= a + lag).length);
+  const phone = t >= L_SEND + .25 && t < L_BACK + .45 ? 1 : 0; // the remote screen holds until Back's light fades
+  const tv = t >= L_BACK + TV_LAG ? 0 : t >= L_OK + TV_LAG ? 2 : t >= L_SEND + TV_LAG ? 1 : 0;
+  const key = L_KEYS.map(([k, a]) => [k, flash(t, a, .3)]).find(([, v]) => v > 0);
+  return { typed: t >= L_SEND + .25 ? 0 : n(0), tvTyped: n(TV_LAG), phone, tv, key, send: flash(t, L_SEND), ok: flash(t, L_OK), back: flash(t, L_BACK), step: tv };
+}
+const LOAD = src => new Promise((res, rej) => { const i = new Image(); i.decoding = 'async'; i.onload = () => res(i); i.onerror = rej; i.src = src; });
+const rr = (g, x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
+function drawPhone(g, img, f) {
+  g.drawImage(f.phone ? img.p2 : img.p1, 0, 0, 1080, 2340);
+  const lit = (v, fn) => { if (v <= 0) return; g.globalAlpha = v; fn(); g.globalAlpha = 1; };
+  if (!f.phone) {
+    g.fillStyle = '#0b0e0d'; g.fillRect(150, 1250, 690, 66); // the baked "lofi beats" -> what has been typed so far
+    g.fillStyle = '#eeeee6'; g.font = '47px "Work Sans", system-ui, sans-serif'; g.textBaseline = 'middle'; g.fillText('lofi'.slice(0, f.typed), 169, 1283);
+    if (f.key) { const [k, v] = f.key, [x, y] = KEY_XY[k]; lit(v, () => { g.fillStyle = '#d4fa7b'; rr(g, x - 47, y - 58, 94, 116, 16); g.fill(); g.fillStyle = '#0b0e0d'; g.font = '600 50px "Work Sans", system-ui, sans-serif'; g.textAlign = 'center'; g.fillText(k, x, y + 2); g.textAlign = 'left'; }); }
+    lit(f.send, () => { g.strokeStyle = '#d4fa7b'; g.lineWidth = 10; g.beginPath(); g.arc(970, 1281, 82, 0, 7); g.stroke(); g.fillStyle = '#eeeee6'; g.globalAlpha *= .45; g.beginPath(); g.arc(970, 1281, 60, 0, 7); g.fill(); });
+  } else {
+    lit(f.ok, () => { g.strokeStyle = '#d4fa7b'; g.lineWidth = 12; g.beginPath(); g.arc(540, 947, 118, 0, 7); g.stroke(); g.fillStyle = '#eeeee6'; g.globalAlpha *= .4; g.beginPath(); g.arc(540, 947, 99, 0, 7); g.fill(); });
+    lit(f.back, () => { g.fillStyle = '#d4fa7b'; rr(g, 54, 1273, 306, 147, 26); g.fill(); g.fillStyle = '#0b0e0d'; g.font = '600 42px "Work Sans", system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('\u2190', 207, 1318); g.font = '500 36px "Work Sans", system-ui, sans-serif'; g.fillText('Back', 207, 1380); g.textAlign = 'left'; });
+  }
+}
+function drawTV(g, img, f) {
+  g.drawImage([img.t1, img.t2, img.t3][f.tv], 0, 0, 1440, 810);
+  if (f.tv < 2) { g.fillStyle = '#151b16'; g.fillRect(425, 68, 600, 46); g.fillStyle = '#eeeee6'; g.font = '32px "Work Sans", system-ui, sans-serif'; g.textBaseline = 'middle'; g.fillText(f.tv ? 'lofi' : 'lofi'.slice(0, f.tvTyped), 435, 91); } // empty bar at frame 0
+}
 function PinLoop({ onStep }) {
-  const { gpu } = useEnvironment(), box = useRef(null), host = useRef(null), tvEl = useRef(null), phEl = useRef(null), api = useRef(null);
+  const { gpu } = useEnvironment(), box = useRef(null), host = useRef(null), tvEl = useRef(null), phEl = useRef(null), api = useRef(null), cv = useRef(null), sig = useRef('');
   const inView = useInView(box, { threshold: .15 }), [mode, setMode] = useState('poster');
   const lease = useGpuLease(gpu && inView && mode !== '2d' && Boolean(PIN.model), 'pin');
-  const t = useLoopClock(box, 0, true), st = loopState(t);
+  const t = useLoopClock(box, 0, true), fr = loopFrame(t), tRef = useRef(0); tRef.current = t;
   useEffect(() => { if (!gpu) setMode('2d'); }, [gpu]);
-  const push = () => { const a = api.current; if (!a || !tvEl.current) return; const k = loopState(tRef.current); a.update(0, k.tv, k.phone, tvEl.current.getBoundingClientRect(), phEl.current.getBoundingClientRect()); };
-  const tRef = useRef(0); tRef.current = t;
+  const paint = () => { const c = cv.current, a = api.current; if (!c || !a) return; const f = loopFrame(tRef.current);
+    const s = JSON.stringify([f.typed, f.tvTyped, f.phone, f.tv, f.key && [f.key[0], +f.key[1].toFixed(2)], +f.send.toFixed(2), +f.ok.toFixed(2), +f.back.toFixed(2)]);
+    if (s !== sig.current) { sig.current = s; drawPhone(c.pg, c.img, f); drawTV(c.tg, c.img, f); a.refresh(); } // upload only on change
+    a.update(0, 0, 0, tvEl.current.getBoundingClientRect(), phEl.current.getBoundingClientRect()); };
   useEffect(() => {
     if (!lease) return;
     const ctrl = new AbortController();
-    import('./pin-scene.js').then(({ createPinScene }) => createPinScene(host.current, { modelUrl: PIN.model, tvTextures: LOOP_TEX.tv, phoneTextures: LOOP_TEX.phone, signal: ctrl.signal }))
-      .then(a => { api.current = a; push(); requestAnimationFrame(() => requestAnimationFrame(() => { if (!ctrl.signal.aborted) setMode('3d'); })); })
+    (async () => {
+      const entries = await Promise.all(Object.entries(LOOP_SRC).map(async ([k, src]) => [k, await LOAD(src)])); await document.fonts?.ready;
+      const pc = Object.assign(document.createElement('canvas'), { width: 1080, height: 2340 }), tc = Object.assign(document.createElement('canvas'), { width: 1440, height: 810 });
+      cv.current = { img: Object.fromEntries(entries), pg: pc.getContext('2d'), tg: tc.getContext('2d') }; sig.current = '';
+      const f = loopFrame(tRef.current); drawPhone(cv.current.pg, cv.current.img, f); drawTV(cv.current.tg, cv.current.img, f);
+      const { createPinScene } = await import('./pin-scene.js');
+      return createPinScene(host.current, { modelUrl: PIN.model, tvTextures: [tc], phoneTextures: [pc], signal: ctrl.signal });
+    })().then(a => { if (ctrl.signal.aborted) { a.dispose(); return; } api.current = a; paint(); requestAnimationFrame(() => requestAnimationFrame(() => { if (!ctrl.signal.aborted) setMode('3d'); })); })
       .catch(() => { if (!ctrl.signal.aborted) setMode('2d'); });
-    return () => { ctrl.abort(); api.current?.dispose(); api.current = null; host.current?.replaceChildren(); setMode(m => (m === '3d' ? 'poster' : m)); };
+    return () => { ctrl.abort(); api.current?.dispose(); api.current = null; cv.current = null; host.current?.replaceChildren(); setMode(m => (m === '3d' ? 'poster' : m)); };
   }, [lease]);
-  useEffect(() => { push(); }, [t, mode]);
-  useEffect(() => { onStep(st.phone); }, [st.phone]);
+  useEffect(() => { paint(); }, [t, mode]);
+  useEffect(() => { onStep(fr.step); }, [fr.step]);
   return <div ref={box} className={`pin-loop is-${mode}`} aria-hidden="true">
     <picture className="pin-loop-poster">{PIN.wide[0] && <source media="(min-width: 391px)" srcSet={PIN.wide[0]} width="1600" height="1000" />}<img src={PIN.stills[0] || PIN.wide[0]} alt="" width="780" height="975" decoding="async" /></picture>
     <span ref={tvEl} className="pin-loop-tv" /><span ref={phEl} className="pin-loop-phone" />
