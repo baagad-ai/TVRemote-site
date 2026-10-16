@@ -13,7 +13,7 @@ export const EVENTS = new Map([
   ['section_view', { k: set('hero', 'search', 'guests', 'trackpad', 'download'), b: null }],
   ['click', { k: set('download', 'qr', 'faq', 'guide', 'article', 'header'), b: null }],
   ['install_steps_open', { k: null, b: null }],
-  ['loop_play', { k: set('hero', 'pin', 'rooms_living', 'rooms_bedroom'), b: null }],
+  ['loop_play', { k: set('hero', 'pin', 'rooms_living', 'rooms_bedroom', 'rooms_kitchen'), b: null }],
   ['time_on_page', { k: null, b: set('lt5', '5_30', '30_120', 'gt120') }],
   ['vital', { k: set('lcp', 'inp', 'cls'), b: set('good', 'ni', 'poor') }],
   ['js_error', { k: null, b: null }],

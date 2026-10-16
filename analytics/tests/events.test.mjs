@@ -69,7 +69,7 @@ const VALID = [
   { e: 'page_view' }, { e: 'install_steps_open' }, { e: 'js_error' }, { e: 'broken_link' },
   ...['hero', 'search', 'guests', 'trackpad', 'download'].map(k => ({ e: 'section_view', k })),
   ...['download', 'qr', 'faq', 'guide', 'article', 'header'].map(k => ({ e: 'click', k })),
-  ...['hero', 'pin', 'rooms_living', 'rooms_bedroom'].map(k => ({ e: 'loop_play', k })),
+  ...['hero', 'pin', 'rooms_living', 'rooms_bedroom', 'rooms_kitchen'].map(k => ({ e: 'loop_play', k })),
   ...['lt5', '5_30', '30_120', 'gt120'].map(b => ({ e: 'time_on_page', b })),
   ...['lcp', 'inp', 'cls'].flatMap(k => ['good', 'ni', 'poor'].map(b => ({ e: 'vital', k, b }))),
 ];

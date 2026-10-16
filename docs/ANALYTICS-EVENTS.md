@@ -46,7 +46,7 @@ Each event is `{ e, k?, b? }`, and only these combinations are valid:
 | `section_view` | `hero`, `search`, `guests`, `trackpad`, `download` | none |
 | `click` | `download`, `qr`, `faq`, `guide`, `article`, `header` | none |
 | `install_steps_open` | none | none |
-| `loop_play` | `hero`, `pin`, `rooms_living`, `rooms_bedroom` | none |
+| `loop_play` | `hero`, `pin`, `rooms_living`, `rooms_bedroom`, `rooms_kitchen` | none |
 | `time_on_page` | none | `lt5`, `5_30`, `30_120`, `gt120` (seconds) |
 | `vital` | `lcp`, `inp`, `cls` | `good`, `ni`, `poor` |
 | `js_error` | none | none |

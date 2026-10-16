@@ -10,7 +10,7 @@ CREATE TABLE page_event_budget (
 CREATE TABLE page_event_daily (
   day TEXT NOT NULL CHECK (length(day) = 10 AND day GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
   event TEXT NOT NULL CHECK (event IN ('page_view', 'section_view', 'click', 'install_steps_open', 'loop_play', 'time_on_page', 'vital', 'js_error', 'broken_link')),
-  key TEXT NOT NULL CHECK (key IN ('', 'hero', 'search', 'guests', 'trackpad', 'download', 'qr', 'faq', 'guide', 'article', 'header', 'pin', 'rooms_living', 'rooms_bedroom', 'lcp', 'inp', 'cls')),
+  key TEXT NOT NULL CHECK (key IN ('', 'hero', 'search', 'guests', 'trackpad', 'download', 'qr', 'faq', 'guide', 'article', 'header', 'pin', 'rooms_living', 'rooms_bedroom', 'rooms_kitchen', 'lcp', 'inp', 'cls')),
   bucket TEXT NOT NULL CHECK (bucket IN ('', 'lt5', '5_30', '30_120', 'gt120', 'good', 'ni', 'poor')),
   source TEXT NOT NULL CHECK (source IN ('x', 'threads', 'reddit', 'instagram', 'linkedin', 'qr', 'qr_site', 'guide', 'none')),
   ref TEXT NOT NULL CHECK (ref IN ('direct', 'other', 'google.com', 'bing.com', 'duckduckgo.com', 'reddit.com', 'x.com', 't.co', 'threads.net', 'instagram.com', 'linkedin.com', 'youtube.com', 'github.com', 'news.ycombinator.com', 'producthunt.com')),
@@ -22,7 +22,7 @@ CREATE TABLE page_event_daily (
     (event IN ('page_view', 'install_steps_open', 'js_error', 'broken_link') AND key = '' AND bucket = '')
     OR (event = 'section_view' AND key IN ('hero', 'search', 'guests', 'trackpad', 'download') AND bucket = '')
     OR (event = 'click' AND key IN ('download', 'qr', 'faq', 'guide', 'article', 'header') AND bucket = '')
-    OR (event = 'loop_play' AND key IN ('hero', 'pin', 'rooms_living', 'rooms_bedroom') AND bucket = '')
+    OR (event = 'loop_play' AND key IN ('hero', 'pin', 'rooms_living', 'rooms_bedroom', 'rooms_kitchen') AND bucket = '')
     OR (event = 'time_on_page' AND key = '' AND bucket IN ('lt5', '5_30', '30_120', 'gt120'))
     OR (event = 'vital' AND key IN ('lcp', 'inp', 'cls') AND bucket IN ('good', 'ni', 'poor'))
   ),
