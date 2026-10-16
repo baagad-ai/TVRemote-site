@@ -51,3 +51,9 @@
   .b-tp-pause{top:0;right:0}
   .b-gest{padding:18px}.b-gest h3{font-size:18px!important}
 }
+/* 23:02: at <= 599 px the drawn pad phone was ~94 px and read blank; it is now 220 px, centred above the caption. */
+@media (max-width:599px){
+  .b-tile-pad{flex-direction:column;flex-wrap:nowrap;align-items:center;position:relative}
+  .b-tile-pad .b-pad{width:min(220px,60vw);border-radius:30px}
+  .b-tile-pad .b-pad-caption{flex:none;text-align:center}
+}

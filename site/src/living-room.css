@@ -1047,7 +1047,7 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 .pin-loop-2d .phone-loop{width:100%;height:auto}
 /* TV and phone placement boxes (height 0: only width and centre are read), matching Build's stills' composition. */
 .pin-loop-tv,.pin-loop-phone{position:absolute;height:0;pointer-events:none}
-.pin-loop-tv{left:-6%;width:92%;top:43%}
+.pin-loop-tv{left:3%;width:86%;top:42%} /* 23:15: the whole TV inside the canvas at every width */
 .pin-loop-phone{left:10%;width:19%;top:70%}
 @media (max-width:430px){.pin-loop-tv{left:5%;width:90%;top:34%}.pin-loop-phone{left:60%;width:24%;top:66%}} /* 23:02: the whole TV and phone inside the 4:5 canvas, 360-430 */
 .b-pin.is-loop .b-pin-step{display:flex;color:var(--muted);padding:14px 0;border-top:1px solid var(--line)}
@@ -1134,3 +1134,9 @@ html.is-save-data .b-grain::after{animation:none}
 }
 /* PM 22:51: rooms-v2 / band-v2 4:5 mp4s are 780x976: cover. */
 .room-media video,.b-closing-still video,.b-closing-still img{object-fit:cover}
+/* PM 23:12: the desktop pin (>= 1200, fine pointer) scrubs the live 4-beat loop; the stage fills the viewport while pinned. */
+.b-pin.is-loop.is-pinned .b-pin-stage{min-height:100vh;display:flex;align-items:center;padding-block:calc(var(--header) + 16px) 32px!important;box-sizing:border-box}
+.b-pin.is-loop.is-pinned .b-pin-grid{width:100%}
+.b-pin.is-loop .b-pin-step.is-on .b-step-title{color:var(--lime)}
+/* PM 23:11: rooms at 1440: the copy column stops short of the render (no copy over the living-room glow). */
+@media (min-width:1200px){body[data-route=landing] main .b-rooms-copy>*{max-width:min(30ch,360px)!important}body[data-route=landing] main .b-rooms-copy>h2{max-width:min(12ch,440px)!important}}

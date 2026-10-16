@@ -78,7 +78,7 @@ export function PinStill({ index }) {
 // One renderer (the 'pin' GPU lease), DPR <= 1.5, demand rendering, paused off-screen (useLoopClock + the lease).
 // No WebGL / the scene fails: Design's 2D <PhoneLoop name="typing" tv />. Reduced motion / Save-Data: the stills.
 const TEX = n => `assets/3d-prod/textures/loop-${n}.png`;
-const LOOP_SRC = { p1: TEX('phone-1-typed'), p2: TEX('phone-2-sent'), t1: TEX('tv-search-typing-1440'), t2: TEX('tv-results-f0-1440'), t3: TEX('tv-playing-1440') };
+const LOOP_SRC = { p1: TEX('phone-1-typed'), p2: TEX('phone-2-sent'), p3: TEX('phone-3-share'), t1: TEX('tv-search-typing-1440'), t2: TEX('tv-results-f0-1440'), t3: TEX('tv-playing-1440') };
 const L_KEYS = [['l', 1.0], ['o', 1.4], ['f', 1.8], ['i', 2.2]], L_SEND = 3.5, L_OK = 6.0, L_BACK = 8.0, TV_LAG = 1 / 30;
 // Key centres on phone-1-typed (1080 x 2340): row 1 q..p at x 54 + 108k, y 1644; row 2 a..l at x 108 + 108k, y 1793.
 const KEY_XY = { l: [972, 1793], o: [918, 1644], f: [432, 1793], i: [810, 1644] };
@@ -109,15 +109,22 @@ function drawTV(g, img, f) {
   g.drawImage([img.t1, img.t2, img.t3][f.tv], 0, 0, 1440, 810);
   if (f.tv < 2) { g.fillStyle = '#151b16'; g.fillRect(425, 68, 600, 46); g.fillStyle = '#eeeee6'; g.font = '32px "Work Sans", system-ui, sans-serif'; g.textBaseline = 'middle'; g.fillText(f.tv ? 'lofi' : 'lofi'.slice(0, f.tvTyped), 435, 91); } // empty bar at frame 0
 }
-function PinLoop({ onStep }) {
+// PM 23:15 (final): the desktop pin (>= 1200, fine pointer) keeps the board's 3 steps and captions, scrub .5, ~300vh, no
+// snap, on this same live glb: pinIdx 0/1/2 shows Build's raw textures phone-1-typed + tv-search-typing / phone-2-sent +
+// tv-results / phone-3-share + tv-playing. Touch and < 1200 px: the 4-beat auto loop (Type, Send, OK plays, Back).
+export const LOOP_LABELS = ['Type', 'Send', 'OK plays', 'Back'];
+export const loopStepAt = t => (t < L_SEND ? 0 : t < L_OK ? 1 : t < L_BACK ? 2 : 3); // lit on 1.0 / 3.5 / 6.0 / 8.0 s
+function PinLoop({ onStep, pinIdx }) {
+  const tExt = pinIdx == null ? undefined : 0;
   const { gpu } = useEnvironment(), box = useRef(null), host = useRef(null), tvEl = useRef(null), phEl = useRef(null), api = useRef(null), cv = useRef(null), sig = useRef('');
   const inView = useInView(box, { threshold: .15 }), [mode, setMode] = useState('poster');
   const lease = useGpuLease(gpu && inView && mode !== '2d' && Boolean(PIN.model), 'pin');
-  const t = useLoopClock(box, 0, true), fr = loopFrame(t), tRef = useRef(0); tRef.current = t;
+  const pinRef = useRef(pinIdx); pinRef.current = pinIdx;
+  const tc = useLoopClock(box, 0, tExt == null), t = tExt ?? tc, fr = loopFrame(t), tRef = useRef(0); tRef.current = t;
   useEffect(() => { if (!gpu) setMode('2d'); }, [gpu]);
   const paint = () => { const c = cv.current, a = api.current; if (!c || !a) return; const f = loopFrame(tRef.current);
-    const s = JSON.stringify([f.typed, f.tvTyped, f.phone, f.tv, f.key && [f.key[0], +f.key[1].toFixed(2)], +f.send.toFixed(2), +f.ok.toFixed(2), +f.back.toFixed(2)]);
-    if (s !== sig.current) { sig.current = s; drawPhone(c.pg, c.img, f); drawTV(c.tg, c.img, f); a.refresh(); } // upload only on change
+    const s = JSON.stringify([pinRef.current, f.typed, f.tvTyped, f.phone, f.tv, f.key && [f.key[0], +f.key[1].toFixed(2)], +f.send.toFixed(2), +f.ok.toFixed(2), +f.back.toFixed(2)]);
+    if (s !== sig.current) { sig.current = s; const k = pinRef.current; if (k != null) { c.pg.drawImage([c.img.p1, c.img.p2, c.img.p3][k], 0, 0, 1080, 2340); c.tg.drawImage([c.img.t1, c.img.t2, c.img.t3][k], 0, 0, 1440, 810); } else { drawPhone(c.pg, c.img, f); drawTV(c.tg, c.img, f); } a.refresh(); } // upload only on change
     a.update(0, 0, 0, tvEl.current.getBoundingClientRect(), phEl.current.getBoundingClientRect()); };
   useEffect(() => {
     if (!lease) return;
@@ -133,8 +140,9 @@ function PinLoop({ onStep }) {
       .catch(() => { if (!ctrl.signal.aborted) setMode('2d'); });
     return () => { ctrl.abort(); api.current?.dispose(); api.current = null; cv.current = null; host.current?.replaceChildren(); setMode(m => (m === '3d' ? 'poster' : m)); };
   }, [lease]);
-  useEffect(() => { paint(); }, [t, mode]);
-  useEffect(() => { onStep(fr.step); }, [fr.step]);
+  useEffect(() => { paint(); }, [t, mode, pinIdx]);
+  const lstep = loopStepAt(t); useEffect(() => { onStep(lstep); }, [lstep]);
+  useEffect(() => { if (mode === '3d') requestAnimationFrame(() => ScrollTrigger.refresh()); }, [mode]); // pin spacing re-measured once the glb is in
   return <div ref={box} className={`pin-loop is-${mode}`} aria-hidden="true">
     <picture className="pin-loop-poster">{PIN.wide[0] && <source media="(min-width: 391px)" srcSet={PIN.wide[0]} width="1600" height="1000" />}<img src={PIN.stills[0] || PIN.wide[0]} alt="" width="780" height="975" decoding="async" /></picture>
     <span ref={tvEl} className="pin-loop-tv" /><span ref={phEl} className="pin-loop-phone" />
@@ -145,12 +153,12 @@ function PinLoop({ onStep }) {
 export default function PinStory() {
   const { ready, motion, gpu } = useEnvironment(), root = useRef(null), stage = useRef(null);
   const [fits, setFits] = useState(false), [focusMode, setFocusMode] = useState(false), [v, setV] = useState(1), [idx, setIdx] = useState(1);
-  const pinned = ready && motion && fits && !focusMode;
+  const pinned = ready && motion && fits && !focusMode && !(typeof navigator !== 'undefined' && navigator.connection?.saveData);
   const [near, setNear] = useState(false), sceneRef = useRef(null), host = useRef(null), live = useRef(null), vRef = useRef(1), idxRef = useRef(1), phoneRef = useRef(1), glowBox = useRef(null);
   // Step 02 "Send it": the phone keeps the typed search (typing step 0: "lofi beats", keyboard up) until step 02's snap
   // has finished, then shows step 1 (sent). The TV switches at the step change as before.
   const [sent, setSent] = useState(true), sentRef = useRef(true);
-  const lease = useGpuLease(pinned && near && gpu && !lowEnd() && Boolean(PIN.model), 'pin');
+  const lease = false; // the old step-scene pin canvas is retired: the pin scrubs <PinLoop> (one WebGL context, lease 'pin')
   const [is3d, setIs3d] = useState(false);
   // "Near" = the pin's top has come up past 60% of the viewport (never at load: the hero's Grainient owns the slot).
   useEffect(() => {
@@ -199,7 +207,7 @@ export default function PinStory() {
     // Baagad 16 Oct: no snap at any width; the pin follows the scroll. pinType 'transform' (with Lenis driving the
     // scroll on fine pointers) keeps the pin a transform, so pinning and the 3D swap-in report no layout shift.
     const st = ScrollTrigger.create({ trigger: stage.current, pin: true, pinSpacing: true, pinType: matchMedia('(hover: hover) and (pointer: fine)').matches ? 'transform' : 'fixed', start: 'top top', end: '+=300%', scrub: .5, invalidateOnRefresh: true,
-      onUpdate: self => { setV(stepValue(self.progress)); setIdx(stepIndex(self.progress)); if (stepIndex(self.progress) !== 1) setSentBoth(false); },
+      onUpdate: self => { setProg(self.progress); setV(stepValue(self.progress)); setIdx(stepIndex(self.progress)); if (stepIndex(self.progress) !== 1) setSentBoth(false); },
       onToggle: self => { if (self.isActive) document.dispatchEvent(new CustomEvent('remote:loop', { detail: { k: 'pin', el: node } })); } });
     setV(stepValue(st.progress)); setIdx(stepIndex(st.progress)); settle(st);
     const scrollEnd = () => settle(st); ScrollTrigger.addEventListener('scrollEnd', scrollEnd);
@@ -209,7 +217,7 @@ export default function PinStory() {
   }, [pinned]);
   // 390 / stacked (PM 21:44): the stills are a plain scroll list, so the active step follows the reader. It is the last
   // step whose top has passed 55% of the viewport (01 until then); scrolling back up walks it back down.
-  const [stackIdx, setStackIdx] = useState(0), [seen, setSeen] = useState(0);
+  const [stackIdx, setStackIdx] = useState(0), [seen, setSeen] = useState(0), [prog, setProg] = useState(0);
   useEffect(() => {
     if (pinned) return;
     let raf = 0;
@@ -224,25 +232,31 @@ export default function PinStory() {
     return () => { cancelAnimationFrame(raf); removeEventListener('scroll', queue); removeEventListener('resize', queue); io.disconnect(); };
   }, [pinned]);
   // Touch / < 1200 px with motion (and no Save-Data): the 10 s three.js loop instead of the three stills.
-  const loopMode = !pinned && ready && motion && !focusMode && !(typeof navigator !== 'undefined' && navigator.connection?.saveData);
+  const loopMode = ready && motion && !focusMode && !(typeof navigator !== 'undefined' && navigator.connection?.saveData);
   const [loopStep, setLoopStep] = useState(0);
   const step = pinned ? idx : loopMode ? loopStep : stackIdx;
   return <section ref={root} className={`b-pin ${pinned ? 'is-pinned' : 'is-stacked'}${loopMode ? ' is-loop' : ''}${!pinned && ready && motion ? ' is-reveal' : ''}${is3d ? ' is-3d' : ''}`} id="search-proof" data-active-step={step + 1} data-track-section="search" aria-labelledby="pin-title">
     <span id="share-story" className="b-anchor" aria-hidden="true" />
     <div ref={stage} className="b-pin-stage">
-      {pinned && <div ref={host} className="pin-canvas-host" aria-hidden="true"><span className="pin-glow" /></div>}
+      
       <div className="b-wrap b-pin-grid">
-        {loopMode && <div className="b-pin-loopcol"><PinLoop onStep={setLoopStep} /></div>}
-        {pinned && <div className="b-pin-media" aria-hidden="true"><Scene v={v} idx={idx} phoneIdx={phoneIdx} eager sceneRef={sceneRef} /></div>}
+        {loopMode && <div className="b-pin-loopcol"><PinLoop onStep={setLoopStep} pinIdx={pinned ? idx : undefined} /></div>}
+        
         <div className="b-pin-copy">
           <p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />01 / YouTube search</p>
           <h2 id="pin-title"><span className="b-h2-desk">Search YouTube <em>from your phone.</em></span><span className="b-h2-m">Type on your phone. <em>Results on the TV.</em></span></h2>
           <p className="b-lede">Type the search on your phone keyboard. The results open on your TV.</p>
-          <ol className="b-pin-steps">{STEPS.map((s, i) => <li key={s.id} className={`b-pin-step${step === i ? ' is-on' : ''}${seen & (1 << i) ? ' is-seen' : ''}`} aria-current={step === i ? 'step' : undefined}>
+          <ol className="b-pin-steps">{pinned ? STEPS.map((s, i) => <li key={s.id} className={`b-pin-step${step === i ? ' is-on' : ''} is-seen`} aria-current={step === i ? 'step' : undefined}>
             <span className="b-step-no">0{i + 1}</span>
-            <SplitText tag="span" text={s.title} className="b-step-title" textAlign="left" splitType="lines" enabled={motion && pinned} delay={40} duration={.6} ease="power3.out" from={{ opacity: 0, y: 18 }} to={{ opacity: 1, y: 0 }} />
+            <SplitText tag="span" text={s.title} className="b-step-title" textAlign="left" splitType="lines" enabled delay={40} duration={.6} ease="power3.out" from={{ opacity: 0, y: 18 }} to={{ opacity: 1, y: 0 }} />
+            <span className="b-step-bar" aria-hidden="true" /></li>)
+            : loopMode ? LOOP_LABELS.map((l, i) => <li key={l} className={`b-pin-step${step === i ? ' is-on' : ''} is-seen`} aria-current={step === i ? 'step' : undefined}>
+            <span className="b-step-no">0{i + 1}</span><span className="b-step-title">{l}</span><span className="b-step-bar" aria-hidden="true" /></li>)
+            : STEPS.map((s, i) => <li key={s.id} className={`b-pin-step${step === i ? ' is-on' : ''}${seen & (1 << i) ? ' is-seen' : ''}`} aria-current={step === i ? 'step' : undefined}>
+            <span className="b-step-no">0{i + 1}</span>
+            <span className="b-step-title">{s.title}</span>
             <span className="b-step-bar" aria-hidden="true" />
-            {!pinned && !loopMode && <div className="b-pin-stacked-still"><PinStill index={i} /></div>}
+            <div className="b-pin-stacked-still"><PinStill index={i} /></div>
           </li>)}</ol>
           
         </div>
