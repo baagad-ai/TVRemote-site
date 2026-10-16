@@ -48,7 +48,7 @@ function Scene({ v, idx, phoneIdx = idx, eager = false, sceneRef }) {
   return <div ref={sceneRef} className="pin-scene" style={{ '--cam-s': cam.s.toFixed(4), '--cam-x': `${cam.x.toFixed(2)}px`, '--cam-y': `${cam.y.toFixed(2)}px` }}>
     {/* Fallback under the canvas (no WebGL, before the pin holds the context): Build's step-1 still when it lands,
         else a code-drawn TV (SVG, lime glow) + the phone with its phoneScreenSvg screen, following the steps. */}
-    {PIN.fallback && <img className="pin-fallback" src={PIN.fallback} alt="" width="1120" height="1240" decoding="async" />}
+    {PIN.fallback && <img className="pin-fallback" src={PIN.fallback} alt="" width="1600" height="1000" decoding="async" />}
     <div className={`pin-tv${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-tv-layer" style={{ opacity: k === 0 ? 1 : op(k) }}><DrawnTV state={s.drawn} focus={0} idPrefix={`pin${k}`} /></div>)}<span className="b-tag pin-tag">Illustrated TV · results open after Send</span></div>
     <div className={`pin-phone${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-phone-layer" style={{ opacity: k === 0 ? 1 : (k === phoneIdx ? 1 : 0) }}><PhoneLoop name="typing" step={k} playing={false} /></div>)}</div>
     <p className="pin-bubble" style={{ opacity: phoneIdx === 1 ? 1 : 0 }}>{SENT}</p>
@@ -85,7 +85,10 @@ export default function PinStory() {
     if (!lease) return;
     const ctrl = new AbortController(); let api = null;
     import('./pin-scene.js').then(({ createPinScene }) => createPinScene(host.current, { modelUrl: PIN.model, tvTextures: STEPS.map(s => s.tv), phoneTextures: STEPS.map((_, i) => phoneScreenSvg('typing', i)), signal: ctrl.signal }))
-      .then(a => { api = a; live.current = a; setIs3d(true); push(vRef.current); }).catch(() => setIs3d(false));
+      .then(a => { api = a; live.current = a; push(vRef.current); requestAnimationFrame(() => requestAnimationFrame(() => { if (!ctrl.signal.aborted) setIs3d(true); })); }).catch(() => setIs3d(false));
+    // The canvas stays hidden (CSS: .pin-canvas-host until .is-3d) and the fallback stays visible until createPinScene has
+    // loaded every texture and put the phoneScreenSvg / DrawnTV maps on PhoneScreen / TVScreen (the glb's baked screen
+    // material is disposed) and the first frame has rendered. Any texture failure rejects: the fallback stays.
     return () => { ctrl.abort(); api?.dispose(); live.current = null; setIs3d(false); };
   }, [lease]);
   const push = value => { const node = sceneRef.current, api = live.current; if (!node || !api) return; const tv = node.querySelector('.pin-tv').getBoundingClientRect(), ph = node.querySelector('.pin-phone').getBoundingClientRect(), hr = host.current.getBoundingClientRect(), g = host.current.firstChild.style;

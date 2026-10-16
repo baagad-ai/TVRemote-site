@@ -12,14 +12,16 @@ import { PhoneLoop, GuestCard } from './slots';
 const Eyebrow = ({ children, className = '' }) => <p className={`b-eyebrow ${className}`}><span className="b-dot" aria-hidden="true" />{children}</p>;
 const Frame = ({ src, alt, w = 342, h = 706, className = '' }) => <div className={`b-frame ${className}`}><img src={src} alt={alt} width={w} height={h} loading="lazy" decoding="async" /></div>;
 
-// 4 · Rooms: the isometric rooms render bleeds off the right and top under a radial vignette; chips swap the lit
+// 4 · Rooms (Build's final loops, 21:05): at 1440 each room is full-section media (inset 0, cover, poster first, webm
+// then mp4) under the copy column, which sits above it (z-index) and overlaps the room's edge as on the board. At 390
+// each room is a 4:5 poster right under the copy (the 1440 video is not shown there). Previously: chips swap the lit
 // room with React Bits PixelTransition (0.5 s; instant under reduced motion). Slots per room in media.js
 // (Build's loops/posters once whitelisted; the board render until then). Only the selected room's loop plays.
-const ROOM_LIST = [['living', 'Living room'], ['bedroom', 'Bedroom'], ['kitchen', 'Kitchen']];
+const ROOM_LIST = [['living', 'Living room'], ['bedroom', 'Bedroom'], ['kitchen', 'Kitchen']], NAMES = Object.fromEntries(ROOM_LIST);
 function RoomMedia({ id, play }) {
   const r = ROOMS[id], video = useRef(null);
   useEffect(() => { const v = video.current; if (!v) return; v.playbackRate = 1; if (play) v.play().catch(() => {}); else v.pause(); }, [play]);
-  return <div className="room-media"><picture>{r.crop !== r.poster && <source media="(max-width: 899px)" srcSet={r.crop} />}<img src={r.poster} width="1200" height="936" alt={r.own ? `Illustrated rooms with the ${id} lit in lime.` : 'Illustrated rooms: a living room lit in lime and a bedroom beside it.'} loading="lazy" decoding="async" /></picture>
+  return <div className="room-media"><picture>{r.crop !== r.poster && <source media="(max-width: 899px)" srcSet={r.crop} />}<img src={r.poster} width={r.own ? 1440 : 1200} height={r.own ? 760 : 936} alt={r.own ? `Illustrated rooms with the ${NAMES[id].toLowerCase()} lit in lime.` : 'Illustrated rooms: a living room lit in lime and a bedroom beside it.'} loading="lazy" decoding="async" /></picture>
     {play && r.mp4 && <video ref={video} data-track-loop={`rooms-${id}`} muted playsInline loop preload="metadata" poster={r.poster} aria-hidden="true">{r.webm && <source src={r.webm} type="video/webm" />}<source src={r.mp4} type="video/mp4" /></video>}</div>;
 }
 export function Rooms() {
@@ -38,7 +40,7 @@ export function Rooms() {
       <Eyebrow>Rooms</Eyebrow>
       <h2 id="rooms-title">The right TV. <em>The right room.</em></h2>
       <p className="b-lede">Name each TV and pick its room when you pair it. Your saved TVs sit in one list, each with its room.</p>
-      <div className="b-chips" role="group" aria-label="Rooms">{ROOM_LIST.map(([id, name]) => <button key={id} type="button" className="b-chip" aria-pressed={room === id} onClick={() => pick(id)}>{room === id && <span className="room-dot" aria-hidden="true" />}{name}</button>)}</div>
+      <div className="b-chips" role="group" aria-label="Rooms">{ROOM_LIST.map(([id, name]) => <button key={id} type="button" className="b-chip" data-track="rooms-chip" data-track-item={`rooms_${id}`} aria-pressed={room === id} onClick={() => pick(id)}>{room === id && <span className="room-dot" aria-hidden="true" />}{name}</button>)}</div>
       <div className="b-rooms-inset"><Frame src="assets/board/pair-rooms-540.webp" w={540} h={1170} alt="Pairing a TV in The Remote: the code from the TV screen, the name Living Room TV and the room chips Living room, Bedroom and Kitchen." /><p className="b-small">Real pairing screen: name the TV, pick the room.</p></div>
     </div>
   </section>;

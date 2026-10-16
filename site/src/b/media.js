@@ -15,15 +15,14 @@ export const PROD_NAMES = {
   // Pin stills, re-rendered by Build from our 3D with Design's code-drawn screens (due 20:35-22:00 IST 16 Oct, into
   // /workspace/site-fix-1016/loops-incoming/; copy here). The earlier pin-step-*.webp had real app captures on the phone
   // and were removed (PM 16 Oct). Until these land, PinStory draws an interim still in code (SVG TV + phoneScreenSvg).
-  pinFallback: 'pin-fallback-step-1-1440.webp',                        // desktop: step 1 under the canvas, 560x620 scene box (2x)
+  pinFallback: 'pin-fallback-step-1-1440.webp',                        // desktop: step 1 under the canvas (1600x1000, Build 21:11)
   pinStill1: 'pin-still-1-390.webp', pinStill2: 'pin-still-2-390.webp', pinStill3: 'pin-still-3-390.webp', // 390 / reduced motion, phone over TV
   // Rooms diorama (PM 16 Oct: the diorama replaces the rejected single-room renders): one 10 s loop per room
   // (webm + mp4), its 1440 poster and a 390 4:5 poster, plus the diorama still that stands in for any room without
   // its own poster yet.
   livingWebm: 'rooms-living.webm', livingMp4: 'rooms-living.mp4', living1440: 'rooms-living-1440.webp', living4x5: 'rooms-living-390-4x5.webp',
   bedroomWebm: 'rooms-bedroom.webm', bedroomMp4: 'rooms-bedroom.mp4', bedroom1440: 'rooms-bedroom-1440.webp', bedroom4x5: 'rooms-bedroom-390-4x5.webp',
-  kitchenWebm: 'rooms-kitchen.webm', kitchenMp4: 'rooms-kitchen.mp4', kitchen1440: 'rooms-kitchen-1440.webp', kitchen4x5: 'rooms-kitchen-390-4x5.webp',
-  diorama1440: 'rooms-diorama-1440.webp', diorama4x5: 'rooms-diorama-390-4x5.webp' // name not in Build's notes yet: change here if Build's differs
+  kitchenWebm: 'rooms-kitchen.webm', kitchenMp4: 'rooms-kitchen.mp4', kitchen1440: 'rooms-kitchen-1440.webp', kitchen4x5: 'rooms-kitchen-390-4x5.webp'
 };
 // A 3d-prod file is used ONLY when its slot key is listed here AND the file exists in site/assets/3d-prod/.
 // Baagad 16 Oct 19:32 IST: the pin is our live 3D scene (Build's pin-tv-phone.glb). PM 19:44: the pin fallback / 390
@@ -32,7 +31,7 @@ export const PROD_NAMES = {
 // Copy only files Build has marked final (never a partial encode, never the rejected single-room renders).
 export const PROD_WHITELIST = Object.fromEntries(['pinModel', 'pinFallback', 'pinStill1', 'pinStill2', 'pinStill3',
   'heroWebm', 'heroMp4', 'heroWebm4x5', 'heroMp44x5', 'hero1920', 'hero1600', 'hero960', 'hero640', 'hero4x5',
-  ...['living', 'bedroom', 'kitchen'].flatMap(k => [`${k}Webm`, `${k}Mp4`, `${k}1440`, `${k}4x5`]), 'diorama1440', 'diorama4x5'].map(k => [k, true]));
+  ...['living', 'bedroom', 'kitchen'].flatMap(k => [`${k}Webm`, `${k}Mp4`, `${k}1440`, `${k}4x5`])].map(k => [k, true]));
 export const prod = key => PROD_WHITELIST[key] === true && present[PROD_NAMES[key]] ? `assets/3d-prod/${PROD_NAMES[key]}` : null;
 // Design's approved board assets (assets/board/, exported from concepts/img and concepts/render) until a whitelisted
 // Build file replaces a slot. Rooms: the board's one rooms render serves every chip until Build's matching room
@@ -50,8 +49,9 @@ export const PIN = { model: prod('pinModel'), contract: prod('pinContract'), fal
 const BOARD_ROOMS = 'assets/board/remote-rooms-1200.webp';
 // Per room: Build's room poster, else the diorama still, else the board's rooms render (all chips). A loop plays only
 // over its own room poster.
+// Build's FINAL room loops (16 Oct 21:05 IST): 1440x760 10 s loop + 1440 poster + 390 4:5 poster (780x975) per room.
 const room = k => {
-  const own = prod(`${k}1440`), still = own || prod('diorama1440');
-  return { poster: still || BOARD_ROOMS, crop: prod(`${k}4x5`) || (own ? null : prod('diorama4x5')) || still || BOARD_ROOMS, webm: own && prod(`${k}Webm`), mp4: own && prod(`${k}Mp4`), board: !still, own: Boolean(own) };
+  const own = prod(`${k}1440`);
+  return { poster: own || BOARD_ROOMS, crop: prod(`${k}4x5`) || own || BOARD_ROOMS, webm: own && prod(`${k}Webm`), mp4: own && prod(`${k}Mp4`), board: !own, own: Boolean(own) };
 };
 export const ROOMS = { living: room('living'), bedroom: room('bedroom'), kitchen: room('kitchen') };

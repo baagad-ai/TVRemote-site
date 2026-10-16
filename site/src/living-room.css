@@ -81,7 +81,7 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 .pin-tv{position:absolute;right:0;top:20px;width:720px;aspect-ratio:16/9;border:10px solid #0b0e0d;border-radius:14px;overflow:hidden;box-shadow:0 0 120px -10px rgb(212 250 123/.33);background:#0b0e0d}
 .pin-tv-layer{position:absolute;inset:0;transition:opacity .2s ease;border-radius:4px;overflow:hidden}
 .pin-tv-layer svg,.pin-still-tv svg{display:block;width:100%;height:100%}
-.pin-fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:100% 50%}
+.pin-fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:0% 50%} /* 16:10 still in the portrait scene box: TV bleeds left, phone in frame, as the canvas */
 .pin-tv.is-geom,.pin-phone.is-geom{background:transparent;border-color:transparent;box-shadow:none}
 .pin-phone img{inset:8px;width:calc(100% - 16px);height:calc(100% - 16px);border-radius:32px}
 .pin-phone{position:absolute;left:30px;top:150px;width:270px;height:540px}
@@ -94,7 +94,7 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 .b-phoneloop-screen{aspect-ratio:1080/2340;border-radius:32px;overflow:hidden;background:var(--ink)}
 .b-phoneloop-screen svg{display:block;width:100%;height:100%}
 .pin-phone .b-phoneloop{position:absolute;inset:0}
-.pin-canvas-host{position:absolute;inset:0;z-index:2;pointer-events:none}
+.pin-canvas-host{position:absolute;inset:0;z-index:2;pointer-events:none;visibility:hidden}.b-pin.is-3d .pin-canvas-host{visibility:visible}
 .pin-canvas-host canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .pin-glow{position:absolute;border-radius:14px;box-shadow:0 0 120px -10px rgb(212 250 123/.33)}
 .b-pin.is-3d .pin-tv{background:transparent;border-color:transparent;box-shadow:none}
@@ -126,13 +126,13 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 
 /* ---------- 4 · Rooms (board mock_rooms: 760px; render right:-40 top:-20 h820 saturate(.9); radial vignette; copy 180 down). ---------- */
 .b-rooms{position:relative;height:760px;overflow:hidden;background:var(--ink)}
-.b-rooms-media{position:absolute;right:-40px;top:-20px;height:820px;aspect-ratio:1200/936;filter:saturate(.9)}
+.b-rooms-media{position:absolute;inset:0;z-index:0}
 .b-rooms-pixwrap,.b-rooms-pixels{position:absolute;inset:0}
 .b-rooms-pixels.pixelated-image-card{width:100%;height:100%;outline:none}
 .room-media{position:absolute;inset:0}
 .room-media img,.room-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.b-rooms-vignette{position:absolute;inset:0;background:radial-gradient(60% 70% at 65% 50%,transparent 40%,#0b0e0d 80%);pointer-events:none}
-.b-rooms-copy{position:relative;padding-top:180px}
+.b-rooms-vignette{display:none}
+.b-rooms-copy{position:relative;z-index:2;padding-top:180px;pointer-events:none}.b-rooms-copy>*{pointer-events:auto}
 .b-rooms .b-lede{max-width:38ch}
 .b-chips{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
 .b-rooms-inset{display:flex;gap:18px;margin-top:40px;align-items:flex-end}
@@ -270,10 +270,11 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
   .pin-still{height:430px;margin:16px 0 8px}
   .pin-still-tv{width:330px;max-width:100%;border-width:6px;border-radius:10px}
   .pin-still-phone{top:90px;width:160px}
-  .b-rooms{height:auto;padding-bottom:44px}
-  .b-rooms-media{position:relative;right:auto;top:auto;width:calc(100% + 40px);height:auto;margin-left:-20px}
-  .b-rooms-vignette{background:linear-gradient(0deg,#0b0e0d 0%,transparent 40%)}
-  .b-rooms-copy{padding-top:0;margin-top:-40px}
+  .b-rooms{height:auto;padding-bottom:44px;display:flex;flex-direction:column}
+  .b-rooms-copy{order:1;padding-top:44px}
+  .b-rooms-media{order:2;position:relative;inset:auto;width:100%;aspect-ratio:4/5;margin-top:24px}
+  .room-media video{display:none}
+  .b-rooms-vignette{display:none}
   .b-closing{margin-top:44px}
   body[data-route=landing] main .b-closing h2{font-size:48px}
   .b-stepper{grid-template-columns:1fr}
