@@ -24,8 +24,9 @@ const SWAPS = [0, .43, .79]; // placeholder swap points (pin-runtime PLACEHOLDER
 const stepFor = (p, swaps) => swaps.reduce((i, at, j) => p >= at ? j : i, 0);
 
 export function PinStill({ index, eager = false }) {
-  const s = STEPS[index], still = PIN.stills[index];
-  if (still) return <figure className="pin-still"><img src={still} alt={`${s.tvAlt} ${s.phoneAlt}`} width="1600" height="1000" loading={eager ? 'eager' : 'lazy'} decoding="async" /></figure>;
+  const s = STEPS[index], still = PIN.stills[index], crop = PIN.stills4x5[index];
+  // Build's stills: 16:10 renders (1080x675) on desktop, 4:5 phone-over-TV (624x780) below 900px. Boxes are reserved by aspect-ratio.
+  if (still) return <figure className="pin-still is-render"><picture>{crop && <source media="(max-width: 899px)" srcSet={crop} width="624" height="780" />}<img src={still} alt={`${s.tvAlt} ${s.phoneAlt}`} width="1080" height="675" loading={eager ? 'eager' : 'lazy'} decoding="async" /></picture></figure>;
   return <figure className="pin-still is-drawn">
     <div className="pin-still-tv"><DrawnTV {...s.tv} idPrefix={`pin${index}`} title={s.tvAlt} /></div>
     <div className="pin-still-phone"><img src={s.phone} alt={s.phoneAlt} width="1080" height="2340" loading="lazy" decoding="async" /></div>
@@ -81,7 +82,7 @@ export default function PinStory() {
         if (canceled) { scene.dispose(); return; }
         runtime.current = scene; const st = ScrollTrigger.getAll().find(t => t.pin === stage.current);
         scene.setProgress(st ? st.progress : 0); setLive(true); ScrollTrigger.refresh();
-      } catch { if (!canceled && canvasHost.current) canvasHost.current.dataset.sceneStatus = 'fallback'; }
+      } catch (error) { if (!canceled && canvasHost.current) { canvasHost.current.dataset.sceneStatus = 'fallback'; canvasHost.current.dataset.sceneError = String(error?.message || error).slice(0, 120); } }
     })();
     return () => { canceled = true; controller.abort(); runtime.current?.dispose(); runtime.current = null; setLive(false); urls.forEach(u => URL.revokeObjectURL(u)); };
   }, [lease]);
@@ -104,7 +105,7 @@ export default function PinStory() {
           <div className="pin-box">
             <div className={`pin-layers ${live ? 'is-hidden' : ''}`}>{STEPS.map((s, i) => <div key={s.id} className={`pin-layer ${step === i ? 'is-on' : ''}`}><PinStill index={i} /></div>)}</div>
             <div ref={canvasHost} className={`pin-canvas-host ${live ? 'is-live' : ''}`} />
-            {live && STEPS[step].chip && <p className="pin-chip pin-chip-live">{STEPS[step].chip}</p>}
+            {live && !PIN.contract && STEPS[step].chip && <p className="pin-chip pin-chip-live">{STEPS[step].chip}</p>}
           </div>
           <p className="b-pin-progress" aria-hidden="true"><span>0{step + 1}</span> / 03</p>
         </div>}

@@ -14,6 +14,19 @@ Pinned revision: `ca44b3f9ee180676a06d7de8ec6bea84cddff85b`. React Bits uses its
 
 LightRays keeps the upstream shader and OGL renderer, with a shared GPU lease, visibility gates, owned cleanup and failure fallback. SplitText uses the upstream GSAP splitting and entrance, preserves the semantic H1, and restores unsplit text for reduced motion. ScrollStack retains upstream progress, scaling and pin-release behavior, uses native scrolling instead of Lenis, and switches to ordinary document flow on narrow or short viewports and keyboard focus.
 
+## React Bits for Concept B "Living Room" (16 Oct 2026)
+
+React Bits has no "2.0" git tag or release; Concept B pins the upstream `main` commit `d9085a5d6cb62a1c7512d8fa05a4f966736b575c` (the React Bits 2.0 component set). Its LICENSE.md (MIT + Commons Clause) is byte-identical to the notice already kept in `licenses/ReactBits-LICENSE.md`. Files are under `src/components/rb/`; each keeps the upstream code, with its CSS import moved into `src/living-room.css`.
+
+- StarBorder.jsx, original SHA-256 `8a82730322a9db4e1f0ceddf312a0b4bdf8a27d10b84ed4f49e93d1977d004c6` (hero and closing CTAs, brand lime).
+- PixelTransition.jsx, original SHA-256 `8a9a6479d528c275fd6f23e3973b8188c4d58691fb735ab7259b584c2fdc2b02` (Rooms poster swap, 0.4 s).
+- Grainient.jsx, original SHA-256 `54e16ec1ea2beae8d50c5774626bc3d113293321095673017aea5a1960555905` (hero background, WebGL2: desktop fine pointer only, behind the GPU lease; still grain on touch, reduced motion and Save-Data).
+- CircularGallery.jsx, original SHA-256 `0fdaec9e596bc8164c0f40dfd2488395980b938a30823b4520d3340261907320` (real-app gallery, OGL/WebGL2 behind the GPU lease, desktop only; CSS scroll-snap row elsewhere).
+
+SplitText and ScrollStack stay at `ca44b3f` above. Spec pieces not used: BlurText, AnimatedList, CountUp (no invented numbers; the live counter stays as is), ScrollReveal and Stepper (the pin's step list does this natively).
+
+Runtime libraries (exact, from package-lock): three 0.186.1 (incl. `examples/jsm/libs/meshopt_decoder.module.js` for Build's EXT_meshopt_compression GLB, MIT), ogl 1.0.11, gsap 3.15.0 (standard no-charge license), lenis 1.3.26 (MIT, `licenses/Lenis-LICENSE.txt`). The YouTube logo path in `src/youtube-logo.js` comes from Wikimedia Commons and is used only on the drawn TV.
+
 ## Magic UI
 
 MIT-licensed registry components, with the full upstream notice retained:

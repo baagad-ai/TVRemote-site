@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'; // Build's GLB requires EXT_meshopt_compression
 
 export const STEP_IDS = ['search', 'results', 'link'];
 // Placeholder timeline (progress 0..1 over the 300vh pin). Camera moves and texture swaps never overlap; snap points
@@ -27,17 +28,31 @@ function parseGLB(buffer) {
   if ([...(json.buffers || []), ...(json.images || [])].some(item => item.uri && !item.uri.startsWith('data:'))) throw Error('External scene resources are not allowed');
   return buffer;
 }
-// Normalise Build's contract into { model, phone, tv, steps:[{id,camera,range,swapAt,phone,tv}], moves, cameras }.
+// Normalise Build's contract into { model, steps:[{id,camera,range,swapAt}], moves, cameras, screens:{phone,tv}:[{at,url}] }.
+// Build's pin-contract.json v1: steps[].PhoneScreen/TVScreen name a key in textures{} (file relative to the contract),
+// timeline.camera_moves[].progress are the camera transitions and timeline.texture_swaps[] swap ONE screen at a time,
+// always outside a camera move. Step copy follows step ranges. Older/placeholder shapes still work.
 export function normaliseContract(raw, base) {
-  const url = p => p && new URL(p, base).href;
+  const url = p => p && new URL(p, base).href, tex = key => url(raw.textures?.[key]?.file || key);
   const steps = (raw.steps || []).map((s, i) => ({
     id: s.id || STEP_IDS[i], camera: s.camera || s.cameraKeyframe || s.cam || PLACEHOLDER.steps[i].camera,
     range: s.range || s.scroll || s.scrollRange || PLACEHOLDER.steps[i].range,
     swapAt: s.swapAt ?? s.swap ?? s.textureSwap ?? (s.range ? s.range[0] : PLACEHOLDER.steps[i].swapAt),
-    phone: url(s.textures?.PhoneScreen || s.phone || s.phoneTexture), tv: url(s.textures?.TVScreen || s.tv || s.tvTexture)
+    phone: (s.PhoneScreen && tex(s.PhoneScreen)) || url(s.textures?.PhoneScreen || s.phone || s.phoneTexture),
+    tv: (s.TVScreen && tex(s.TVScreen)) || url(s.textures?.TVScreen || s.tv || s.tvTexture)
   }));
-  const moves = raw.moves || raw.cameraMoves || steps.slice(1).map((s, i) => { const prev = steps[i]; const a = s.range[0] - (prev.range[1] - prev.range[0]) * .25; return [Math.max(0, a), Math.min(s.swapAt - .02, s.range[0] + (s.range[1] - s.range[0]) * .3)]; });
-  return { model: url(raw.model || raw.glb || 'pin-tv-phone.glb'), phoneMesh: raw.meshes?.phone || 'PhoneScreen', tvMesh: raw.meshes?.tv || 'TVScreen', steps, moves, cameras: raw.cameras || null, flipY: raw.flipY ?? false };
+  const moves = raw.timeline?.camera_moves?.map(m => m.progress) || raw.moves || raw.cameraMoves || steps.slice(1).map((s, i) => { const prev = steps[i]; const a = s.range[0] - (prev.range[1] - prev.range[0]) * .25; return [Math.max(0, a), Math.min(s.swapAt - .02, s.range[0] + (s.range[1] - s.range[0]) * .3)]; });
+  let screens = null;
+  if (raw.timeline?.texture_swaps?.length) {
+    const first = raw.steps?.[0] || {}, typing = first.optional_typing_beat;
+    screens = { phone: [{ at: 0, url: tex(typing?.PhoneScreen || first.PhoneScreen) }], tv: [{ at: 0, url: tex(first.TVScreen) }] };
+    for (const sw of [...raw.timeline.texture_swaps].sort((a, b) => a.at - b.at)) {
+      const list = sw.screen === (raw.nodes?.tv_screen || 'TVScreen') ? screens.tv : screens.phone;
+      if (sw.optional && !typing) continue;
+      list.push({ at: sw.at, url: tex(sw.to) });
+    }
+  }
+  return { model: url(raw.model || raw.glb || 'pin-tv-phone.glb'), phoneMesh: raw.nodes?.phone_screen || raw.meshes?.phone || 'PhoneScreen', tvMesh: raw.nodes?.tv_screen || raw.meshes?.tv || 'TVScreen', steps, moves, screens, cameras: raw.cameras || null, flipY: raw.screen_texture?.flipY ?? raw.flipY ?? false, build: Boolean(raw.timeline) };
 }
 const VERT = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
 const FRAG = 'uniform sampler2D mapA; uniform sampler2D mapB; uniform float mixv; varying vec2 vUv; void main(){ gl_FragColor = mix(texture2D(mapA, vUv), texture2D(mapB, vUv), mixv);\n#include <colorspace_fragment>\n}';
@@ -50,12 +65,14 @@ export async function createPinScene(host, { contractUrl, modelUrl, tvTextures, 
     if (modelUrl) contract.model = new URL(modelUrl, location.href).href;
   } else contract = { model: new URL(modelUrl, location.href).href, phoneMesh: 'PhoneScreen', tvMesh: 'TVScreen', steps: PLACEHOLDER.steps.map(s => ({ ...s })), moves: PLACEHOLDER.moves, cameras: null, flipY: false, placeholder: true };
   contract.steps.forEach((s, i) => { s.phone ||= phoneTextures[i]; s.tv ||= tvTextures[i]; });
+  contract.screens ||= { phone: contract.steps.map(s => ({ at: s.swapAt, url: s.phone })), tv: contract.steps.map(s => ({ at: s.swapAt, url: s.tv })) };
 
-  let disposed = false, frame = 0, progress = 0, fade = null, shown = -1, width = 1, height = 1;
+  let disposed = false, frame = 0, progress = 0, shown = -1, width = 1, height = 1;
   const disposeList = [];
   const response = await fetch(contract.model, { credentials: 'omit', signal }); if (!response.ok) throw Error('Scene unavailable');
   const buffer = await response.arrayBuffer(); if (buffer.byteLength > 1_100_000) throw Error('Scene exceeds budget');
-  const gltf = await new GLTFLoader().parseAsync(parseGLB(buffer), '');
+  await MeshoptDecoder.ready;
+  const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parseAsync(parseGLB(buffer), '');
   const root = gltf.scene;
   root.getObjectByName('FocusRail')?.removeFromParent(); // placeholder GLB: drop the lime corner brackets
   const phoneScreen = root.getObjectByName(contract.phoneMesh), tvScreen = root.getObjectByName(contract.tvMesh);
@@ -92,21 +109,27 @@ export async function createPinScene(host, { contractUrl, modelUrl, tvTextures, 
   // Screen materials with a two-texture crossfade.
   const loader = new THREE.TextureLoader();
   const load = url => new Promise((resolve, reject) => loader.load(url, t => { t.colorSpace = THREE.SRGBColorSpace; t.flipY = contract.flipY; t.anisotropy = 4; disposeList.push(t); resolve(t); }, undefined, reject));
-  const textures = await Promise.all(contract.steps.map(s => Promise.all([load(s.phone), load(s.tv)])));
+  const cache = new Map(), get = u => { if (!cache.has(u)) cache.set(u, load(u)); return cache.get(u); };
+  const lists = { phone: await Promise.all(contract.screens.phone.map(async e => ({ at: e.at, map: await get(e.url) }))), tv: await Promise.all(contract.screens.tv.map(async e => ({ at: e.at, map: await get(e.url) }))) };
   if (signal?.aborted) { disposeList.forEach(x => x.dispose()); throw Error('aborted'); }
   const canvas = document.createElement('canvas'); canvas.className = 'pin-canvas';
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = contract.build ? 1 : 1.15;
   const scene = new THREE.Scene(), pmrem = new THREE.PMREMGenerator(renderer), room = new RoomEnvironment();
   const environment = pmrem.fromScene(room, .04); scene.environment = environment.texture; room.dispose();
-  scene.add(new THREE.HemisphereLight(0xeeeee6, 0x151b16, 2.2));
-  const key = new THREE.DirectionalLight(0xeeeee6, 3.2); key.position.set(-3, 5, 6); scene.add(key);
-  const bias = new THREE.PointLight(0xd4fa7b, 18, 12); bias.position.set(0, -.6, -1.2); scene.add(bias); // lime bias light behind the TV
+  if (contract.build) { // Build's lighting recommendation (pin-contract.json "lighting"); BiasStrip is emissive in the GLB.
+    scene.environmentIntensity = .45; const key = new THREE.DirectionalLight(0xeeeee6, 1.2); key.position.set(-3, 5, 6); scene.add(key);
+  } else {
+    scene.add(new THREE.HemisphereLight(0xeeeee6, 0x151b16, 2.2));
+    const key = new THREE.DirectionalLight(0xeeeee6, 3.2); key.position.set(-3, 5, 6); scene.add(key);
+    const bias = new THREE.PointLight(0xd4fa7b, 18, 12); bias.position.set(0, -.6, -1.2); scene.add(bias); // lime bias light behind the TV
+  }
   scene.add(root);
 
   const screen = (mesh, a) => { const material = new THREE.ShaderMaterial({ uniforms: { mapA: { value: a }, mapB: { value: a }, mixv: { value: 0 } }, vertexShader: VERT, fragmentShader: FRAG, toneMapped: false }); mesh.material?.dispose?.(); mesh.material = material; disposeList.push(material); return material; };
-  const phoneMat = screen(phoneScreen, textures[0][0]), tvMat = screen(tvScreen, textures[0][1]);
+  const mats = { phone: screen(phoneScreen, lists.phone[0].map), tv: screen(tvScreen, lists.tv[0].map) }, fades = { phone: null, tv: null }, shownMap = { phone: lists.phone[0].map, tv: lists.tv[0].map };
+  const mapAt = (list, p) => list.reduce((m, e) => p >= e.at ? e.map : m, list[0].map);
 
   function stepAt(p) { let i = 0; contract.steps.forEach((s, j) => { if (p >= s.swapAt) i = j; }); return i; }
   function cameraAt(p) {
@@ -125,15 +148,16 @@ export async function createPinScene(host, { contractUrl, modelUrl, tvTextures, 
   function render(now) {
     frame = 0; if (disposed || document.hidden) return;
     cameraAt(progress);
-    if (fade) { const t = Math.min(1, (now - fade.start) / 200); phoneMat.uniforms.mixv.value = tvMat.uniforms.mixv.value = t; if (t === 1) { phoneMat.uniforms.mapA.value = phoneMat.uniforms.mapB.value; tvMat.uniforms.mapA.value = tvMat.uniforms.mapB.value; phoneMat.uniforms.mixv.value = tvMat.uniforms.mixv.value = 0; fade = null; } }
+    let fading = false;
+    for (const k of ['phone', 'tv']) { const f = fades[k], u = mats[k].uniforms; if (!f) continue; const t = Math.min(1, (now - f) / 200); u.mixv.value = t; if (t === 1) { u.mapA.value = u.mapB.value; u.mixv.value = 0; fades[k] = null; } else fading = true; }
     renderer.render(scene, camera);
-    if (fade) frame = requestAnimationFrame(render);
+    if (fading) frame = requestAnimationFrame(render);
   }
   const invalidate = () => { if (!frame && !disposed) frame = requestAnimationFrame(render); };
   function setProgress(p) {
     progress = Math.max(0, Math.min(1, p));
-    const i = stepAt(progress);
-    if (i !== shown) { const first = shown < 0; shown = i; phoneMat.uniforms.mapB.value = textures[i][0]; tvMat.uniforms.mapB.value = textures[i][1]; if (first) { phoneMat.uniforms.mapA.value = textures[i][0]; tvMat.uniforms.mapA.value = textures[i][1]; } else fade = { start: performance.now() }; }
+    const first = shown < 0; shown = stepAt(progress);
+    for (const k of ['phone', 'tv']) { const map = mapAt(lists[k], progress), u = mats[k].uniforms; if (map === shownMap[k]) continue; shownMap[k] = map; if (first) { u.mapA.value = u.mapB.value = map; continue; } u.mapA.value = u.mixv.value > 0 ? u.mapB.value : u.mapA.value; u.mapB.value = map; u.mixv.value = 0; fades[k] = performance.now(); }
     invalidate();
   }
   const resize = () => { const r = host.getBoundingClientRect(); width = Math.max(1, r.width); height = Math.max(1, r.height); renderer.setSize(width, height, false); invalidate(); };

@@ -428,3 +428,6 @@ body[data-route=landing] .download-steps p:first-child b{color:var(--lime)}
 .download-count b{display:inline-block;min-width:5ch;font-variant-numeric:tabular-nums;text-align:right}
 /* The hero QR always takes its own row under the CTAs, so CTA width changes at hydration cannot re-wrap it (was CLS 0.19). */
 .b-hero .qr-hint{flex-basis:100%;align-items:flex-start;text-align:left}
+/* Build's pin stills: 16:10 box on desktop, 4:5 box below 900px (reserved before the image loads). */
+.pin-still.is-render picture,.pin-still.is-render img{display:block;width:100%;height:100%;object-fit:cover}
+@media (max-width:899px){.pin-still.is-render{aspect-ratio:4/5}}

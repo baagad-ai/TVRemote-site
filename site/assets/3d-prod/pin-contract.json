@@ -1,0 +1,386 @@
+{
+  "version": 1,
+  "model": "pin-tv-phone.glb",
+  "bytes": null,
+  "section": "2 · single pin: YouTube search → results → shared link",
+  "coordinate_system": "GLB +Y up, metres-ish, screens face +Z. Blender source +Z up, front -Y. Convert position (x,y,z) -> (x,z,-y). All numbers below are glTF space.",
+  "canvas": {
+    "aspect": [
+      16,
+      10
+    ],
+    "max_css": [
+      720,
+      450
+    ],
+    "dpr": [
+      1,
+      1.5
+    ],
+    "frameloop": "demand",
+    "canvas_limit": 1,
+    "gpu_owner": "tv-scene"
+  },
+  "nodes": {
+    "phone": "PinPhone",
+    "phone_model": "PinPhoneModel",
+    "phone_screen": "PhoneScreen",
+    "television": "PinTV",
+    "tv_screen": "TVScreen",
+    "console_and_tv": "PinConsoleTV",
+    "room_root": "PinRoom",
+    "bias_strip": "BiasStrip",
+    "cameras": [
+      "cam_search",
+      "cam_results",
+      "cam_link"
+    ]
+  },
+  "required_nodes": [
+    "PhoneScreen",
+    "TVScreen",
+    "PinPhone",
+    "PinTV",
+    "cam_search",
+    "cam_results",
+    "cam_link"
+  ],
+  "cameras": {
+    "cam_search": {
+      "node": "cam_search",
+      "position": [
+        0.66,
+        0.84,
+        3.32
+      ],
+      "target": [
+        0.44,
+        0.77,
+        2.45
+      ],
+      "fov": 25.361,
+      "fov_axis": "vertical (THREE.PerspectiveCamera.fov) at the 16:10 canvas",
+      "aspect": 1.6,
+      "near": 0.02,
+      "far": 50,
+      "blender_lens_mm": 50
+    },
+    "cam_results": {
+      "node": "cam_results",
+      "position": [
+        0.22,
+        1.0,
+        3.7
+      ],
+      "target": [
+        0.07,
+        0.73,
+        -0.0
+      ],
+      "fov": 28.684,
+      "fov_axis": "vertical (THREE.PerspectiveCamera.fov) at the 16:10 canvas",
+      "aspect": 1.6,
+      "near": 0.02,
+      "far": 50,
+      "blender_lens_mm": 44
+    },
+    "cam_link": {
+      "node": "cam_link",
+      "position": [
+        0.15,
+        0.96,
+        3.85
+      ],
+      "target": [
+        0.24,
+        0.74,
+        0.9
+      ],
+      "fov": 31.417,
+      "fov_axis": "vertical (THREE.PerspectiveCamera.fov) at the 16:10 canvas",
+      "aspect": 1.6,
+      "near": 0.02,
+      "far": 50,
+      "blender_lens_mm": 40
+    }
+  },
+  "camera_note": "The three cameras are also exported as glTF camera nodes with the same names (yfov radians, aspectRatio 1.6). Use position + target (lookAt) from this file; up = +Y. No depth of field in the live scene; the stills use a mild DOF.",
+  "screens": {
+    "PhoneScreen": {
+      "aspect": "1080:2340 (0.4615)",
+      "uv": "single quad, clean 0–1 UVs. glTF UV (0,0) = top-left of the image, (1,1) = bottom-right. Use texture.flipY = false.",
+      "center": [
+        0.4977,
+        0.764,
+        2.6285
+      ],
+      "corners_world": [
+        [
+          0.4647,
+          0.6743,
+          2.6091
+        ],
+        [
+          0.5432,
+          0.6779,
+          2.6313
+        ],
+        [
+          0.5306,
+          0.8537,
+          2.6478
+        ],
+        [
+          0.4521,
+          0.8502,
+          2.6257
+        ]
+      ],
+      "embedded_default": "phone-search (540x1170 WebP)"
+    },
+    "TVScreen": {
+      "aspect": "16:9",
+      "uv": "single quad, clean 0–1 UVs. glTF UV (0,0) = top-left of the image, (1,1) = bottom-right. Use texture.flipY = false.",
+      "center": [
+        0.0,
+        0.8635,
+        -0.007
+      ],
+      "corners_world": [
+        [
+          -0.7625,
+          0.4346,
+          -0.007
+        ],
+        [
+          0.7625,
+          0.4346,
+          -0.007
+        ],
+        [
+          0.7625,
+          1.2924,
+          -0.007
+        ],
+        [
+          -0.7625,
+          1.2924,
+          -0.007
+        ]
+      ],
+      "embedded_default": "tv-home (1170x658 WebP)"
+    }
+  },
+  "screen_texture": {
+    "flipY": false,
+    "colorSpace": "SRGBColorSpace",
+    "material": "unlit: replace the screen material with THREE.MeshBasicMaterial({ map, toneMapped:false }) as scene-runtime.js already does; preserve the full native frame, never crop",
+    "crossfade": "0.2 s emissive/opacity mix between the old and new map (two stacked MeshBasicMaterials or a mix uniform); time-based, triggered when progress crosses a swap point"
+  },
+  "textures": {
+    "phone-search": {
+      "file": "textures/phone-search.webp",
+      "size": [
+        540,
+        1170
+      ],
+      "screen": "PhoneScreen",
+      "what": "Real YouTube search sheet capture, \"lofi beats\" typed, keyboard up. No caret, no cursor."
+    },
+    "phone-search-typing": {
+      "file": "textures/phone-search-typing.webp",
+      "size": [
+        540,
+        1170
+      ],
+      "screen": "PhoneScreen",
+      "what": "Optional typing beat: same sheet with \"lofi\" typed.",
+      "optional": true
+    },
+    "phone-sent": {
+      "file": "textures/phone-sent.webp",
+      "size": [
+        540,
+        1170
+      ],
+      "screen": "PhoneScreen",
+      "what": "Real remote screen, sheet closed, status line \"YouTube search action sent. Check the TV.\""
+    },
+    "phone-share": {
+      "file": "textures/phone-share.webp",
+      "size": [
+        540,
+        1170
+      ],
+      "screen": "PhoneScreen",
+      "what": "Real share-sheet capture (assets/showcase/youtube-share.png, unmodified): Shared to The Remote · Open YouTube video?"
+    },
+    "tv-home": {
+      "file": "textures/tv-home.webp",
+      "size": [
+        1280,
+        720
+      ],
+      "screen": "TVScreen",
+      "what": "Illustrative TV home row, static lime focus ring on tile 1, no text, no logos."
+    },
+    "tv-results": {
+      "file": "textures/tv-results.webp",
+      "size": [
+        1280,
+        720
+      ],
+      "screen": "TVScreen",
+      "what": "Illustrative YouTube results grid: search pill \"lofi beats\", YouTube logo, 3x2 palette tiles, lime focus ring on result 1."
+    },
+    "tv-playing": {
+      "file": "textures/tv-playing.webp",
+      "size": [
+        1280,
+        720
+      ],
+      "screen": "TVScreen",
+      "what": "Shared link playing: illustrative palette video frame + lime progress bar, small YouTube logo. No title, no times."
+    }
+  },
+  "steps": [
+    {
+      "id": "search",
+      "range": [
+        0.0,
+        0.3333
+      ],
+      "snap": 0.0,
+      "camera": "cam_search",
+      "hold": [
+        0.0,
+        0.3333
+      ],
+      "PhoneScreen": "phone-search",
+      "TVScreen": "tv-home",
+      "optional_typing_beat": {
+        "PhoneScreen": "phone-search-typing",
+        "until": 0.12,
+        "note": "show 'lofi' first, swap to 'lofi beats' at 0.12; the camera is still, so the swap is safe"
+      },
+      "copy": "Type a YouTube search on your phone.",
+      "still": {
+        "desktop_16x10": "pin-step-1-16x10.webp",
+        "mobile_4x5": "pin-step-1.webp"
+      }
+    },
+    {
+      "id": "results",
+      "range": [
+        0.3333,
+        0.6667
+      ],
+      "snap": 0.5,
+      "camera": "cam_results",
+      "hold": [
+        0.45,
+        0.6667
+      ],
+      "PhoneScreen": "phone-sent",
+      "TVScreen": "tv-results",
+      "copy": "Send, and the results open on the TV.",
+      "still": {
+        "desktop_16x10": "pin-step-2-16x10.webp",
+        "mobile_4x5": "pin-step-2.webp"
+      }
+    },
+    {
+      "id": "link",
+      "range": [
+        0.6667,
+        1.0
+      ],
+      "snap": 1.0,
+      "camera": "cam_link",
+      "hold": [
+        0.84,
+        1.0
+      ],
+      "PhoneScreen": "phone-share",
+      "TVScreen": "tv-playing",
+      "copy": "Share a YouTube link from your phone. It plays on the TV.",
+      "still": {
+        "desktop_16x10": "pin-step-3-16x10.webp",
+        "mobile_4x5": "pin-step-3.webp"
+      }
+    }
+  ],
+  "timeline": {
+    "progress": "ScrollTrigger progress 0..1 (end:+=300%, scrub 0.5, snap [0, 0.5, 1])",
+    "camera_moves": [
+      {
+        "from": "cam_search",
+        "to": "cam_results",
+        "progress": [
+          0.3333,
+          0.45
+        ],
+        "ease": "power2.inOut on local t; lerp position and target, lerp fov"
+      },
+      {
+        "from": "cam_results",
+        "to": "cam_link",
+        "progress": [
+          0.6667,
+          0.84
+        ],
+        "ease": "power2.inOut on local t; lerp position and target, lerp fov"
+      }
+    ],
+    "texture_swaps": [
+      {
+        "at": 0.12,
+        "screen": "PhoneScreen",
+        "from": "phone-search-typing",
+        "to": "phone-search",
+        "optional": true
+      },
+      {
+        "at": 0.46,
+        "screen": "PhoneScreen",
+        "from": "phone-search",
+        "to": "phone-sent",
+        "why": "Send happens on the phone first"
+      },
+      {
+        "at": 0.48,
+        "screen": "TVScreen",
+        "from": "tv-home",
+        "to": "tv-results",
+        "why": "results open only after Send; settled before the 0.5 snap"
+      },
+      {
+        "at": 0.85,
+        "screen": "PhoneScreen",
+        "from": "phone-sent",
+        "to": "phone-share",
+        "why": "the link is shared from the phone first"
+      },
+      {
+        "at": 0.87,
+        "screen": "TVScreen",
+        "from": "tv-results",
+        "to": "tv-playing",
+        "why": "then the shared link plays on the TV; settled before the 0.9–1 hold"
+      }
+    ],
+    "rule": "No swap point lies inside a camera move. Reverse scroll crosses the same points backwards and shows the previous texture (crossfade 0.2 s).",
+    "why_not_step_midpoints": "The spec's 'swap at step midpoint' (0.5 / 0.833) would fall at the 0.5 snap and inside the 'first 60%' camera move of the link step. These points keep every snapped state fully settled and every swap outside a move."
+  },
+  "lighting": {
+    "recommendation": "RoomEnvironment via PMREMGenerator.fromScene (as runtime-contract.json), scene.environmentIntensity ≈ 0.45, one soft DirectionalLight from upper-left (-3,5,6) intensity ≈ 1.2. Keep toneMapping ACES or AgX with exposure ≈ 1. Screens and BiasStrip read as self-lit; the canvas background should be the section's --ink/#0b0e0d.",
+    "note": "The stills are Cycles renders of the same scene with a wall, floor and a lime bias light; the live scene will be flatter. Verify poster-to-WebGL parity on the snapped states."
+  },
+  "fallback": {
+    "when": "reduced motion · Save-Data · deviceMemory<4 · no WebGL2 · off-screen · innerWidth<900",
+    "desktop": "pin-step-N-16x10.webp per step, crossfaded by the same ScrollTrigger",
+    "mobile_390": "pin-step-N.webp (4:5 phone-over-TV), stacked, no pin"
+  },
+  "materials": "Brand tints only (#0b0e0d / #eeeee6 shades); BiasStrip is lime emissive (#d4fa7b). The YouTube logo appears only inside the TV textures.",
+  "claims": "No cursor or pointer on either screen, no caret, no long press, generic names only (Living Room TV / Living room). The TV shows results only after Send (texture order enforces it)."
+}
