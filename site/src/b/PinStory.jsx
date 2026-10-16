@@ -144,7 +144,7 @@ export default function PinStory() {
             <span className="b-step-bar" aria-hidden="true" />
             {!pinned && <div className="b-pin-stacked-still"><PinStill index={i} /></div>}
           </li>)}</ol>
-          {!pinned && <p className="b-small b-pin-note">Still frames on mobile (the live 3D pin runs on desktop only).</p>}
+          
         </div>
       </div>
     </div>

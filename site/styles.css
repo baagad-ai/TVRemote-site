@@ -308,7 +308,8 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 body[data-route=landing] main .b-split h2{max-width:none}.b-split h2 .b-h2-l1{display:block;white-space:nowrap}@media (max-width:740px){.b-split h2 .b-h2-l1{white-space:normal}}
 .b-split-copy .b-lede{margin-top:0}
 .b-split-copy .b-small{margin-top:18px}
-.b-line{display:flex;align-items:center;margin-top:40px}
+.b-line{display:flex;align-items:center;margin-top:40px;max-width:100%;min-width:0}
+.b-split-grid>*{min-width:0;max-width:100%}
 .b-line .b-chip{cursor:default;flex:none}
 .b-line svg{flex:1;height:2px;overflow:visible}
 .b-line line{stroke:var(--lime);stroke-width:2;stroke-dasharray:100;stroke-dashoffset:100;vector-effect:non-scaling-stroke;transition:stroke-dashoffset .8s cubic-bezier(.45,0,.55,1)}
@@ -398,10 +399,10 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
   .b-lede{font-size:16px}
   .b-section{padding-block:44px}
   .b-hero{height:auto;display:flex;flex-direction:column;padding-top:var(--header)}
-  .b-hero-scene{position:relative;inset:auto;height:auto;aspect-ratio:4/5;order:2} /* PM 20:29: a 4:5 box (poster hero-390-4x5.webp) */
+  .b-hero-scene{position:relative;inset:auto;height:auto;aspect-ratio:4/5;order:1} /* PM 20:29: a 4:5 box (poster hero-390-4x5.webp) */
   .b-hero-loop img,.b-hero-video{object-position:50% 50%}
   .b-hero-scrim{inset:-1px 0 0;background:linear-gradient(0deg,#0b0e0d 0%,transparent 30%),linear-gradient(180deg,#0b0e0d 0,rgb(11 14 13/.6) 24px,transparent 60px)} /* Design: 60px top fade, no edge */
-  .b-hero-copy{order:1;padding:24px 0 10px}
+  .b-hero-copy{order:2;padding:24px 0 10px} /* Design 21:36: at 390 the 4:5 loop first, copy below */
   .b-hide-m{display:none}.b-show-m{display:inline}
   body[data-route=landing] .b-hero h1,.b-h1{font-size:46px;max-width:none}
   .b-hero h1 br,.b-hero h1.b-h1>span[aria-hidden=true]{display:none}
@@ -413,6 +414,7 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
   .pin-still{height:430px;margin:16px 0 8px}
   .pin-still-tv{width:330px;max-width:100%;border-width:6px;border-radius:10px}
   .pin-still-phone{top:90px;width:160px}
+  .b-line{flex-wrap:wrap;row-gap:10px}.b-line svg{min-width:24px}
   .b-rooms{height:auto;padding-bottom:44px;display:flex;flex-direction:column}
   .b-rooms-copy{order:1;padding-top:44px}
   .b-rooms-media{order:2;position:relative;inset:auto;width:100%;aspect-ratio:4/5;margin-top:24px}

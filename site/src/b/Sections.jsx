@@ -43,7 +43,7 @@ export function Rooms() {
       <h2 id="rooms-title">The right TV. <em>The right room.</em></h2>
       <p className="b-lede">Name each TV and pick its room when you pair it. Your saved TVs sit in one list, each with its room.</p>
       <div className="b-chips" role="group" aria-label="Rooms">{ROOM_LIST.map(([id, name]) => <button key={id} type="button" className="b-chip" data-track="rooms-chip" data-track-item={`rooms_${id}`} aria-pressed={room === id} onClick={() => pick(id)}>{room === id && <span className="room-dot" aria-hidden="true" />}{name}</button>)}</div>
-      <div className="b-rooms-inset"><Frame src="assets/board/pair-rooms-540.webp" w={540} h={1170} alt="Pairing a TV in The Remote: the code from the TV screen, the name Living Room TV and the room chips Living room, Bedroom and Kitchen." /><p className="b-small">Real pairing screen: name the TV, pick the room.</p></div>
+      <div className="b-rooms-inset"><Frame src="assets/board/pair-rooms-540.webp" w={540} h={1170} alt="Pairing a TV in The Remote: the code from the TV screen, the name Living Room TV and the room chips Living room, Bedroom and Kitchen." /></div>
     </div>
   </section>;
 }
@@ -112,7 +112,7 @@ const LIST_VARS = { '--al-tile': '#151b16', '--al-tile-edge': '#354032', '--al-t
 export function Proof() {
   const { ready, motion } = useEnvironment();
   return <section className="b-section b-proof" aria-labelledby="proof-title"><div className="b-wrap b-proof-grid">
-    <div><Eyebrow>Straight facts</Eyebrow><h2 id="proof-title">No catch. <em>Just a remote.</em></h2><LiveCount className="is-proof" /><p className="b-small b-note">The live counter is the only number on the page.</p></div>
+    <div><Eyebrow>Straight facts</Eyebrow><h2 id="proof-title">No catch. <em>Just a remote.</em></h2><LiveCount className="is-proof" /></div>
     {ready && motion ? <AnimatedList fallback={<StaticFacts />} className="b-facts-list" items={FACTS} renderItem={f => <><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></>} frame={false} showGradients={false} displayScrollbar={false} selectOnHover={false} enableArrowNavigation={false} animation="pop" animateOnce stagger={.07} radius={28} gap={12} width={520} maxHeight="none" style={LIST_VARS} />
       : <StaticFacts />}
   </div></section>;
