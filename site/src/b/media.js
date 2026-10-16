@@ -18,7 +18,8 @@ export const PROD_NAMES = {
 // Build's current 3d-prod renders are off-board and being re-rendered (16 Oct). A 3d-prod file is used ONLY when its
 // slot key is listed here AND the file exists. Add a key (e.g. hero1600: true) once Design has checked that file
 // against the approved board. Empty = every slot uses Design's approved assets / placeholders.
-export const PROD_WHITELIST = {};
+// Baagad 16 Oct 19:32 IST: the pin is our live 3D scene (Build's pin-tv-phone.glb). Other slots stay off.
+export const PROD_WHITELIST = { pinModel: true };
 export const prod = key => PROD_WHITELIST[key] === true && present[PROD_NAMES[key]] ? `assets/3d-prod/${PROD_NAMES[key]}` : null;
 // Design's approved board assets (assets/board/, exported from concepts/img and concepts/render) until a whitelisted
 // Build file replaces a slot. Rooms: the board's one rooms render serves every chip until Build's matching room
