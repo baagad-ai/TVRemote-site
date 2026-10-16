@@ -22,9 +22,16 @@
   },
   "env": {
     "preview": {
-      "d1_databases": [],
+      "d1_databases": [
+        {
+          "binding": "METRICS_DB",
+          "database_name": "the-remote-metrics-preview",
+          "database_id": "184c8200-32d2-470d-ba16-ff27e3febf9f",
+          "migrations_dir": "analytics/migrations"
+        }
+      ],
       "vars": {
-        "METRICS_ENABLED": "false",
+        "METRICS_ENABLED": "true",
         "METRICS_ALLOWED_ORIGINS": "https://*.theremote-site.pages.dev",
         "EVENTS_ALLOW_ORIGIN_WILDCARD": "true",
         "METRICS_ALLOWED_RELEASES": "0.1.0-beta.9-b93bcf1e9cf6,0.1.0-beta.8.2-b8dfd7f8b41e,0.1.0-beta.8.1-3fbb8e414cdf,0.1.0-beta.8-8ea325cd117f,0.1.0-beta.7-b60880306e71",

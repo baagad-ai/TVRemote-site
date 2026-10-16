@@ -25,8 +25,10 @@ test('Pages only invokes private metrics endpoint; preview has no production dat
   assert.deepEqual(routes, { version: 1, include: ['/api/metrics', '/api/download-count', '/api/events'], exclude: [] });
   const config = JSON.parse(fs.readFileSync(new URL('../wrangler.jsonc', import.meta.url)));
   assert.equal(config.d1_databases[0].binding, 'METRICS_DB');
-  assert.equal(config.env.preview.vars.METRICS_ENABLED, 'false');
-  assert.deepEqual(config.env.preview.d1_databases, []);
+  // Preview writes only to the separate test database, never the production one.
+  assert.equal(config.env.preview.d1_databases.length, 1);
+  assert.equal(config.env.preview.d1_databases[0].database_name, 'the-remote-metrics-preview');
+  assert.notEqual(config.env.preview.d1_databases[0].database_id, config.d1_databases[0].database_id);
   // Wildcard origins are a preview-only convenience; production stays an exact origin list.
   assert.equal(config.vars.EVENTS_ALLOW_ORIGIN_WILDCARD, undefined);
   assert.doesNotMatch(config.vars.METRICS_ALLOWED_ORIGINS, /\*/);
