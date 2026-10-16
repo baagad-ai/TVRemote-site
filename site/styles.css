@@ -1217,8 +1217,8 @@ body[data-route=landing] main .b-pin.is-loop h2{font-size:clamp(34px,4.2vw,48px)
 @keyframes bGrain{0%{transform:translate(0,0)}17%{transform:translate(-23px,14px)}33%{transform:translate(17px,-31px)}50%{transform:translate(-37px,-9px)}67%{transform:translate(29px,25px)}83%{transform:translate(-11px,38px)}100%{transform:translate(0,0)}}
 html.is-save-data .b-grain::after{animation:none}
 .b-closing{position:relative}
-.b-closing .b-grain.is-band{opacity:0;mix-blend-mode:multiply}
-.b-closing.is-anim .b-grain.is-band{opacity:.35}
+.b-closing .b-grain.is-band{opacity:0!important;mix-blend-mode:multiply}
+.b-closing:not(.is-anim) .b-grain.is-band{opacity:.35!important} /* grain only as the reduced-motion / Save-Data fallback; the band-v2 video carries the motion */
 .b-closing .b-grain.is-band::after{filter:invert(1)}
 .b-closing-grid{position:relative}
 .b-closing-still{position:relative}
@@ -1259,12 +1259,12 @@ html.is-save-data .b-grain::after{animation:none}
   .b-rooms-media{order:1;margin-top:0}
   .b-rooms-vignette{display:none}
   .b-rooms-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,#0b0e0d 92%);pointer-events:none;z-index:1}
-  .b-rooms-copy{order:2;margin-top:-30vw;padding-top:0;z-index:2}
+  .b-rooms-copy{order:2;margin-top:-20vw;padding-top:0;z-index:2} /* over the 4:5 loop's bottom ink (last 16%) */
   /* Closing band: the band image full-bleed, the headline over its bottom on a lime gradient. */
   .b-closing-grid{display:flex;flex-direction:column-reverse;padding:0!important;min-height:0;gap:0}
-  .b-closing-still{width:100%;height:auto;aspect-ratio:4/5;position:relative}
+  .b-closing-still{width:100vw;margin-inline:calc(50% - 50vw);height:auto;aspect-ratio:4/5;position:relative}
   .b-closing-still img,.b-closing-still video{border-radius:0;box-shadow:none}
-  .b-closing-still::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,var(--lime) 92%);z-index:1}
+  .b-closing-still::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,var(--lime) 72%);z-index:1}
   .b-closing-copy{position:relative;z-index:2;margin-top:-34vw;padding:0 20px 72px}
   body[data-route=landing] main .b-closing h2{font-size:clamp(34px,9vw,44px)!important}
   /* Guests: copy on top, the live phone (220 px) below, bleeding off the card's bottom edge. */
@@ -1275,6 +1275,8 @@ html.is-save-data .b-grain::after{animation:none}
   body[data-route=landing] .brand{min-height:44px;display:inline-flex;align-items:center}
   main .text-link,.site-footer a{display:inline-flex;align-items:center;min-height:44px}
 }
+/* PM 22:51: rooms-v2 / band-v2 4:5 mp4s are 780x976: cover. */
+.room-media video,.b-closing-still video,.b-closing-still img{object-fit:cover}
 
 /* ---------- 3 · Swipe and tap (CONCEPT-B-GUIDE.md §3, board gen.py:226-243). Section bg = the 30% panel mix; the cards sit
    straight on it (--panel, 1px --line, r28, padding 22). Grid 300px 1fr 1fr 1fr: phone tile first (2 rows), TV tile 2 cols,

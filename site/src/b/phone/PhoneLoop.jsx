@@ -98,7 +98,15 @@ function guestlist(t) { // your list: the connected guest lights (1.5), the away
 function guestremote(t) {
   return { phone: <RemoteHome guest lit={{ right: bump(t, 2, .15, .15, .4), ok: bump(t, 4.5, .15, .15, .4), back: bump(t, 7, .15, .15, .4) }} /> };
 }
-const SCENES = { guestlist: [guestlist, 0, 'Your guest list: a connected guest phone and one away, with Invite a guest.'], guestjoin: [guestjoin, 6, 'Invite a guest: the QR code and code, waiting for the guest, then the guest phone joined.'], guestremote: [guestremote, 4.6, "A guest's phone with the full remote: a d-pad press, OK, then Back."], typing: [typing, 7.2, 'Type a YouTube search on your phone and send it; the results open on the TV.'], trackpad: [trackpad, 4.15, 'The trackpad: swipe to move the TV focus, tap for OK.'], invite: [invite, 3, 'Invite a guest: a QR code and a short code for their phone.'] };
+// remote (guest card step 2, 16 Oct): guest remote | 1.5 d-pad RIGHT lights, TV focus glides tile 1 -> 2 | 4.0 OK lights,
+// TV pulses | 6.5 Back lights, focus glides back to tile 1 | 8.2-10 rest. State at 10 == 0, so it is seamless.
+const R_RIGHT = 1.5, R_OK = 4, R_BACK = 6.5;
+function remote(t) {
+  const fx = sine(seg(t, R_RIGHT + .033, .8)) * (1 - sine(seg(t, R_BACK + .033, .8)));
+  return { tv: <TV results={1} fx={fx} fy={0} pulse={bump(t, R_OK + .033, .25, .1, .35)} />,
+    phone: <RemoteHome guest lit={{ right: bump(t, R_RIGHT, .15, .15, .4), ok: bump(t, R_OK, .15, .15, .4), back: bump(t, R_BACK, .15, .15, .4) }} /> };
+}
+const SCENES = { remote: [remote, 4.05, 'A guest uses the remote on their own phone: move, OK, Back.'], guestlist: [guestlist, 0, 'Your guest list: a connected guest phone and one away, with Invite a guest.'], guestjoin: [guestjoin, 6, 'Invite a guest: the QR code and code, waiting for the guest, then the guest phone joined.'], guestremote: [guestremote, 4.6, "A guest's phone with the full remote: a d-pad press, OK, then Back."], typing: [typing, 7.2, 'Type a YouTube search on your phone and send it; the results open on the TV.'], trackpad: [trackpad, 4.15, 'The trackpad: swipe to move the TV focus, tap for OK.'], invite: [invite, 3, 'Invite a guest: a QR code and a short code for their phone.'] };
 // Marketing patch (16 Oct, §3 bento): optional `t` = an external clock (seconds in [0, 10)), so the bento's TV focus and
 // this phone render from ONE timeline in the same frame. Without `t` the component runs its own clock, as Design shipped it.
 export default function PhoneLoop({ name = 'typing', step, playing, tv = false, frame = false, className = '', t: tExt }) {

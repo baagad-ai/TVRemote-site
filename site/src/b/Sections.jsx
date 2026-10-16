@@ -78,7 +78,7 @@ export function Guests() {
         <p className="b-lede">Invite a guest from The Remote. They join on your home Wi-Fi from their own Android phone.</p></div>
       <div className="b-guests-stack"><ScrollStack itemScale={.04} baseScale={.92} itemStackDistance={70} stackTop={guestStackTop}>{GUESTS.map(([title, text], i) => <ScrollStackItem key={title} itemClassName="b-guest-card">
         <div className="b-guest-copy"><span className="b-tag">Step {i + 1}</span><h3>{title}</h3><p className="b-lede">{text}</p></div>
-        <div className="b-guest-phone">{ready && motion && !navigator.connection?.saveData ? <PhoneLoop name={['guestjoin', 'guestremote', 'guestlist'][i]} /> : <GuestCard i={i} />}</div>
+        <div className="b-guest-phone">{ready && motion && !navigator.connection?.saveData ? <PhoneLoop name={['invite', 'remote', 'guestlist'][i]} /> : <GuestCard i={i} />}</div>
       </ScrollStackItem>)}</ScrollStack></div>
     </div>
   </section>;
@@ -215,8 +215,8 @@ export function TypeSplit() {
 export function Closing() {
   const { ready, motion } = useEnvironment(), ref = useRef(null), vid = useRef(null), inView = useInView(ref, { threshold: .25 }), [seen, setSeen] = useState(false), narrow = useNarrow();
   const live = ready && motion && !navigator.connection?.saveData, src = narrow ? [CLOSING.webm4x5, CLOSING.mp44x5] : [CLOSING.webm, CLOSING.mp4];
-  useEffect(() => { if (inView) setSeen(true); const v = vid.current; if (v) { if (inView) v.play().catch(() => {}); else v.pause(); } }, [inView]);
+  useEffect(() => { if (inView) setSeen(true); const v = vid.current; if (v) { if (inView) v.play().catch(() => {}); else v.pause(); } }, [inView, live, narrow]);
   return <section ref={ref} className={`b-closing ${live ? 'is-anim' : ''} ${seen ? 'is-seen' : ''}`}><div className="b-grain is-band" aria-hidden="true" /><div className="b-wrap b-closing-grid"><div className="b-closing-copy"><Eyebrow className="on-lime">Ready when you are</Eyebrow><h2>A better remote. Already in your pocket.</h2><div className="b-closing-cta">{live ? <StarCta button="footer" inView={inView} color="#0b0e0d" /> : <DownloadLink button="footer" />}</div><p className="b-closing-fine">Free Android APK. No ads. No account.</p></div>
-    <figure className="b-closing-still"><picture>{CLOSING.poster4x5 && <source media="(max-width: 899px)" srcSet={CLOSING.poster4x5} />}<img src={CLOSING.poster} width="1280" height="920" loading="lazy" decoding="async" alt="The illustrated living room: the phone with The Remote in front of the drawn TV, lit by a lime light under the console." /></picture>{live && src[1] && <video ref={vid} muted playsInline loop preload="metadata" aria-hidden="true">{src[0] && <source src={src[0]} type="video/webm" />}<source src={src[1]} type="video/mp4" /></video>}</figure></div></section>;
+    <figure className="b-closing-still"><picture>{CLOSING.poster4x5 && <source media="(max-width: 899px)" srcSet={CLOSING.poster4x5} />}<img src={CLOSING.poster} width="1280" height="920" loading="lazy" decoding="async" alt="The illustrated living room: the phone with The Remote in front of the drawn TV, lit by a lime light under the console." /></picture>{live && src[1] && <video key={src[1]} ref={vid} muted playsInline loop preload="metadata" poster={narrow ? CLOSING.poster4x5 || CLOSING.poster : CLOSING.poster} aria-hidden="true">{src[0] && <source src={src[0]} type="video/webm" />}<source src={src[1]} type="video/mp4" /></video>}</figure></div></section>;
 }
 export const TRADEMARK = 'YouTube is a trademark of Google LLC. The Remote is not affiliated with or endorsed by Google or YouTube.';
