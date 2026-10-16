@@ -18,11 +18,13 @@ const Frame = ({ src, alt, w = 342, h = 706, className = '' }) => <div className
 // room with React Bits PixelTransition (0.5 s; instant under reduced motion). Slots per room in media.js
 // (Build's loops/posters once whitelisted; the board render until then). Only the selected room's loop plays.
 const ROOM_LIST = [['living', 'Living room'], ['bedroom', 'Bedroom'], ['kitchen', 'Kitchen']], NAMES = Object.fromEntries(ROOM_LIST);
+// 390 (max-width 899px, the rooms mobile layout): no <video> at all (nothing fetched or played), the 4:5 poster only.
+const useNarrow = () => { const [n, setN] = useState(true); useEffect(() => { const q = matchMedia('(max-width: 899px)'), f = () => setN(q.matches); f(); q.addEventListener('change', f); return () => q.removeEventListener('change', f); }, []); return n; };
 function RoomMedia({ id, play }) {
-  const r = ROOMS[id], video = useRef(null);
+  const r = ROOMS[id], video = useRef(null), narrow = useNarrow();
   useEffect(() => { const v = video.current; if (!v) return; v.playbackRate = 1; if (play) v.play().catch(() => {}); else v.pause(); }, [play]);
   return <div className="room-media"><picture>{r.crop !== r.poster && <source media="(max-width: 899px)" srcSet={r.crop} />}<img src={r.poster} width={r.own ? 1440 : 1200} height={r.own ? 760 : 936} alt={r.own ? `Illustrated rooms with the ${NAMES[id].toLowerCase()} lit in lime.` : 'Illustrated rooms: a living room lit in lime and a bedroom beside it.'} loading="lazy" decoding="async" /></picture>
-    {play && r.mp4 && <video ref={video} data-track-loop={`rooms-${id}`} muted playsInline loop preload="metadata" poster={r.poster} aria-hidden="true">{r.webm && <source src={r.webm} type="video/webm" />}<source src={r.mp4} type="video/mp4" /></video>}</div>;
+    {play && !narrow && r.mp4 && <video ref={video} data-track-loop={`rooms-${id}`} muted playsInline loop preload="metadata" poster={r.poster} aria-hidden="true">{r.webm && <source src={r.webm} type="video/webm" />}<source src={r.mp4} type="video/mp4" /></video>}</div>;
 }
 export function Rooms() {
   const { motion } = useEnvironment(), [room, setRoom] = useState('living'), [swap, setSwap] = useState({ from: 'living', to: 'living', n: 0, on: false });

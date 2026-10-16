@@ -416,7 +416,6 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
   .b-rooms{height:auto;padding-bottom:44px;display:flex;flex-direction:column}
   .b-rooms-copy{order:1;padding-top:44px}
   .b-rooms-media{order:2;position:relative;inset:auto;width:100%;aspect-ratio:4/5;margin-top:24px}
-  .room-media video{display:none}
   .b-rooms-vignette{display:none}
   .b-closing{margin-top:44px}
   body[data-route=landing] main .b-closing h2{font-size:48px}

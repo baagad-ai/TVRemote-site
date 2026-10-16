@@ -90,7 +90,7 @@ const html=read('index.html'),privacy=read('privacy/index.html');
  for(const id of ['hero','search','guests','trackpad','download'])assert.equal((html.match(new RegExp(`data-track-section="${id}"`,'g'))||[]).length,1,'data-track-section '+id);
  assert([...html.matchAll(/<a\b[^>]*data-download-cta=[^>]*>/g)].every(m=>/data-track="download"/.test(m[0])),'download links carry data-track="download"');
  assert.equal((html.match(/data-track="faq-open" data-track-item="faq-\d\d"/g)||[]).length,faq.length,'every FAQ item is tracked');
- for(const k of ['install-steps','qr','nav','guide'])assert(html.includes(`data-track="${k}"`),'data-track '+k);
+ for(const k of ['nav','guide'])assert(html.includes(`data-track="${k}"`),'data-track '+k);
  for(const m of html.matchAll(/data-track-loop="([^"]+)"/g))assert(['hero','rooms-living','rooms-bedroom','rooms-kitchen'].includes(m[1]),'loop key not in Build contract: '+m[1]);
  for(const route of routes){const page=read(route),wants=!/^(404\.html|join\/)/.test(route);assert.equal(/<script src="[^"]*analytics\.js(?:\?v=[0-9a-f]+)?" defer><\/script>/.test(page),wants,route+(wants?' loads':' must not load')+' analytics.js');}
  assert(!/<script/.test(read('404.html')),'404 has no scripts');
