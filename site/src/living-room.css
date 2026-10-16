@@ -142,14 +142,7 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 
 /* 5 · Guests: src/b/sections/guests.css */
 
-/* ---------- 6 · Gallery (board mock_gallery B: bg 50%; 7 phones 220px, gap 26, arc translateY(|i-3|*34) rotate((i-3)*4deg)). ---------- */
-.b-gallery{background:var(--bg50)}
-.b-gallery-box{position:relative;height:620px;margin-top:60px}
-.b-gallery-box.is-live{height:640px}
-.b-circular{position:absolute;inset:0}
-.b-arc{list-style:none;margin:0;padding:0;display:flex;gap:26px;justify-content:center;height:100%}
-.b-arc li{flex:none;width:220px;transform:translateY(calc(max(var(--i),calc(var(--i)*-1))*34px)) rotate(calc(var(--i)*4deg))}
-.b-arc img{display:block;width:100%;height:auto;filter:drop-shadow(0 40px 50px rgb(0 0 0/.55))}
+/* 6 · Gallery: src/b/sections/gallery.css */
 
 /* ---------- 7 · Proof (board mock_proof B: bg 70%; grid 1fr 520px gap 80; 6 fact cards 16px 20px, ✓ circles). ---------- */
 .b-proof{background:var(--bg70);padding-block:90px}
@@ -267,9 +260,6 @@ body[data-route=landing] .site-footer{width:min(var(--wrap),calc(100% - 64px));m
   .b-rooms-media{position:relative;right:auto;top:auto;width:calc(100% + 40px);height:auto;margin-left:-20px}
   .b-rooms-vignette{background:linear-gradient(0deg,#0b0e0d 0%,transparent 40%)}
   .b-rooms-copy{padding-top:0;margin-top:-40px}
-  .b-gallery-box{height:auto;margin-top:28px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:30px}
-  .b-arc{justify-content:flex-start;gap:16px;padding-inline:20px;height:auto}
-  .b-arc li{width:200px;transform:none;scroll-snap-align:center}
   .b-closing{margin-top:44px}
   body[data-route=landing] main .b-closing h2{font-size:48px}
   .b-stepper{grid-template-columns:1fr}

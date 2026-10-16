@@ -1,0 +1,18 @@
+/* ---------- 6 · Gallery (CONCEPT-B-GUIDE.md §6, board mock_gallery B): bg = the 50% mix; heading in the wrap, then an
+   arc of 7 whole phones (Design's code-drawn 440x932 textures, bezel baked in), ~225px wide, gap 26, bleeding both
+   edges; the centre phone sits highest, the outer ones drop and tilt out. Live: React Bits CircularGallery (OGL).
+   Static (reduced motion, touch, before the lease): the same arc in CSS. 390: a swipe row (scroll-snap). ---------- */
+.b-gallery{background:var(--bg50);padding-bottom:0}
+.b-gallery h2{letter-spacing:-.05em}
+.b-gallery-box{position:relative;height:700px;margin-top:-52px;overflow:hidden} /* centre phone centred ~580px below the section top, as on the board */
+.b-circular{position:absolute;inset:0}
+.b-arc{list-style:none;margin:0;padding:111px 0 0;display:flex;gap:26px;justify-content:center;height:100%}
+.b-arc li{flex:none;width:225px;aspect-ratio:440/932;transform:translateY(calc(max(var(--i),calc(var(--i)*-1))*34px)) rotate(calc(var(--i)*4deg))}
+.b-arc.is-flat li{transform:none} /* reduced motion: a flat row (guide) */
+.b-arc img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 40px 50px rgb(0 0 0/.55))}
+@media (max-width:899px){
+  .b-gallery{padding-bottom:44px}
+  .b-gallery-box{height:auto;margin-top:28px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding-bottom:30px}
+  .b-arc{justify-content:flex-start;gap:16px;padding:0 20px;height:auto}
+  .b-arc li{width:200px;transform:none;scroll-snap-align:center}
+}

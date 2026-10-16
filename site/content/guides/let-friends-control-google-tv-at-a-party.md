@@ -14,7 +14,7 @@ Open the TV's Guest access list in The Remote and tap Invite. Your friend enters
 
 They can scan the QR code with their phone's camera or type the code.
 
-Invites work on your home Wi-Fi only, so your friend needs to be on the same Wi-Fi as the TV. An unused invite code expires after 2 minutes, and it's only used for joining.
+Invites work on your home Wi-Fi only, so your friend needs to be on the same Wi-Fi as the TV. The invite code is only used for joining.
 
 A TV can have up to 10 guests.
 
@@ -30,13 +30,13 @@ If a friend only needs to turn it up or pause it, you can limit that guest to **
 
 ## When the party's over
 
-Open the TV's Guest access list and tap Remove next to anyone you want off it. Removal is done by The Remote, not in the TV's own settings. If a friend has already gone home, their entry shows Removal pending until both phones are on your Wi-Fi again.
+Open the TV's Guest access list and tap Remove next to anyone you want off it. You can do this any time. Removal is done by The Remote, not in the TV's own settings.
 
-You don't have to clean up the list. Guests who stop coming around are removed over time. Every Primary remote can invite and remove guests, so anyone else at home with their own Primary remote can tidy the list too.
+You don't have to clean up the list. Guest access doesn't expire, but The Remote removes a guest by itself only after they've been off your home Wi-Fi and haven't connected for 7 days in a row. Every Primary remote can invite and remove guests, so anyone else at home with their own Primary remote can tidy the list too.
 
 ## No server, no account
 
-The invite goes from your phone to your friend's phone over your home Wi-Fi. There's no server in between and no account for you or them. If you'd rather send the invite as a link, the app can make one that you share yourself, and it expires after 2 minutes. More on that in [using a TV remote app without an account](https://theremote-site.pages.dev/guides/tv-remote-app-without-account/).
+The invite goes from your phone to your friend's phone over your home Wi-Fi. There's no server in between and no account for you or them. If you'd rather send the invite as a link, the app can make one that you share yourself. More on that in [using a TV remote app without an account](https://theremote-site.pages.dev/guides/tv-remote-app-without-account/).
 
 For the full details on invites and the guest list, see [how Guest access works](https://theremote-site.pages.dev/guides/guests-control-google-tv-without-google-account/).
 

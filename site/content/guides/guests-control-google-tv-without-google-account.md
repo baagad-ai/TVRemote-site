@@ -10,7 +10,7 @@ Google's help page says it plainly: "Guest mode is no longer supported. Guests c
 
 Any phone you've paired with the TV, using the code the TV shows, is a Primary remote for that TV. A Primary remote invites guests: open the TV's Guest access list in The Remote and tap Invite. Your guest enters the invite code on their phone. They can scan the QR code with their phone's camera or type the code.
 
-Invites work on your home Wi-Fi only. Unused invite codes expire after 2 minutes, and they're only used for joining.
+Invites work on your home Wi-Fi only, and the invite code is only used for joining. Guest access doesn't expire.
 
 If a TV doesn't accept the shared guest key, The Remote switches just that guest to their own TV code, which the TV shows once.
 
@@ -32,11 +32,11 @@ You can limit a guest to **Media and volume only**. That allows only play/pause,
 
 Each TV has its own guest list. Every Primary remote can invite and remove guests. A TV can have up to 10 guests.
 
-Tap Remove to take a guest off the list. Removal is done by The Remote, not in the TV's own settings. If either phone is away from home, the list shows Removal pending until both phones are on your Wi-Fi.
+Tap Remove to take a guest off the list. You can do this any time. Removal is done by The Remote, not in the TV's own settings.
 
 ## Guests who stop visiting drop off by themselves
 
-Guests who stop coming around are removed over time, and you can remove anyone yourself whenever you like.
+Guest access never expires. The Remote removes a guest by itself only after they've been off your home Wi-Fi and haven't connected for 7 days in a row. You can still remove anyone yourself whenever you like.
 
 ## Where The Remote fits
 

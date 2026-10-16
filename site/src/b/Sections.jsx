@@ -78,9 +78,16 @@ const SHOTS = [
   ['your-tvs-g1', 'Your TVs', 'The Your TVs list: Living Room TV in Living room, connected.'],
   ['pair-name-and-room', 'Name and room', 'Pairing a TV: the name Living Room TV and the Living room chip selected.'],
   ['guests-guest-remote', 'Guest remote', "A guest's own phone with The Remote connected to Living Room TV."],
-  ['trackpad-pad', 'Trackpad', 'The trackpad for Living Room TV: the whole screen is a pad.']
+  ['trackpad-pad', 'Trackpad', 'The trackpad for Living Room TV: the whole screen is a pad, mid swipe to the right.']
 ];
-const GalleryArc = () => <ul className="b-arc">{SHOTS.map(([n, , alt], i) => <li key={n} style={{ '--i': i - 3 }}><img src={`assets/board/gallery-${n}.webp`} alt={alt} width="440" height="953" loading="lazy" decoding="async" /></li>)}</ul>;
+// Design's code-drawn phones (phone-components/gallery, ORDER.txt order): 440x932, bezel baked in, transparent corners.
+const GALLERY_ASPECT = 440 / 932;
+// CircularGallery centres its first item and loops, so the list starts at the board's centre phone (your-tvs-g1, 4th):
+// the cyclic order, and so the arc, is the board's (remote-home ... trackpad-pad), with your-tvs-g1 in the middle.
+const ARC_ITEMS = [...SHOTS.slice(3), ...SHOTS.slice(0, 3)].map(([n, text, alt]) => ({ image: `assets/b/gallery-${n}.webp`, text, alt }));
+// Plane height = 0.6 x box height x itemSize: 477px tall = the board's ~225px-wide phone in the 700px box.
+const GALLERY_SIZE = 477 / (.6 * 700);
+const GalleryArc = ({ flat = false }) => <ul className={`b-arc${flat ? ' is-flat' : ''}`}>{SHOTS.map(([n, , alt], i) => <li key={n} style={{ '--i': i - 3 }}><img src={`assets/b/gallery-${n}.webp`} alt={alt} width="440" height="932" loading="lazy" decoding="async" /></li>)}</ul>;
 export function Gallery() {
   const { ready, gpu, motion } = useEnvironment(), ref = useRef(null), inView = useInView(ref, { threshold: .3 }), [desktop, setDesktop] = useState(false);
   useEffect(() => { if (!ready) return; const q = matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)'), u = () => setDesktop(q.matches && !lowEnd()); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
@@ -88,8 +95,8 @@ export function Gallery() {
   return <section className="b-section b-gallery" id="screens" aria-labelledby="gallery-title">
     <div className="b-wrap"><Eyebrow>The real app</Eyebrow><h2 id="gallery-title">Every screen, <em>as it ships.</em></h2></div>
     <div ref={ref} className={`b-gallery-box ${lease ? 'is-live' : ''}`}>
-      {lease ? <CircularGallery fallback={<GalleryArc />} items={SHOTS.map(([n, text, alt]) => ({ image: `assets/board/gallery-${n}.webp`, text, alt }))} bend={1.4} itemSize={.62} itemAspect={440 / 953} gap={.1} showTitles={false} shadow={0} fadeEdges={0} textColor="#eeeee6" borderRadius={.07} scrollEase={.05} autoScroll={0} openOnClick={false} snap={false} intro={false} dpr={1.5} className="b-circular" />
-        : <GalleryArc />}
+      {lease ? <CircularGallery fallback={<GalleryArc />} items={ARC_ITEMS} bend={2.2} itemSize={GALLERY_SIZE} itemAspect={GALLERY_ASPECT} gap={.115} showTitles={false} shadow={0} fadeEdges={0} textColor="#eeeee6" borderRadius={.06} scrollEase={.05} autoScroll={0} openOnClick={false} snap={false} intro={false} dpr={1.5} className="b-circular" />
+        : <GalleryArc flat={ready && !motion} />}
     </div>
   </section>;
 }
