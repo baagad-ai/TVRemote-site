@@ -28,6 +28,7 @@ body[data-route=landing] main em{font-style:normal;color:var(--lime)}
 .b-frame img{display:block;width:100%;height:auto;border-radius:32px}
 .b-text-link{display:inline-block;margin-top:18px;font-size:14px;color:var(--paper);text-decoration:none;border-bottom:1px solid var(--line2);padding-bottom:4px}
 .b-text-link:hover{color:var(--lime);border-color:var(--lime)}
+.b-show-m{display:none}
 .visually-hidden{position:absolute!important;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* Never smaller than 14 px. */
 .fine-print,.text-link,.download-count,.qr-hint p,.site-footer,.site-footer a,.mobile-cta-bar span,.faq-list p,.faq-list summary,.guide-card p,.guides-preview p,.guides-preview a,.eyebrow{font-size:14px!important}
@@ -270,7 +271,9 @@ body[data-route=landing] .site-footer{width:min(var(--wrap),calc(100% - 64px));m
   .b-hero-loop img{object-position:40% 50%}
   .b-hero-scrim{background:linear-gradient(0deg,#0b0e0d 0%,transparent 30%),linear-gradient(180deg,#0b0e0d 0%,transparent 22%)}
   .b-hero-copy{order:1;padding:24px 0 10px}
-  body[data-route=landing] .b-hero h1,.b-h1{font-size:46px;max-width:9.5ch}
+  .b-hide-m{display:none}.b-show-m{display:inline}
+  body[data-route=landing] .b-hero h1,.b-h1{font-size:46px;max-width:none}
+  .b-hero h1 br,.b-hero h1.b-h1>span[aria-hidden=true]{display:none}
   .b-hero-actions{margin-top:22px}.b-hero-actions .b-ghost{display:none}
   .b-pin-stage{padding-block:44px!important}
   .b-pin .b-lede{display:none}
