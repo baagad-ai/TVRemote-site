@@ -16,6 +16,7 @@ export const PROD_NAMES = {
   // /workspace/site-fix-1016/loops-incoming/; copy here). The earlier pin-step-*.webp had real app captures on the phone
   // and were removed (PM 16 Oct). Until these land, PinStory draws an interim still in code (SVG TV + phoneScreenSvg).
   pinFallback: 'pin-fallback-step-1-1440.webp',                        // desktop: step 1 under the canvas (1600x1000, Build 21:11)
+  pinWide2: 'pin-fallback-step-2-1440.webp', pinWide3: 'pin-fallback-step-3-1440.webp', // Baagad 16 Oct: stacked stills 391-1199 px / touch (with pinFallback = step 1)
   pinStill1: 'pin-still-1-390.webp', pinStill2: 'pin-still-2-390.webp', pinStill3: 'pin-still-3-390.webp', // 390 / reduced motion, phone over TV
   // Rooms diorama (PM 16 Oct: the diorama replaces the rejected single-room renders): one 10 s loop per room
   // (webm + mp4), its 1440 poster and a 390 4:5 poster, plus the diorama still that stands in for any room without
@@ -29,7 +30,7 @@ export const PROD_NAMES = {
 // still slots point at Build's re-renders (code-drawn screens). PM 20:22: hero and rooms-diorama slots too, so each
 // section switches to Build's final files as soon as they are copied in; until then the stand-ins below stay.
 // Copy only files Build has marked final (never a partial encode, never the rejected single-room renders).
-export const PROD_WHITELIST = Object.fromEntries(['pinModel', 'pinFallback', 'pinStill1', 'pinStill2', 'pinStill3',
+export const PROD_WHITELIST = Object.fromEntries(['pinModel', 'pinFallback', 'pinWide2', 'pinWide3', 'pinStill1', 'pinStill2', 'pinStill3',
   'heroWebm', 'heroMp4', 'heroWebm4x5', 'heroMp44x5', 'hero1920', 'hero1600', 'hero960', 'hero640', 'hero4x5',
   ...['living', 'bedroom', 'kitchen'].flatMap(k => [`${k}Webm`, `${k}Mp4`, `${k}1440`, `${k}4x5`])].map(k => [k, true]));
 export const prod = key => PROD_WHITELIST[key] === true && present[PROD_NAMES[key]] ? `assets/3d-prod/${PROD_NAMES[key]}` : null;
@@ -45,7 +46,7 @@ export const HERO = {
   webm: prod('heroWebm'), mp4: prod('heroMp4'),
   webm4x5: prod('heroWebm4x5'), mp44x5: prod('hero4x5') && prod('heroMp44x5')
 };
-export const PIN = { model: prod('pinModel'), contract: prod('pinContract'), fallback: prod('pinFallback'), stills: [prod('pinStill1'), prod('pinStill2'), prod('pinStill3')] };
+export const PIN = { model: prod('pinModel'), contract: prod('pinContract'), fallback: prod('pinFallback'), stills: [prod('pinStill1'), prod('pinStill2'), prod('pinStill3')], wide: [prod('pinFallback'), prod('pinWide2'), prod('pinWide3')] };
 const BOARD_ROOMS = 'assets/board/remote-rooms-1200.webp';
 // Per room: Build's room poster, else the diorama still, else the board's rooms render (all chips). A loop plays only
 // over its own room poster.

@@ -692,7 +692,7 @@ const CircularGallery = ({
         prune(s.items);
         s.items.forEach(item => textureFor(item.image));
       }
-      const idle = now - state.lastInput > 1800;
+      const idle = now - state.lastInput > 1500; // site: auto-scroll resumes 1.5 s after the last drag / wheel / key
       const auto =
         s.autoScroll &&
         !reduce &&
@@ -915,7 +915,10 @@ const CircularGallery = ({
 
     const onWheel = event => {
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? view.height : 1;
-      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      // Site fix 16 Oct: never trap the page. Only a clearly horizontal wheel/trackpad gesture (or Shift + wheel) moves
+      // the gallery; a vertical wheel over it scrolls the page as usual.
+      const horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY) * 1.2;
+      const delta = horizontal ? event.deltaX : event.shiftKey ? event.deltaY : 0;
       if (!delta) return;
       event.preventDefault();
       state.target += delta * unit * (settingsRef.current.scrollSpeed / 2);

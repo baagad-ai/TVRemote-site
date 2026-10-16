@@ -144,7 +144,6 @@ body:not([data-route=landing]) .site-header{border-bottom:1px solid var(--line)}
 /* ===== Concept B "Living Room" — built from concepts/CONCEPT-B-GUIDE.md (16 Oct 2026, 19:09) + the board-backed gaps in
    compare/BOARD-CROSSCHECK.md. Board source of every value: concepts/build/gen.py (CSS block + mock_* functions). ===== */
 :root{--ink:#0b0e0d;--panel:#151b16;--paper:#eeeee6;--lime:#d4fa7b;--line:#354032;--line2:#354032;--muted:#b0b9a2;--body:var(--paper);
-  --bg30:color-mix(in srgb,#151b16 30%,#0b0e0d);--bg50:color-mix(in srgb,#151b16 50%,#0b0e0d);--bg70:color-mix(in srgb,#151b16 70%,#0b0e0d);
   --header:84px;--b-eyebrow-size:14px;--wrap:1248px}
 html{scroll-padding-top:var(--header)}
 body[data-route=landing]{background:var(--ink)}
@@ -179,7 +178,7 @@ body[data-route=landing] main em{font-style:normal;color:var(--lime)}
 /* ---------- Global: header (board NAV: 84px, Outfit 24 brand, 6 links, lime pill). Overlaid on the hero, transparent;
    solid ink once the hero has scrolled past (.is-solid from Hero.jsx). ---------- */
 body[data-route=landing] .site-header{position:fixed;top:0;left:0;right:0;z-index:40;height:var(--header);min-height:0;margin:0;padding:0 max(32px,calc((100% - var(--wrap))/2));width:auto;max-width:none;display:flex;align-items:center;justify-content:space-between;background:transparent;border-bottom:1px solid var(--line);transition:background-color .3s ease,backdrop-filter .3s ease}
-body[data-route=landing] .site-header.is-solid{background:rgb(11 14 13/.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+body[data-route=landing] .site-header.is-solid{background:#0b0e0d;border-bottom:1px solid var(--line)}
 body[data-route=landing] .site-header .brand{display:flex;gap:10px;align-items:center;font-family:Outfit,Outfit Fallback,system-ui,sans-serif;font-size:24px;letter-spacing:-.04em;color:var(--paper);text-decoration:none}
 body[data-route=landing] .site-header .brand img{width:30px;height:30px}
 body[data-route=landing] .site-header nav{display:flex;gap:28px}
@@ -189,12 +188,11 @@ body[data-route=landing] .site-header nav a:hover{color:var(--paper)}
 
 /* ---------- 1 · Hero (board mock_hero B: 820px, render cover 50% 40%, scrims 90deg + 0deg; copy 140px down). ---------- */
 .b-hero{position:relative;height:820px;overflow:hidden;background:var(--ink);isolation:isolate}
-.b-hero-scene{position:absolute;inset:0;z-index:0;overflow:hidden} /* the 10 s push-in scales the loop to 1.04: never spill past the scrim */
+.b-hero-scene{position:absolute;inset:0;z-index:0;overflow:hidden} 
 .b-hero-move,.b-hero-loop{position:absolute;inset:0;will-change:transform}
 .b-hero-loop img,.b-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block} /* Build 20:56: framing baked into the loop, centred */
 /* PM/QA: one seamless 10.0 s loop: 1 s rest on the approved frame, 4 s slow eased push-in (4%), 4 s equally slow ease back, 1 s rest; first = last frame. */
-@keyframes bHeroLoop{0%,10%{transform:scale(1)}50%{transform:scale(1.04)}90%,100%{transform:scale(1)}}
-.b-hero.is-looping .b-hero-loop{animation:bHeroLoop 10s cubic-bezier(.45,0,.55,1) infinite;transform-origin:62% 52%}
+.b-hero-loop.is-painted picture{visibility:hidden} /* Baagad 16 Oct: the poster only until the video's first frame; no zoom anywhere on the hero media */
 .b-grain-live{position:absolute;inset:0;opacity:.18;mix-blend-mode:overlay;pointer-events:none}
 .b-grain{position:absolute;inset:0;pointer-events:none;opacity:.06;background-image:radial-gradient(rgb(238 238 230/.5) .5px,transparent .6px);background-size:3px 3px;mix-blend-mode:overlay}
 .b-grain-live~.b-grain{display:none}
@@ -213,7 +211,7 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 .star-cta .download-cta{border-radius:999px;min-height:56px;padding:16px 26px;font-size:16px;font-weight:600;gap:12px;justify-content:center}
 
 /* ---------- 2 · The single pin (board mock_pin B: bg 30%, grid 560px 1fr gap 70; TV 720 bleeding left w/ lime glow). ---------- */
-.b-pin{position:relative;background:var(--bg30)}
+.b-pin{position:relative;background:var(--ink)}
 .b-pin-stage{position:relative;overflow:hidden}
 .b-pin.is-pinned .b-pin-stage{height:100vh;display:flex;align-items:center}
 .b-pin.is-pinned .b-pin-stage>.b-wrap{width:min(var(--wrap),calc(100% - 64px))}
@@ -239,7 +237,7 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 .pin-phone .b-phoneloop{position:absolute;inset:0}
 .pin-canvas-host{position:absolute;inset:0;z-index:2;pointer-events:none;visibility:hidden}.b-pin.is-3d .pin-canvas-host{visibility:visible}
 .pin-canvas-host canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.pin-glow{position:absolute;border-radius:14px;box-shadow:0 0 120px -10px rgb(212 250 123/.33)}
+.pin-glow{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:14px;box-shadow:0 0 120px -10px rgb(212 250 123/.33)}
 .b-pin.is-3d .pin-tv{background:transparent;border-color:transparent;box-shadow:none}
 .b-pin.is-3d .pin-tv-layer,.b-pin.is-3d .pin-phone,.b-pin.is-3d .pin-fallback{visibility:hidden}
 .b-pin.is-3d .pin-bubble{position:absolute;z-index:3}
@@ -288,7 +286,7 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 /* 6 · Gallery: src/b/sections/gallery.css */
 
 /* ---------- 7 · Proof (board mock_proof B: bg 70%; grid 1fr 520px gap 80; 6 fact cards 16px 20px, ✓ circles). ---------- */
-.b-proof{background:var(--bg70);padding-block:90px}
+.b-proof{background:var(--panel);padding-block:90px}
 .b-proof-grid{display:grid;grid-template-columns:1fr 520px;gap:80px;align-items:center}
 .b-proof .b-note{margin-top:12px}
 .b-facts{list-style:none;margin:0;padding:0;display:grid;gap:12px}
@@ -296,14 +294,19 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 .b-check{flex:none;width:30px;height:30px;border-radius:30px;background:color-mix(in srgb,#d4fa7b 13%,#151b16);display:grid;place-items:center;color:var(--lime);font-size:15px}
 .b-facts-list.animated-list{width:100%!important;max-width:520px}
 /* Board: the last 2 facts at opacity .45, drawn here with solid tokens (AA text, no opacity): muted text, line check. */
-.b-facts li:nth-child(n+5),.b-facts-list .animated-list__item:nth-child(n+5){background:var(--bg70);color:var(--muted)}
-.b-facts li:nth-child(n+5) .b-check,.b-facts-list .animated-list__item:nth-child(n+5) .b-check{background:var(--line);color:var(--muted)}
+/* Baagad 16 Oct: no dim facts. Un-ticked (only while waiting to tick in): an empty outlined check, text already full
+   strength; ticked: the lime check pops in (transform/opacity only) and stays. */
+.b-facts .b-check{transition:background-color .25s ease,box-shadow .25s ease}
+.b-facts li:not(.is-ticked) .b-check{background:var(--panel);box-shadow:inset 0 0 0 2px var(--line);color:transparent}
+.b-facts li.is-ticked .b-check{animation:b-tick .35s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes b-tick{0%{transform:scale(.6)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.b-facts li.is-ticked .b-check{animation:none}}
 .b-facts-list .animated-list__viewport{max-height:none!important;overflow:visible!important}
 .b-facts-list .animated-list__track{gap:12px!important}
 .b-facts-list .animated-list__indicator,.b-facts-list .animated-list__rim{display:none!important}
 
 /* ---------- 8 · Will it work? (board mock_trust: bg 70%; grid 1fr 1fr gap 80; line draws once 0.8 s). ---------- */
-.b-split{background:var(--bg70)}
+.b-split{background:var(--panel)}
 .b-split-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px}
 body[data-route=landing] main .b-split h2{max-width:none}.b-split h2 .b-h2-l1{display:block;white-space:nowrap}@media (max-width:740px){.b-split h2 .b-h2-l1{white-space:normal}}
 .b-split-copy .b-lede{margin-top:0}
@@ -425,7 +428,6 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
   .b-card-cta{flex-wrap:wrap}
 }
 @media (prefers-reduced-motion:reduce){
-  .b-hero .b-hero-loop{animation:none!important}
   .b-line line{transition:none!important;stroke-dashoffset:0!important}
 }
 
@@ -1102,11 +1104,48 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 .scroll-reveal-piece {
   display: inline-block;
 }
+@media (max-width:520px){.b-line svg.is-fade{display:none}} /* 390: Living Room TV wraps under, so the connector ends at Home Wi-Fi; wider screens keep both segments */
+/* Baagad 16 Oct: the stacked pin (touch, or under 1200 px) above 390: each step is one row, its copy on the left and
+   Build's 1600x1000 still filling the rest of the row, no frame, border or box. Each row eases in once as it scrolls in
+   (opacity + transform only, so nothing shifts). 390 and below keep the 4:5 stills. */
+@media (min-width:391px){
+  .b-pin.is-stacked .b-pin-copy{max-width:none}
+  .b-pin.is-stacked .b-pin-step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);grid-template-areas:"no still" "title still";column-gap:40px;row-gap:8px;align-items:center;padding:24px 0;border-top:0}
+  .b-pin.is-stacked .b-step-no{grid-area:no;align-self:end}
+  .b-pin.is-stacked .b-step-title{grid-area:title;align-self:start;font-size:22px}
+  .b-pin.is-stacked .b-pin-stacked-still{grid-area:still}
+  .b-pin.is-stacked .pin-still.has-wide{max-width:none;margin:0}
+  .b-pin.is-stacked .pin-still.has-wide img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover}
+}
+.b-pin.is-stacked.is-reveal .b-pin-step{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.b-pin.is-stacked.is-reveal .b-pin-step.is-seen{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.b-pin.is-stacked.is-reveal .b-pin-step{opacity:1;transform:none;transition:none}}
+/* 1b · Proof marquee (Baagad 16 Oct, Concept A §2): full width, panel band, 1px line top and bottom, Outfit ~56/40/24 px.
+   overflow:clip so the moving track never widens the page; transform-only loop; no card, no box. */
+.b-marq{--marq-gap:clamp(22px,3.2vw,46px);position:relative;overflow:clip;background:var(--panel);border-block:1px solid var(--line);padding-block:clamp(14px,1.9vw,28px);font-family:Outfit,Outfit Fallback,system-ui,sans-serif;font-size:clamp(24px,calc(2.524vw + 14.16px),40px);line-height:1.15;letter-spacing:-.03em;color:var(--paper)}
+@media (min-width:1025px){.b-marq{font-size:clamp(40px,calc(3.846vw + .62px),56px)}}
+.b-marq-track{display:flex;width:max-content;will-change:transform;animation:b-marq var(--marq-dur,60s) linear infinite}
+.b-marq-unit{flex:none}
+.b-marq-copy{display:flex;align-items:center;gap:var(--marq-gap);padding:0 var(--marq-gap) 0 0;margin:0;list-style:none;white-space:nowrap}
+.b-marq-copy li{display:flex;align-items:center;gap:var(--marq-gap)}
+.b-marq-sep{color:var(--lime);font-size:.62em}
+.b-marq:hover .b-marq-track,.b-marq:focus-within .b-marq-track,.b-marq.is-off .b-marq-track{animation-play-state:paused}
+@keyframes b-marq{to{transform:translate3d(-50%,0,0)}}
+.b-marq.is-still .b-marq-track{animation:none;width:auto;will-change:auto}
+.b-marq.is-still .b-marq-copy{flex-wrap:wrap;white-space:normal;row-gap:10px;padding:0 max(20px,calc((100% - var(--wrap))/2))}
+.b-marq.is-still .b-marq-copy li:last-child .b-marq-sep{display:none}
+@media (prefers-reduced-motion:reduce){
+  .b-marq-track{animation:none;width:auto;will-change:auto}
+  .b-marq-unit[aria-hidden=true]{display:none}
+  .b-marq-unit{flex:1 1 auto}
+  .b-marq-copy{flex-wrap:wrap;white-space:normal;row-gap:10px;padding:0 max(20px,calc((100vw - var(--wrap))/2))}
+  .b-marq-copy li:last-child .b-marq-sep{display:none}
+}
 
 /* ---------- 3 · Swipe and tap (CONCEPT-B-GUIDE.md §3, board gen.py:226-243). Section bg = the 30% panel mix; the cards sit
    straight on it (--panel, 1px --line, r28, padding 22). Grid 300px 1fr 1fr 1fr: phone tile first (2 rows), TV tile 2 cols,
    then the 7 gesture tiles. No box around the scene beyond the board's own tile. ---------- */
-.b-trackpad{background:var(--bg30)}
+.b-trackpad{background:var(--ink)}
 .b-split-head{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end}
 .b-split-head .b-lede{margin:0}
 .b-trackpad h2{letter-spacing:-.05em}
@@ -1118,9 +1157,9 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 .b-pad .b-phoneloop{pointer-events:none}
 .b-pad-caption{margin:0;text-align:center}
 .b-mini{min-height:44px;padding:8px 16px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--muted);font:500 14px/1 Work Sans,Work Sans Fallback,system-ui,sans-serif;cursor:pointer}
-.b-tp-pause{position:absolute;top:12px;right:12px;z-index:2;width:32px;height:32px;display:grid;place-items:center;padding:0;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,#151b16 60%,#0b0e0d);color:var(--paper);cursor:pointer}
+.b-tp-pause{position:absolute;top:12px;right:12px;z-index:2;width:32px;height:32px;display:grid;place-items:center;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--paper);cursor:pointer}
 .b-tp-pause:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
-.b-tile-tv{grid-column:span 2;padding:0;background:color-mix(in srgb,#151b16 30%,#0b0e0d);aspect-ratio:16/9}
+.b-tile-tv{grid-column:span 2;padding:0;background:var(--ink);aspect-ratio:16/9}
 .b-tvtile-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .b-tv-ring{position:absolute;will-change:transform}
 .b-tv-ring-pulse{position:absolute;inset:0;display:block;transform-origin:50% 50%}
@@ -1160,7 +1199,7 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 /* ---------- 5 · Guests (CONCEPT-B-GUIDE.md §5, board mock_guests_stack): bg = the 50% panel mix; grid 440px 1fr gap 70;
    the heading column is sticky while the cards stack; cards --panel, 1px --line, r28, padding 36, inner grid 1fr 240px gap 40,
    shadow 0 -20px 60px -20px #0b0e0d, settling at 0 / 70 / 140 px with scale .92 / .96 / 1 (transform-origin top). ---------- */
-.b-guests{background:var(--bg50);overflow:clip} /* clip, not hidden: hidden makes the section a scroll container and breaks the sticky heading */
+.b-guests{background:var(--panel);overflow:clip} /* clip, not hidden: hidden makes the section a scroll container and breaks the sticky heading */
 .b-guests-grid{display:grid;grid-template-columns:440px 1fr;gap:70px;align-items:start}
 .b-guests-head{position:sticky;top:calc(var(--header) + 40px)}
 .b-guests-head h2{letter-spacing:-.05em}
@@ -1180,12 +1219,13 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
   .b-guest-card h3{font-size:30px!important}
   .b-guest-phone{width:200px;justify-self:center}
 }
+@media (pointer:coarse),(max-width:1199px){.b-guests-head{position:static}} /* Baagad 16 Oct: nothing sticks on touch or under 1200 px */
 
 /* ---------- 6 · Gallery (CONCEPT-B-GUIDE.md §6, board mock_gallery B): bg = the 50% mix; heading in the wrap, then an
    arc of 7 whole phones (Design's code-drawn 440x932 textures, bezel baked in), ~225px wide, gap 26, bleeding both
    edges; the centre phone sits highest, the outer ones drop and tilt out. Live: React Bits CircularGallery (OGL).
    Static (reduced motion, touch, before the lease): the same arc in CSS. 390: a swipe row (scroll-snap). ---------- */
-.b-gallery{background:var(--bg50);padding-bottom:0}
+.b-gallery{background:var(--panel);padding-bottom:0}
 .b-gallery h2{letter-spacing:-.05em}
 .b-gallery-box{position:relative;height:700px;margin-top:-52px;overflow:hidden} /* centre phone centred ~580px below the section top, as on the board */
 .b-circular{position:absolute;inset:0}

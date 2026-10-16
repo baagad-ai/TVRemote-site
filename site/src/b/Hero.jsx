@@ -1,6 +1,5 @@
 // 1 · Hero (CONCEPT-B-GUIDE.md §1, board gen.py:160-164). Design's lit living-room render is the full-bleed scene
-// behind the copy, under the board's two ink gradients. Effects: seamless 10 s loop (slow push-in, equally slow
-// ease back, start = end; PM 19:10), React Bits Grainient as overlay grain (cursor off) holding the page's one GPU
+// behind the copy, under the board's two ink gradients. Effects: Build's seamless 10 s video loop (no CSS zoom), React Bits Grainient as overlay grain (cursor off) holding the page's one GPU
 // lease while the hero is >= 30% visible, React Bits BlurText on the h1 (words, from top, 0.8 s), Star Border CTA,
 // 8% image parallax. Reduced motion: the still, plain h1, no parallax. The QR lives in the download card, not here.
 import { useEffect, useRef, useState } from 'react';
@@ -22,12 +21,14 @@ export default function Hero() {
   const [desktop, setDesktop] = useState(false), [small, setSmall] = useState(false);
   const inView = useInView(root, { threshold: .3 });
   useEffect(() => { if (!ready) return; const q = matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)'), u = () => setDesktop(q.matches && !lowEnd()); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
-  useEffect(() => { if (!ready) return; const q = matchMedia('(max-width: 899px)'), u = () => setSmall(q.matches); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
+  // Baagad 16 Oct (tablet): the loop plays on ANY device; 16:9 at 600 px and wider, the 4:5 loop below 600 px.
+  useEffect(() => { if (!ready) return; const q = matchMedia('(max-width: 599px)'), u = () => setSmall(q.matches); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
   const lease = useGpuLease(ready && gpu && desktop && inView, 'grainient');
-  // Header: transparent over the hero, solid ink once past it (guide, Global).
+  // Header: transparent at the very top, solid ink #0b0e0d as soon as the page has scrolled (Baagad 16 Oct: scrollY > 8),
+  // so the hero copy never shows through it.
   useEffect(() => {
-    const node = root.current, header = document.querySelector('.site-header'); if (!header) return;
-    const update = () => header.classList.toggle('is-solid', node.getBoundingClientRect().bottom <= header.offsetHeight);
+    const header = document.querySelector('.site-header'); if (!header) return;
+    const update = () => header.classList.toggle('is-solid', scrollY > 8);
     update(); addEventListener('scroll', update, { passive: true }); addEventListener('resize', update);
     return () => { removeEventListener('scroll', update); removeEventListener('resize', update); };
   }, []);
@@ -44,14 +45,27 @@ export default function Hero() {
   // Build's loops, webm first then mp4: 16:9 at desktop sizes, the 4:5 loop in the 390 scene (poster alone until it
   // exists). Poster first: the <img> is the loop's frame 0 in a fixed box; the video (same poster) sits over it.
   // No size is assumed for the video files (CSS fills the box). No Save-Data / low-end.
-  const loop = small ? (HERO.mp44x5 && !lowEnd() ? { webm: HERO.webm4x5, mp4: HERO.mp44x5, poster: HERO.crop } : null) : desktop && HERO.mp4 ? { webm: HERO.webm, mp4: HERO.mp4, poster: HERO.src } : null;
-  const playVideo = Boolean(ready && motion && loop && !navigator.connection?.saveData);
-  useEffect(() => { const v = video.current; if (!v) return; v.playbackRate = 1; if (playVideo && inView && !document.hidden) v.play().catch(() => {}); else v.pause(); }, [playVideo, inView, small]);
-  return <section ref={root} className={['b-hero', motion && inView && !playVideo && 'is-looping'].filter(Boolean).join(' ')} id="hero" data-track-section="hero" aria-labelledby="hero-title">
+  // Baagad 16 Oct: no hover / pointer / low-end gate any more (a 1024 touch tablet got the poster). Only reduced motion and
+  // Save-Data keep the poster. The poster shows until the video's first frame has painted, then it is hidden.
+  const loop = small ? (HERO.mp44x5 ? { webm: HERO.webm4x5, mp4: HERO.mp44x5, poster: HERO.crop } : null) : HERO.mp4 ? { webm: HERO.webm, mp4: HERO.mp4, poster: HERO.src } : null;
+  const playVideo = Boolean(ready && motion && loop && !lowEnd() && !navigator.connection?.saveData);
+  const [painted, setPainted] = useState(false);
+  useEffect(() => { setPainted(false); }, [small]);
+  useEffect(() => {
+    const v = video.current; if (!v) return; v.muted = true; v.playbackRate = 1;
+    const want = () => playVideo && inView && !document.hidden;
+    const tryPlay = () => { if (want() && v.paused) v.play().catch(() => {}); };
+    if (want()) tryPlay(); else v.pause();
+    // Autoplay can be refused (battery saver, some tablets): retry on the first touch / click / key and on visibility.
+    const retry = () => tryPlay(), vis = () => (document.hidden ? v.pause() : tryPlay());
+    addEventListener('pointerdown', retry, { passive: true }); addEventListener('touchstart', retry, { passive: true }); addEventListener('keydown', retry); document.addEventListener('visibilitychange', vis);
+    return () => { removeEventListener('pointerdown', retry); removeEventListener('touchstart', retry); removeEventListener('keydown', retry); document.removeEventListener('visibilitychange', vis); };
+  }, [playVideo, inView, small]);
+  return <section ref={root} className="b-hero" id="hero" data-track-section="hero" aria-labelledby="hero-title">
     <div className="b-hero-scene">
-      <div className="b-hero-move" ref={media}><div className="b-hero-loop">
-        <picture><source media="(max-width: 899px)" srcSet={HERO.crop} width="720" height="900" /><img src={HERO.src} srcSet={HERO.srcset} sizes="100vw" width="1920" height="1080" alt="An illustrated living room: a phone with The Remote's YouTube search typed for lofi beats, in front of a drawn TV showing YouTube results, lit by a lime light under the console." fetchPriority="high" loading="eager" decoding="async" /></picture>
-        {playVideo && <video key={loop.mp4} ref={video} className="b-hero-video" data-track-loop="hero" muted loop playsInline preload="auto" poster={loop.poster} aria-hidden="true">{loop.webm && <source src={loop.webm} type="video/webm" />}<source src={loop.mp4} type="video/mp4" /></video>}
+      <div className="b-hero-move" ref={media}><div className={`b-hero-loop${playVideo && painted ? ' is-painted' : ''}`}>
+        <picture><source media="(max-width: 599px)" srcSet={HERO.crop} width="720" height="900" /><img src={HERO.src} srcSet={HERO.srcset} sizes="100vw" width="1920" height="1080" alt="An illustrated living room: a phone with The Remote's YouTube search typed for lofi beats, in front of a drawn TV showing YouTube results, lit by a lime light under the console." fetchPriority="high" loading="eager" decoding="async" /></picture>
+        {playVideo && <video key={loop.mp4} ref={video} className="b-hero-video" data-track-loop="hero" muted autoPlay loop playsInline preload="auto" poster={loop.poster} aria-hidden="true" onPlaying={() => setPainted(true)}>{loop.webm && <source src={loop.webm} type="video/webm" />}<source src={loop.mp4} type="video/mp4" /></video>}
       </div></div>
       {lease && <div className="b-grain-live" aria-hidden="true"><Grainient className="b-grainient" colors={['#0b0e0d', '#151b16', '#d4fa7b']} speed={.15} grainAmount={.08} interactive={false} clickSwirl={false} intro={false} dpr={1} /></div>}
       <div className="b-grain" aria-hidden="true" />

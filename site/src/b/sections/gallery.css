@@ -2,7 +2,7 @@
    arc of 7 whole phones (Design's code-drawn 440x932 textures, bezel baked in), ~225px wide, gap 26, bleeding both
    edges; the centre phone sits highest, the outer ones drop and tilt out. Live: React Bits CircularGallery (OGL).
    Static (reduced motion, touch, before the lease): the same arc in CSS. 390: a swipe row (scroll-snap). ---------- */
-.b-gallery{background:var(--bg50);padding-bottom:0}
+.b-gallery{background:var(--panel);padding-bottom:0}
 .b-gallery h2{letter-spacing:-.05em}
 .b-gallery-box{position:relative;height:700px;margin-top:-52px;overflow:hidden} /* centre phone centred ~580px below the section top, as on the board */
 .b-circular{position:absolute;inset:0}

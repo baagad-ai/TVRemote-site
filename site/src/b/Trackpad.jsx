@@ -3,8 +3,8 @@
 // board's 7 gesture tiles (Pointer "Coming soon", dashed). WebGL slot: free (DOM + SVG). No screenshots, no video.
 // Auto demo, one 10.00 s timeline (Design's clock, phone/clock.js) drives BOTH the phone (<PhoneLoop name="trackpad"
 // t={t} />) and the TV focus from the same t: rest on tile 1 | 1.0 s swipe right (0.8 s glide), the TV focus moves to
-// tile 2 two frames after the glide ends | 3.4 s tap = OK, pulse 1 -> 1.06 -> 1 in 0.3 s | 5.8 s swipe left, focus
-// back to tile 1 after that glide | hold to 10.0 s. Every value is a pure function of t, so t = 10 renders as t = 0.
+// tile 2 two frames after the glide ends | 3.4 s tap = OK, pulse 1 -> 1.06 -> 1 in 0.3 s, then the video plays on the
+// TV | 5.8 s two-finger tap = Back, the TV returns to the results | 7.6 s swipe left, focus back to tile 1 | rest to 10.0 s. Every value is a pure function of t, so t = 10 renders as t = 0.
 // Moves: the focus ring (React Bits Star Border) slides one tile in 0.25 s power2.out (GSAP), settling on the tile.
 // Visitors: a swipe on the pad (>= 24 px, direction locked) or an arrow key moves the focus one tile; a tap / Enter is
 // OK; an edge gives a 6 px nudge back over 0.18 s, no wrap. No cursor, finger dot or trail on the TV, no long press.
@@ -25,12 +25,27 @@ const PANEL = '#151b16', LINE = '#354032', PAPER = '#eeeee6', MUTED = '#b0b9a2';
 // The 10 s beats (seconds). Design's PhoneLoop.jsx (SWIPE_R 1, TAP 3.4, SWIPE_L 5.8, SW_D .8, TV_D .25) does not export
 // its constants, so they are mirrored here: the TV focus moves 2 frames after each 0.8 s glide ends (1.867 s, 6.667 s,
 // done 2.117 s / 6.917 s); the OK pulse is unchanged, 33 ms after the press (3.433 s).
-export const BEATS = { right: 1.0, ok: 3.4, left: 5.8 }, GLIDE = .8, FOCUS_LAG = .067, OK_LAG = 1 / 30, STILL_T = 3.65; // STILL_T = Design's trackpad still (just after OK, focus on tile 2)
+export const BEATS = { right: 1.0, ok: 3.4, back: 5.8, left: 7.6 }, GLIDE = .8, FOCUS_LAG = .067, OK_LAG = 1 / 30, STILL_T = 3.65; // STILL_T = Design's trackpad still (just after OK, focus on tile 2)
 const out2 = x => 1 - (1 - clamp(x)) ** 2; // power2.out
 const slide = (t, at) => out2((t - at - GLIDE - FOCUS_LAG) / .25);
 const pulseAt = (t, at) => { const x = t - at - OK_LAG; return x < 0 || x > .3 ? 1 : x < .15 ? 1 + .06 * out2(x / .15) : 1 + .06 * (1 - out2((x - .15) / .15)); };
 export const focusAt = t => slide(t, BEATS.right) - slide(t, BEATS.left); // 0 = tile 1, 1 = tile 2 (column)
 export const scaleAt = t => pulseAt(t, BEATS.ok);
+// Baagad 16 Oct: OK plays the focused video on the TV (crossfade in right after the OK pulse) and the two-finger-tap
+// Back returns to the YouTube results (crossfade out 2 frames after the press). 0 = results, 1 = playing.
+export const playAt = t => out2((t - BEATS.ok - .2) / .3) * (1 - out2((t - BEATS.back - FOCUS_LAG) / .3));
+// The playing screen: the result video full screen, YouTube logo, pause bars and a progress bar that runs while it plays.
+function PlayingTV({ k, p }) {
+  return <svg className="b-tvtile-svg b-tv-playing" viewBox="0 0 1600 900" aria-hidden="true" style={{ opacity: k }}>
+    <rect width="1600" height="900" fill={PANEL} />
+    <circle cx="560" cy="540" r="300" fill={PANEL} stroke={LINE} strokeWidth="3" /><circle cx="1040" cy="360" r="210" fill={LINE} />
+    <rect x="0" y="660" width="1600" height="240" fill="#0b0e0d" />
+    <YouTubeLogo x={96} y={74} height={44} />
+    <text x="96" y="736" fill={PAPER} fontFamily="Work Sans, Work Sans Fallback, Arial, sans-serif" fontSize="34">lofi beats</text>
+    <rect x="96" y="806" width="1408" height="10" rx="5" fill={LINE} /><rect x="96" y="806" width={1408 * p} height="10" rx="5" fill="#d4fa7b" /><circle cx={96 + 1408 * p} cy="811" r="16" fill="#d4fa7b" />
+    <path d="M1460 724v40M1480 724v40" stroke={PAPER} strokeWidth="9" strokeLinecap="round" />
+  </svg>;
+}
 
 function BoardTV() {
   return <svg className="b-tvtile-svg" viewBox="0 0 1600 900" aria-hidden="true">
@@ -62,7 +77,7 @@ export function Bento() {
   useLayoutEffect(() => {
     if (user || !ringEl.current) return;
     const tt = auto ? t : STILL_T;
-    gsap.set(ringEl.current, { xPercent: focusAt(tt) * STEP_X, yPercent: 0, x: 0 }); gsap.set(pulseEl.current, { scale: auto ? scaleAt(tt) : 1 });
+    gsap.set(ringEl.current, { xPercent: focusAt(tt) * STEP_X, yPercent: 0, x: 0, opacity: auto ? 1 - playAt(tt) : 1 }); gsap.set(pulseEl.current, { scale: auto ? scaleAt(tt) : 1 });
   }, [t, auto, user]);
   useEffect(() => { if (!user) setFocus(Math.round(focusAt(auto ? t : STILL_T))); }, [t, auto, user]);
   const act = useCallback(action => {
@@ -92,7 +107,7 @@ export function Bento() {
       <div className="b-pad" tabIndex={0} role="application" aria-roledescription="demo trackpad" aria-label="Demo trackpad for the drawn TV: arrow keys or a swipe move the focus one tile, Enter or a tap is OK" onKeyDown={onKey} onPointerDown={onDown} onPointerUp={onUp} onPointerCancel={() => { drag.current = null; }}>
         <PhoneLoop name="trackpad" t={user ? 0 : auto ? t : STILL_T} playing={false} />
       </div>
-      <p className="b-small b-pad-caption"><span className="b-show-m">One swipe = one tile. Tap = OK. </span>Swipe to move, tap for OK.</p>
+      <p className="b-small b-pad-caption">Swipe to move, tap for OK.</p>
       {/* WCAG 2.2.2: the auto demo can be paused. Small, in the phone tile's corner (outside the board's composition). */}
       {ready && motion && <button type="button" className="b-tp-pause" aria-label={paused ? 'Play the trackpad demo' : 'Pause the trackpad demo'} aria-pressed={paused} onClick={() => setPaused(p => !p)}>
         <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">{paused ? <path d="M4 2.5v11l9-5.5z" fill="currentColor" /> : <path d="M4 2.5h2.6v11H4zM9.4 2.5H12v11H9.4z" fill="currentColor" />}</svg></button>}
@@ -100,12 +115,12 @@ export function Bento() {
     </div>
     <div className="b-tile b-tile-tv" role="img" aria-label={`Illustrated TV: YouTube results for lofi beats. Result ${focus + 1} of 6 is focused.`}>
       <BoardTV />
+      {auto && playAt(t) > 0 && <PlayingTV k={playAt(t)} p={.08 + .12 * clamp((t - BEATS.ok - .2) / (BEATS.back - BEATS.ok))} />}
       <div ref={ringEl} className="b-tv-ring" style={ringBox} aria-hidden="true">
         <span ref={pulseEl} className="b-tv-ring-pulse">
           <StarBorder as="span" className="b-tv-star" color="#d4fa7b" duration={6} thickness={1} radius={12} hover="none" clickPulse={false} backgroundColor="transparent" borderColor="#d4fa7b" textColor="#d4fa7b"><span /></StarBorder>
         </span>
       </div>
-      <span className="b-tag b-tv-tag" aria-hidden="true">Illustrated TV · focus steps one tile per swipe</span>
     </div>
     {GEST.map(([name, text, n, line]) => <div key={name} className="b-tile b-gest">{glyph(n, line)}<h3>{name}</h3><p className="b-small">{text}</p></div>)}
     <div className="b-tile b-gest is-soon"><span className="b-tag is-soon">Coming soon</span><h3>Pointer · For browsers</h3><p className="b-small">A separate switch on the Gestures screen.</p></div>

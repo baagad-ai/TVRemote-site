@@ -5,8 +5,8 @@
 // (pinSpacing, end +=400%, scrub 1, no snap) maps scroll to a progress with held plateaus: step 1 holds 0-.22, eases
 // to step 2 (.22-.39), step 2 holds .39-.61 (mid-scroll), eases to step 3 (.61-.78), step 3 holds to the release.
 // Each move is a slow sine in-out dolly of the whole scene plus crossfades of the TV and phone screens.
-// Off below 900 px wide or 640 px tall, under reduced motion, and while keyboard focus is inside: then three stacked
-// stills (phone over a TV crop). Analytics: remote:loop k='pin' when the pin becomes active.
+// Off on touch (pointer: coarse), below 1200 px wide or 640 px tall, under reduced motion, and while keyboard focus is
+// inside: then three stacked stills (1440 stills above 390 px, 4:5 stills at 390), revealed as each scrolls in. Analytics: remote:loop k='pin' when the pin becomes active.
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -25,10 +25,9 @@ export const STEPS = [
   { id: 'link', title: 'Share a YouTube link. Review it, pick the TV, open it.', tv: 'assets/board/tv-playing-1440.webp', tvAlt: 'The drawn TV playing the shared YouTube video.', drawn: 'playing', phoneAlt: "The Remote's share sheet: a YouTube link, Living Room TV selected, and an Open on Living room button." }
 ];
 // Held plateaus (step index while holding) and eased moves between them.
-const HOLD = [[0, .2], [.4, .6], [.8, 1]]; // snap points 0 / .5 / 1 sit inside the holds
+const HOLD = [[0, .2], [.4, .6], [.8, 1]];
 const sine = t => -(Math.cos(Math.PI * t) - 1) / 2;
 // Texture swaps happen when a camera move has finished (never during it): step index changes at .4 and .8.
-export const SNAP = [0, .5, 1]; // one snap point per step, inside its hold
 export const stepIndex = p => (p >= HOLD[2][0] ? 2 : p >= HOLD[1][0] ? 1 : 0);
 export function stepValue(p) { // continuous 0..2 with plateaus
   if (p <= HOLD[0][1]) return 0;
@@ -49,7 +48,7 @@ function Scene({ v, idx, phoneIdx = idx, eager = false, sceneRef }) {
     {/* Fallback under the canvas (no WebGL, before the pin holds the context): Build's step-1 still when it lands,
         else a code-drawn TV (SVG, lime glow) + the phone with its phoneScreenSvg screen, following the steps. */}
     {PIN.fallback && <img className="pin-fallback" src={PIN.fallback} alt="" width="1600" height="1000" decoding="async" />}
-    <div className={`pin-tv${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-tv-layer" style={{ opacity: k === 0 ? 1 : op(k) }}><DrawnTV state={s.drawn} focus={0} idPrefix={`pin${k}`} /></div>)}<span className="b-tag pin-tag">Illustrated TV · results open after Send</span></div>
+    <div className={`pin-tv${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-tv-layer" style={{ opacity: k === 0 ? 1 : op(k) }}><DrawnTV state={s.drawn} focus={0} idPrefix={`pin${k}`} /></div>)}</div>
     <div className={`pin-phone${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-phone-layer" style={{ opacity: k === 0 ? 1 : (k === phoneIdx ? 1 : 0) }}><PhoneLoop name="typing" step={k} playing={false} /></div>)}</div>
     <p className="pin-bubble" style={{ opacity: phoneIdx === 1 ? 1 : 0 }}>{SENT}</p>
   </div>;
@@ -58,7 +57,10 @@ function Scene({ v, idx, phoneIdx = idx, eager = false, sceneRef }) {
 // drawn TV crop at the right, the phone with phoneScreenSvg('typing', step) overlapping at the left). No app captures.
 export function PinStill({ index }) {
   const s = STEPS[index], built = PIN.stills[index];
-  if (built) return <figure className="pin-still is-built"><img src={built} alt={`${s.tvAlt} ${s.phoneAlt}`} width="780" height="975" loading="lazy" decoding="async" /></figure>;
+  // Baagad 16 Oct: wider than 390 (tablets, touch, < 1200 px) the stacked step uses Build's 1600x1000 1440 still, full
+  // width of its column; 390 and below keep the 4:5 still. The wide set is used only once all three exist.
+  const wide = PIN.wide.every(Boolean) && PIN.wide[index];
+  if (built) return <figure className={`pin-still is-built${wide ? ' has-wide' : ''}`}><picture>{wide && <source media="(min-width: 391px)" srcSet={wide} width="1600" height="1000" />}<img src={built} alt={`${s.tvAlt} ${s.phoneAlt}`} width="780" height="975" loading="lazy" decoding="async" /></picture></figure>;
   return <figure className="pin-still">
     <div className="pin-still-tv" role="img" aria-label={s.tvAlt}><DrawnTV state={s.drawn} focus={0} idPrefix={`still${index}`} /></div>
     <div className="pin-still-phone" role="img" aria-label={s.phoneAlt}><PhoneLoop name="typing" step={index} /></div>
@@ -68,7 +70,7 @@ export default function PinStory() {
   const { ready, motion, gpu } = useEnvironment(), root = useRef(null), stage = useRef(null);
   const [fits, setFits] = useState(false), [focusMode, setFocusMode] = useState(false), [v, setV] = useState(1), [idx, setIdx] = useState(1);
   const pinned = ready && motion && fits && !focusMode;
-  const [near, setNear] = useState(false), sceneRef = useRef(null), host = useRef(null), live = useRef(null), vRef = useRef(1), idxRef = useRef(1), phoneRef = useRef(1);
+  const [near, setNear] = useState(false), sceneRef = useRef(null), host = useRef(null), live = useRef(null), vRef = useRef(1), idxRef = useRef(1), phoneRef = useRef(1), glowBox = useRef(null);
   // Step 02 "Send it": the phone keeps the typed search (typing step 0: "lofi beats", keyboard up) until step 02's snap
   // has finished, then shows step 1 (sent). The TV switches at the step change as before.
   const [sent, setSent] = useState(true), sentRef = useRef(true);
@@ -92,13 +94,16 @@ export default function PinStory() {
     return () => { ctrl.abort(); api?.dispose(); live.current = null; setIs3d(false); };
   }, [lease]);
   const push = value => { const node = sceneRef.current, api = live.current; if (!node || !api) return; const tv = node.querySelector('.pin-tv').getBoundingClientRect(), ph = node.querySelector('.pin-phone').getBoundingClientRect(), hr = host.current.getBoundingClientRect(), g = host.current.firstChild.style;
-    g.left = `${tv.left - hr.left}px`; g.top = `${tv.top - hr.top}px`; g.width = `${tv.width}px`; g.height = `${tv.height}px`; api.update(value, idxRef.current, phoneRef.current, { left: tv.left, top: tv.top, width: tv.width, height: tv.height }, { left: ph.left + 8, top: ph.top + 8, width: ph.width - 16, height: ph.height - 16 }); };
+    if (!glowBox.current) { glowBox.current = [tv.width, tv.height]; g.width = `${tv.width}px`; g.height = `${tv.height}px`; } g.transform = `translate(${tv.left - hr.left}px,${tv.top - hr.top}px) scale(${tv.width / glowBox.current[0]},${tv.height / glowBox.current[1]})`; /* transform only: no layout shift */ api.update(value, idxRef.current, phoneRef.current, { left: tv.left, top: tv.top, width: tv.width, height: tv.height }, { left: ph.left + 8, top: ph.top + 8, width: ph.width - 16, height: ph.height - 16 }); };
   const phoneIdx = pinned && idx === 1 && !sent ? 0 : idx;
   useEffect(() => { vRef.current = v; idxRef.current = idx; phoneRef.current = phoneIdx; requestAnimationFrame(() => push(v)); }, [v, idx, phoneIdx, is3d]);
   useEffect(() => {
     if (!ready) return;
-    const update = () => setFits(innerWidth >= 900 && innerHeight >= 640); update();
-    addEventListener('resize', update); return () => removeEventListener('resize', update);
+    // Baagad 16 Oct (tablet test): never pin on touch or under 1200 px wide; those get the three stacked stills.
+    const mq = matchMedia('(pointer: coarse), (max-width: 1199px)');
+    const update = () => setFits(!mq.matches && innerHeight >= 640); update();
+    addEventListener('resize', update); mq.addEventListener('change', update);
+    return () => { removeEventListener('resize', update); mq.removeEventListener('change', update); };
   }, [ready]);
   useEffect(() => {
     const node = root.current;
@@ -112,13 +117,12 @@ export default function PinStory() {
     if (!pinned) { setV(1); setIdx(1); setSentBoth(true); return; }
     const node = root.current, before = node.getBoundingClientRect(), wasAbove = before.bottom < 0;
     setV(0); setIdx(0); setSentBoth(false);
-    // Settled on step 02 = its snap tween finished, or scrolling stopped right on the snap point (no tween needed).
-    const settle = self => { if (stepIndex(self.progress) === 1 && Math.abs(self.progress - .5) < .01) setSentBoth(true); };
-    // Guide §2: pin, end +=300%, scrub 0.5, snap 0/.5/1 (0.35 s power2.out) — each snap point is inside a hold.
-    const st = ScrollTrigger.create({ trigger: stage.current, pin: true, pinSpacing: true, start: 'top top', end: '+=300%', scrub: .5, anticipatePin: 1, invalidateOnRefresh: true,
-      // QA 16 Oct: the snap follows the label. It goes to the snap point of the step the label shows (stepIndex of the
-      // real scroll progress, the same thresholds .4 / .8), never a velocity-projected neighbour: label 02 -> snaps to 02.
-      snap: { snapTo: (_, self) => SNAP[stepIndex(self.progress)], inertia: false, duration: .35, ease: 'power2.out', delay: .15, onComplete: () => settle(st) },
+    // Settled on step 02 = scrolling has stopped while the label reads 02 (there is no snap any more).
+    const settle = self => { if (stepIndex(self.progress) === 1) setSentBoth(true); };
+    // Guide §2: pin, end +=300%, scrub 0.5. The snap 0/.5/1 was removed (Baagad 16 Oct).
+    // Baagad 16 Oct: no snap at any width; the pin follows the scroll. pinType 'transform' (with Lenis driving the
+    // scroll on fine pointers) keeps the pin a transform, so pinning and the 3D swap-in report no layout shift.
+    const st = ScrollTrigger.create({ trigger: stage.current, pin: true, pinSpacing: true, pinType: matchMedia('(hover: hover) and (pointer: fine)').matches ? 'transform' : 'fixed', start: 'top top', end: '+=300%', scrub: .5, invalidateOnRefresh: true,
       onUpdate: self => { setV(stepValue(self.progress)); setIdx(stepIndex(self.progress)); if (stepIndex(self.progress) !== 1) setSentBoth(false); },
       onToggle: self => { if (self.isActive) document.dispatchEvent(new CustomEvent('remote:loop', { detail: { k: 'pin', el: node } })); } });
     setV(stepValue(st.progress)); setIdx(stepIndex(st.progress)); settle(st);
@@ -127,8 +131,23 @@ export default function PinStory() {
     document.fonts.ready.then(() => ScrollTrigger.refresh());
     return () => { ScrollTrigger.removeEventListener('scrollEnd', scrollEnd); const h = node.getBoundingClientRect(), above = h.bottom < 0, height = h.height; st.kill(true); if (above) { const delta = node.getBoundingClientRect().height - height; if (delta) scrollBy(0, delta); } };
   }, [pinned]);
-  const step = idx;
-  return <section ref={root} className={`b-pin ${pinned ? 'is-pinned' : 'is-stacked'}${is3d ? ' is-3d' : ''}`} id="search-proof" data-track-section="search" aria-labelledby="pin-title">
+  // 390 / stacked (PM 21:44): the stills are a plain scroll list, so the active step follows the reader. It is the last
+  // step whose top has passed 55% of the viewport (01 until then); scrolling back up walks it back down.
+  const [stackIdx, setStackIdx] = useState(0);
+  useEffect(() => {
+    if (pinned) return;
+    let raf = 0;
+    const read = () => { raf = 0; const items = root.current?.querySelectorAll('.b-pin-step'); if (!items) return; let k = 0; items.forEach((li, i) => { if (li.getBoundingClientRect().top <= innerHeight * .55) k = i; }); setStackIdx(k); };
+    const queue = () => { if (!raf) raf = requestAnimationFrame(read); };
+    read(); addEventListener('scroll', queue, { passive: true }); addEventListener('resize', queue);
+    // Each stacked step plays its entrance once as it scrolls in (IntersectionObserver, no ScrollTrigger, no pin).
+    const items = [...root.current.querySelectorAll('.b-pin-step')];
+    const io = new IntersectionObserver(list => { for (const e of list) if (e.isIntersecting) { e.target.classList.add('is-seen'); io.unobserve(e.target); } }, { threshold: .2 });
+    items.forEach(li => io.observe(li));
+    return () => { cancelAnimationFrame(raf); removeEventListener('scroll', queue); removeEventListener('resize', queue); io.disconnect(); };
+  }, [pinned]);
+  const step = pinned ? idx : stackIdx;
+  return <section ref={root} className={`b-pin ${pinned ? 'is-pinned' : 'is-stacked'}${!pinned && ready && motion ? ' is-reveal' : ''}${is3d ? ' is-3d' : ''}`} id="search-proof" data-active-step={step + 1} data-track-section="search" aria-labelledby="pin-title">
     <span id="share-story" className="b-anchor" aria-hidden="true" />
     <div ref={stage} className="b-pin-stage">
       {pinned && <div ref={host} className="pin-canvas-host" aria-hidden="true"><span className="pin-glow" /></div>}
@@ -138,7 +157,7 @@ export default function PinStory() {
           <p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />01 / YouTube search</p>
           <h2 id="pin-title"><span className="b-h2-desk">Search YouTube <em>from your phone.</em></span><span className="b-h2-m">Type on your phone. <em>Results on the TV.</em></span></h2>
           <p className="b-lede">Type the search on your phone keyboard. The results open on your TV.</p>
-          <ol className="b-pin-steps">{STEPS.map((s, i) => <li key={s.id} className={`b-pin-step ${(pinned ? step : 1) === i ? 'is-on' : ''}`} aria-current={pinned && step === i ? 'step' : undefined}>
+          <ol className="b-pin-steps">{STEPS.map((s, i) => <li key={s.id} className={`b-pin-step ${step === i ? 'is-on' : ''}`} aria-current={step === i ? 'step' : undefined}>
             <span className="b-step-no">0{i + 1}</span>
             <SplitText tag="span" text={s.title} className="b-step-title" textAlign="left" splitType="lines" enabled={motion} delay={40} duration={.6} ease="power3.out" from={{ opacity: 0, y: 18 }} to={{ opacity: 1, y: 0 }} />
             <span className="b-step-bar" aria-hidden="true" />

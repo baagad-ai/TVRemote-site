@@ -1,7 +1,7 @@
 /* ---------- 5 · Guests (CONCEPT-B-GUIDE.md §5, board mock_guests_stack): bg = the 50% panel mix; grid 440px 1fr gap 70;
    the heading column is sticky while the cards stack; cards --panel, 1px --line, r28, padding 36, inner grid 1fr 240px gap 40,
    shadow 0 -20px 60px -20px #0b0e0d, settling at 0 / 70 / 140 px with scale .92 / .96 / 1 (transform-origin top). ---------- */
-.b-guests{background:var(--bg50);overflow:clip} /* clip, not hidden: hidden makes the section a scroll container and breaks the sticky heading */
+.b-guests{background:var(--panel);overflow:clip} /* clip, not hidden: hidden makes the section a scroll container and breaks the sticky heading */
 .b-guests-grid{display:grid;grid-template-columns:440px 1fr;gap:70px;align-items:start}
 .b-guests-head{position:sticky;top:calc(var(--header) + 40px)}
 .b-guests-head h2{letter-spacing:-.05em}
@@ -21,3 +21,4 @@
   .b-guest-card h3{font-size:30px!important}
   .b-guest-phone{width:200px;justify-self:center}
 }
+@media (pointer:coarse),(max-width:1199px){.b-guests-head{position:static}} /* Baagad 16 Oct: nothing sticks on touch or under 1200 px */

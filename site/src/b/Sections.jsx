@@ -1,6 +1,6 @@
 // Concept B sections 4-9 and the lime close (CONCEPT-B-GUIDE.md §4-9, board gen.py:115-124, 193-268).
 import { useEffect, useRef, useState } from 'react';
-import { PixelTransition, CircularGallery, AnimatedList, ScrollReveal } from '../components/rb/lazy';
+import { PixelTransition, CircularGallery, ScrollReveal } from '../components/rb/lazy';
 import ScrollStack, { ScrollStackItem } from '../components/ScrollStack';
 import { LiveCount } from './counter';
 import { DownloadLink } from '../Download';
@@ -95,26 +95,57 @@ const GALLERY_SIZE = 477 / (.6 * 700);
 const GalleryArc = ({ flat = false }) => <ul className={`b-arc${flat ? ' is-flat' : ''}`}>{SHOTS.map(([n, , alt], i) => <li key={n} style={{ '--i': i - 3 }}><img src={`assets/b/gallery-${n}.webp`} alt={alt} width="440" height="932" loading="lazy" decoding="async" /></li>)}</ul>;
 export function Gallery() {
   const { ready, gpu, motion } = useEnvironment(), ref = useRef(null), inView = useInView(ref, { threshold: .3 }), [desktop, setDesktop] = useState(false);
-  useEffect(() => { if (!ready) return; const q = matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)'), u = () => setDesktop(q.matches && !lowEnd()); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
-  const lease = useGpuLease(ready && gpu && motion && desktop && inView, 'circular-gallery');
+  // Baagad 16 Oct: the live gallery runs at 900 px and wider on touch too (tablets swipe it), and under reduced motion
+  // (no auto-scroll there, drag still works). It auto-scrolls slowly and resumes 1.5 s after a drag / swipe / wheel.
+  useEffect(() => { if (!ready) return; const q = matchMedia('(min-width: 900px)'), u = () => setDesktop(q.matches && !lowEnd()); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
+  const lease = useGpuLease(ready && (gpu || (!motion && !navigator.connection?.saveData)) && desktop && inView, 'circular-gallery');
   return <section className="b-section b-gallery" id="screens" aria-labelledby="gallery-title">
     <div className="b-wrap"><Eyebrow>The real app</Eyebrow><h2 id="gallery-title">Every screen, <em>as it ships.</em></h2></div>
     <div ref={ref} className={`b-gallery-box ${lease ? 'is-live' : ''}`}>
-      {lease ? <CircularGallery fallback={<GalleryArc />} items={ARC_ITEMS} bend={2.2} itemSize={GALLERY_SIZE} itemAspect={GALLERY_ASPECT} gap={.115} showTitles={false} shadow={0} fadeEdges={0} textColor="#eeeee6" borderRadius={.06} scrollEase={.05} autoScroll={0} openOnClick={false} snap={false} intro={false} dpr={1.5} className="b-circular" />
+      {lease ? <CircularGallery fallback={<GalleryArc />} items={ARC_ITEMS} bend={2.2} itemSize={GALLERY_SIZE} itemAspect={GALLERY_ASPECT} gap={.115} showTitles={false} shadow={0} fadeEdges={0} textColor="#eeeee6" borderRadius={.109} scrollEase={.05} autoScroll={motion ? .6 : 0} openOnClick={false} snap={false} intro={false} dpr={1.5} className="b-circular" />
         : <GalleryArc flat={ready && !motion} />}
     </div>
   </section>;
 }
-// 7 · Proof: React Bits AnimatedList rows (spring in once, 70 ms stagger) + the live counter, unchanged.
+// 1b · Proof marquee (Baagad 16 Oct; Concept A §2 .marq): directly below the hero, a full-width text ticker of the six
+// true facts, ✦ between them. Two identical copies of the list sit in one track (the second aria-hidden); each copy
+// ends with its own ✦ and the same gap after it (padding-right = gap), so translating the track by -50% lands exactly
+// on the next "Free". ~40 px/s: the duration is the measured copy width / 40. Transform only. Paused on hover, on
+// focus-within and off-screen (IntersectionObserver). Reduced motion: one static row that wraps, no copy, no trailing ✦.
+const MARQ = ['Free', 'No ads', 'No account', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
+const MarqCopy = ({ hidden }) => <ul className="b-marq-copy" aria-hidden={hidden || undefined}>{MARQ.map(f => <li key={f}><span>{f}</span><span className="b-marq-sep" aria-hidden="true">✦</span></li>)}</ul>;
+export function ProofMarquee() {
+  const { ready, motion } = useEnvironment(), band = useRef(null), copy = useRef(null), [dur, setDur] = useState(60), [off, setOff] = useState(false);
+  useEffect(() => {
+    if (!ready || !motion || !copy.current) return;
+    const measure = () => setDur(Math.max(10, copy.current.getBoundingClientRect().width / 40));
+    const ro = new ResizeObserver(measure); ro.observe(copy.current); measure();
+    const io = new IntersectionObserver(([e]) => setOff(!e.isIntersecting)); io.observe(band.current);
+    return () => { ro.disconnect(); io.disconnect(); };
+  }, [ready, motion]);
+  const still = ready && !motion;
+  return <section ref={band} className={`b-marq${still ? ' is-still' : ''}${off ? ' is-off' : ''}`} aria-label="Straight facts">
+    <div className="b-marq-track" style={{ '--marq-dur': `${dur.toFixed(2)}s` }}><div ref={copy} className="b-marq-unit"><MarqCopy /></div>{!still && <div className="b-marq-unit" aria-hidden="true"><MarqCopy hidden /></div>}</div>
+  </section>;
+}
+// 7 · Proof (Baagad 16 Oct): six facts, none ever dim. When the band comes into view (IntersectionObserver, once) the
+// checks tick in one after another, 150 ms apart, and stay fully checked: full-strength text, lime checks. Before
+// hydration, without JS and under reduced motion they are all checked straight away. Plus the live counter, unchanged.
 const FACTS = ['Free', 'No ads', 'No account', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
-const StaticFacts = () => <ul className="b-facts">{FACTS.map(f => <li key={f}><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></li>)}</ul>;
-const LIST_VARS = { '--al-tile': '#151b16', '--al-tile-edge': '#354032', '--al-tile-highlight': 'transparent', '--al-tile-shadow': 'none', '--al-ink': '#eeeee6', '--al-muted': '#b0b9a2', '--al-ring': 'transparent', '--al-ring-fill': 'transparent', '--al-hover': 'none', '--al-press': 'none', '--al-active': 'none' };
 export function Proof() {
-  const { ready, motion } = useEnvironment();
+  const { ready, motion } = useEnvironment(), list = useRef(null), [ticked, setTicked] = useState(FACTS.length), [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!ready || !motion || armed) return;
+    const node = list.current; if (!node) return;
+    setTicked(0); setArmed(true);
+    let timers = [];
+    const io = new IntersectionObserver(([e]) => { if (!e.isIntersecting) return; io.disconnect(); timers = FACTS.map((_, i) => setTimeout(() => setTicked(n => Math.max(n, i + 1)), 150 * (i + 1))); }, { threshold: .35 });
+    io.observe(node);
+    return () => { io.disconnect(); timers.forEach(clearTimeout); setTicked(FACTS.length); };
+  }, [ready, motion]);
   return <section className="b-section b-proof" aria-labelledby="proof-title"><div className="b-wrap b-proof-grid">
     <div><Eyebrow>Straight facts</Eyebrow><h2 id="proof-title">No catch. <em>Just a remote.</em></h2><LiveCount className="is-proof" /></div>
-    {ready && motion ? <AnimatedList fallback={<StaticFacts />} className="b-facts-list" items={FACTS} renderItem={f => <><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></>} frame={false} showGradients={false} displayScrollbar={false} selectOnHover={false} enableArrowNavigation={false} animation="pop" animateOnce stagger={.07} radius={28} gap={12} width={520} maxHeight="none" style={LIST_VARS} />
-      : <StaticFacts />}
+    <ul ref={list} className="b-facts">{FACTS.map((f, i) => <li key={f} className={i < ticked ? 'is-ticked' : ''}><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></li>)}</ul>
   </div></section>;
 }
 // 8 · Compatibility split: the Phone -> Home Wi-Fi -> Living Room TV line draws once (0.8 s); React Bits ScrollReveal

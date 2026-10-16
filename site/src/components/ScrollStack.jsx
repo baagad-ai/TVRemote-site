@@ -10,7 +10,7 @@ export const ScrollStackItem = ({ children, itemClassName = '' }) => <article cl
 export default function ScrollStack({ children, itemScale = .02, itemStackDistance = 24, baseScale = .94, stackTop = null }) {
   const ref = useRef(null), { motion } = useEnvironment();
   useEffect(() => {
-    const root = ref.current, wide = matchMedia('(min-width: 1000px) and (min-height: 760px)');
+    const root = ref.current, wide = matchMedia('(min-width: 1200px) and (min-height: 760px) and (pointer: fine)') // Baagad 16 Oct: never on touch or under 1200 px;
     let frame = 0, cards = [], tops = [], endTop = 0, enabled = false;
     const cache = new Map(), original = new Map();
     const progress = (scroll, start, end) => Math.max(0, Math.min(1, (scroll - start) / Math.max(1, end - start)));

@@ -10,7 +10,7 @@ import SmoothScroll from './SmoothScroll';
 import Hero from './b/Hero';
 import PinStory from './b/PinStory';
 import BTrackpad from './b/Trackpad';
-import { Rooms, Guests as BGuests, Gallery, Proof, TypeSplit, Closing as BClosing, TRADEMARK } from './b/Sections';
+import { Rooms, Guests as BGuests, Gallery, Proof, ProofMarquee, TypeSplit, Closing as BClosing, TRADEMARK } from './b/Sections';
 
 export function Header({ privacy = false }) {
   return <header className="site-header page-width"><a className="brand" href={privacy ? '../' : '#top'} aria-label="The Remote, home"><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="32" height="32" /><span>The Remote<span className="brand-period">.</span></span></a><nav aria-label="Main navigation">{privacy ? <a data-track="nav" href="../">Home ↗</a> : <><a data-track="nav" href="#search-proof">How it works</a><a data-track="nav" href="#inside">Your rooms</a><a data-track="nav" href="#guests">Guests</a><a data-track="nav" href="#trackpad">Trackpad</a><a data-track="nav" href="#compatibility">Will it work?</a><a data-track="nav" href="guides/">Guides</a></>}</nav>{!privacy && <DownloadLink button="nav" className="header-cta b-pill"><span className="b-hide-m">Download the app</span><span className="b-show-m">Download</span></DownloadLink>}</header>;
@@ -51,5 +51,5 @@ function MobileCta() {
 // Concept B "Living Room" (approved 16 Oct 2026): hero -> the single pin -> trackpad bento -> rooms -> guests ->
 // gallery -> proof band -> type split -> download, guides, FAQ, lime close. The earlier landing sections stay in
 // the repo (PhoneStory, PinnedStory, Guests, Trackpad, ControlsProof) but are not rendered.
-function Landing({ config }) { return <><Header /><main id="main" tabIndex={-1}><Hero /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><DownloadFinale /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
+function Landing({ config }) { return <><Header /><main id="main" tabIndex={-1}><Hero /><ProofMarquee /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><DownloadFinale /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
 export default function App({ route = 'landing', config }) { return <EnvironmentProvider><SmoothScroll /><DownloadProvider config={config}><a className="skip-link" href="#main">Skip to content</a>{route === 'not-found' ? <NotFound config={config} /> : route === 'privacy' ? <Privacy /> : route.startsWith('guides') ? <GuidesPage slug={route.split('/')[1]} /> : <Landing config={config} />}</DownloadProvider></EnvironmentProvider>; }
