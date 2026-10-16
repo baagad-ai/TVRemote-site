@@ -23,15 +23,15 @@ export function useCountUpSlot(slot) {
     const run = node => {
       const target = node.nodeValue, value = Number(target.replace(/[^0-9]/g, ''));
       if (!Number.isSafeInteger(value) || value <= 0) return;
-      done = true; const start = performance.now(), live = root.querySelector('.download-count');
+      done = true; const start = performance.now(), live = root.querySelector('.download-count'); let last = '0';
       live?.setAttribute('aria-busy', 'true');
       const tick = now => {
-        if (node.nodeValue !== target && !node.__counting) { live?.removeAttribute('aria-busy'); return; } // React updated it
+        if (node.nodeValue !== last) { live?.removeAttribute('aria-busy'); return; } // React updated it
         const t = Math.min(1, (now - start) / DURATION);
-        node.__counting = true; node.nodeValue = t < 1 ? Math.round(value * EASE(t)).toLocaleString('en-US') : target; node.__counting = false;
+        node.nodeValue = t < 1 ? Math.round(value * EASE(t)).toLocaleString('en-US') : target; last = node.nodeValue;
         if (t < 1) frame = requestAnimationFrame(tick); else live?.removeAttribute('aria-busy');
       };
-      node.nodeValue = '0'; frame = requestAnimationFrame(tick);
+      node.nodeValue = '0'; last = node.nodeValue; frame = requestAnimationFrame(tick);
     };
     const arm = () => {
       const node = root.querySelector('.download-count b')?.firstChild;
