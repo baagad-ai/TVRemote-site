@@ -1,6 +1,6 @@
 // File slots for Remote Build's production 3D (Concept B). Build delivers into /workspace/site-fix-1016/3d-prod/;
-// copy the files into site/assets/3d-prod/ under these names. build-react.mjs lists that folder at build time and a
-// slot switches from its placeholder to Build's file as soon as the file exists, so the swap needs no code change.
+// copy the files into site/assets/3d-prod/ under these names. build-react.mjs lists that folder at build time; a slot
+// switches from its placeholder to Build's file only when the file exists AND the slot is in PROD_WHITELIST below.
 // If Build's README uses a different name, change the ONE string here. See /workspace/site-fix-1016/build-B/BUILD-NOTES.md.
 /* global __PROD_FILES__ */
 const present = typeof __PROD_FILES__ === 'undefined' ? {} : __PROD_FILES__;
@@ -14,7 +14,11 @@ export const PROD_NAMES = {
   livingWebm: 'rooms-living.webm', livingMp4: 'rooms-living.mp4', living1440: 'rooms-living-1440.webp', living4x5: 'rooms-living-4x5.webp',
   bedroomWebm: 'rooms-bedroom.webm', bedroomMp4: 'rooms-bedroom.mp4', bedroom1440: 'rooms-bedroom-1440.webp', bedroom4x5: 'rooms-bedroom-4x5.webp'
 };
-export const prod = key => present[PROD_NAMES[key]] ? `assets/3d-prod/${PROD_NAMES[key]}` : null;
+// Build's current 3d-prod renders are off-board and being re-rendered (16 Oct). A 3d-prod file is used ONLY when its
+// slot key is listed here AND the file exists. Add a key (e.g. hero1600: true) once Design has checked that file
+// against the approved board. Empty = every slot uses Design's approved assets / placeholders.
+export const PROD_WHITELIST = {};
+export const prod = key => PROD_WHITELIST[key] === true && present[PROD_NAMES[key]] ? `assets/3d-prod/${PROD_NAMES[key]}` : null;
 // Placeholders used until Build's files land (existing site assets and Design's approved concept render).
 export const HERO = {
   srcset: prod('hero1600') ? `${prod('hero1600')} 1600w, ${prod('hero960') || prod('hero1600')} 960w, ${prod('hero640') || prod('hero1600')} 640w` : 'assets/b/hero-placeholder-1600.webp 1600w, assets/b/hero-placeholder-960.webp 960w, assets/b/hero-placeholder-640.webp 640w',
