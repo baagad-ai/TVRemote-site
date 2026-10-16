@@ -1037,7 +1037,7 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 .b-pin.is-loop .b-pin-grid{display:grid;grid-template-columns:1fr;gap:28px;align-items:center}
 @media (min-width:900px){.b-pin.is-loop .b-pin-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:40px}}
 .pin-loop{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:4px;background:var(--ink)}
-@media (max-width:390px){.pin-loop{aspect-ratio:4/5}}
+@media (max-width:430px){.pin-loop{aspect-ratio:4/5}}
 .pin-loop-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .3s ease}
 .pin-loop.is-3d .pin-loop-poster img,.pin-loop.is-2d .pin-loop-poster img{opacity:0}
 .pin-loop-host{position:absolute;inset:0;visibility:hidden}
@@ -1049,7 +1049,7 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 .pin-loop-tv,.pin-loop-phone{position:absolute;height:0;pointer-events:none}
 .pin-loop-tv{left:-6%;width:92%;top:43%}
 .pin-loop-phone{left:10%;width:19%;top:70%}
-@media (max-width:390px){.pin-loop-tv{left:-8%;width:123%;top:41%}.pin-loop-phone{left:37%;width:25%;top:59%}}
+@media (max-width:430px){.pin-loop-tv{left:5%;width:90%;top:34%}.pin-loop-phone{left:60%;width:24%;top:66%}} /* 23:02: the whole TV and phone inside the 4:5 canvas, 360-430 */
 .b-pin.is-loop .b-pin-step{display:flex;color:var(--muted);padding:14px 0;border-top:1px solid var(--line)}
 .b-pin.is-loop .b-pin-step .b-step-no{color:var(--muted)}
 .b-pin.is-loop .b-pin-step.is-on{color:var(--paper)}

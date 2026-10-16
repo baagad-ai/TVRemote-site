@@ -39,11 +39,17 @@ export const typingStep = s => s === 1 ? <><RemoteHome /><Sent /></> : s === 2 ?
 // two-finger tap = Back (the results fade back in, the TV focus slides home to tile 1 over 0.4 s) | rest to 10.
 const SWIPE_R = 1.5, TAP = 4.0, TAP_UP = 4.25, BACK = 6.5, BACK_UP = 6.75, SW_D = .8, TV_D = .25, PY = 400, MUTE = PAPER;
 const CHIPS = [[SWIPE_R, 'Swipe → ', 'Right'], [TAP, 'Tap → ', 'OK'], [BACK, '2-finger tap → ', 'Back']];
-const Pad = ({ children }) => <><StatusBar /><circle cx="37" cy="56" r="20" fill={PANEL} stroke={LINE} /><I n="close" x={37} y={56} s={.8} />
+// 23:02 fix: the pad reads clearly at 390: panel surface, a muted (#b0b9a2, >= 3:1 on ink) border, stronger dot grid, a
+// muted hint at rest, and a Back button at the pad's foot that lights lime on the Back beat (6.5 s).
+const PAD_MUTED = '#b0b9a2';
+const Pad = ({ children, backLit = 0, hint = 1 }) => <><StatusBar /><circle cx="37" cy="56" r="20" fill={PANEL} stroke={LINE} /><I n="close" x={37} y={56} s={.8} />
   <circle cx="80" cy="50" r="12" fill={PANEL} stroke={LINE} strokeWidth="1" /><I n="tv" x={80} y={51} s={.7} c={LIME} /><Tx x={100} y={54} s={12} w={600}>Living Room TV</Tx><circle cx="84" cy="69" r="2.6" fill={LIME} /><Muted x={92} y={72} s={9.5}>Connected</Muted>
-  <rect x="14" y="89" width="332" height="640" rx="26" fill={INK} stroke={LINE} />
-  <defs><pattern id="pcPadDots" x="16.3" y="91.4" width="23.4" height="25.2" patternUnits="userSpaceOnUse"><circle cx="11.7" cy="12.6" r="1.1" fill={PAPER} fillOpacity=".1" /></pattern></defs>
+  <rect x="14" y="89" width="332" height="640" rx="26" fill={PANEL} stroke={PAD_MUTED} strokeWidth="1.6" />
+  <defs><pattern id="pcPadDots" x="16.3" y="91.4" width="23.4" height="25.2" patternUnits="userSpaceOnUse"><circle cx="11.7" cy="12.6" r="1.4" fill={PAPER} fillOpacity=".24" /></pattern></defs>
   <rect x="16" y="91" width="328" height="636" rx="25" fill="url(#pcPadDots)" />
+  {hint > 0 && <g opacity={hint}><Tx x={180} y={300} s={14} w={600} a="middle" c={PAD_MUTED}>Swipe to move</Tx><Tx x={180} y={322} s={12} a="middle" c={PAD_MUTED}>Tap for OK</Tx></g>}
+  <rect x="120" y="640" width="120" height="44" rx="22" fill={backLit > 0 ? LIME : INK} fillOpacity={backLit > 0 ? backLit : 1} stroke={backLit > .5 ? LIME : PAD_MUTED} strokeWidth="1.4" />
+  <I n="back" x={150} y={662} s={.8} c={backLit > .5 ? INK : PAPER} /><Tx x={190} y={667} s={13} w={600} a="middle" c={backLit > .5 ? INK : PAPER}>Back</Tx>
   <rect x="170" y="712" width="20" height="5" rx="2.5" fill={LIME} />{children}<NavBar y={757} /></>;
 // one swipe: finger from x0 to x1 (dir +1 right / -1 left) over SW_D, eased like the TV focus
 const DOT_R = [10, 9, 8, 7, 6, 4.8, 3.7, 2.6];
@@ -52,13 +58,13 @@ function swipe(t, a, x0, x1) {
   const k = seg(t, a, SW_D), dir = Math.sign(x1 - x0), hx = lerp(x0, x1, k), sp = Math.min(14, Math.abs(hx - x0) / 8);
   return <g key={'sw' + a} opacity={o}>
     {DOT_R.map((r, i) => <circle key={i} cx={hx - dir * (i + 1) * sp} cy={PY} r={r} fill={LIME} />).reverse()}
-    <circle cx={hx} cy={PY} r="19" fill="none" stroke={LIME} strokeWidth="2" />
+    <circle cx={hx} cy={PY} r="19" fill="none" stroke={LIME} strokeWidth="2.4" /><circle cx={hx} cy={PY} r="13" fill={PAPER} fillOpacity=".92" /><path d={`M${x0} ${PY}H${hx}`} stroke={LIME} strokeOpacity=".35" strokeWidth="10" strokeLinecap="round" />
     {[15, 26, 37].map((d, i) => <path key={d} d={`M${hx + dir * d} ${PY - 8.5}l${dir * 6} 8.5l${-dir * 6} 8.5`} fill="none" stroke={i < 2 ? MUTE : LIME} strokeOpacity={i < 2 ? .5 : 1} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />)}
   </g>;
 }
 function tap(t) {
   if (t < TAP) return null; const o = t < TAP_UP ? Math.min(1, (t - TAP) / .06) : 1 - seg(t, TAP_UP, .2, sine); if (o <= 0) return null;
-  return <g opacity={o}><circle cx="180" cy={PY} r="28" fill="none" stroke={MUTE} strokeOpacity=".5" strokeWidth="1.6" /><circle cx="180" cy={PY} r="17" fill="none" stroke={LIME} strokeWidth="2.2" />
+  const rp = seg(t, TAP, .6); return <g opacity={o}><circle cx="180" cy={PY} r={20 + 52 * rp} fill="none" stroke={LIME} strokeOpacity={1 - rp} strokeWidth="3" /><circle cx="180" cy={PY} r="28" fill="none" stroke={MUTE} strokeOpacity=".5" strokeWidth="1.6" /><circle cx="180" cy={PY} r="17" fill="none" stroke={LIME} strokeWidth="2.2" /><circle cx="180" cy={PY} r="12" fill={PAPER} fillOpacity=".92" />
     {[0, 1, 2].map(i => <circle key={i} cx={163 + i * 17} cy={PY + 52} r="5" fill={i ? LINE : LIME} />)}</g>;
 }
 // Back = a two-finger tap: two lime finger rings side by side, each in an outline halo, plus the finger-count dots (2 of 3 lit).
@@ -72,7 +78,7 @@ function trackpad(t) {
   const fx = seg(t, SWIPE_R + SW_D + .067, TV_D) - seg(t, BACK + .067, .4);
   const chips = CHIPS.map(([a, l, b], i) => { const next = CHIPS[i + 1]?.[0] ?? 99, k = seg(t, a, .25, sine) * (1 - seg(t, Math.min(a + 1.6, next - .05), .4, sine)); if (k <= 0) return null;
     return <g key={b} opacity={k} transform={`translate(0 ${(1 - k) * -6})`}><rect x={b === 'Back' ? 100 : 120} y="100" width={b === 'Back' ? 160 : 120} height="30" rx="15" fill={LIME} fillOpacity=".14" stroke={LIME} strokeWidth="1.4" /><Tx x={180} y={119.5} s={11.5} w={600} a="middle">{l}<tspan fill={LIME}>{b}</tspan></Tx></g>; });
-  return { tv: <TV results={1} fx={fx} fy={0} pulse={bump(t, TAP + .033, .25, .1, .35)} />, phone: <Pad>{chips}{swipe(t, SWIPE_R, 110, 250)}{tap(t)}{twoTap(t)}</Pad> };
+  return { tv: <TV results={1} fx={fx} fy={0} pulse={bump(t, TAP + .033, .25, .1, .35)} />, phone: <Pad backLit={bump(t, BACK, .1, .3, .45)} hint={1 - seg(t, SWIPE_R - .4, .3) + seg(t, 8.6, .4)}>{chips}{swipe(t, SWIPE_R, 110, 250)}{tap(t)}{twoTap(t)}</Pad> };
 }
 // Gallery still: mid swipe right (dot trail, finger ring, chevrons + "Swipe → Right" chip).
 export const TrackpadStill = () => trackpad(2.05).phone;
