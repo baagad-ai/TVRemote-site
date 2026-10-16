@@ -47,10 +47,11 @@ export function Rooms() {
 // on the left; three step cards in the repo's ScrollStack (native scroll) settling at 0 / 70 / 140 px with scale .92 /
 // .96 / 1, released before the gallery. Each card: tag, h3 40px, lede, and Design's code-drawn phone (240px) on the right:
 // step 1 the live invite loop (<PhoneLoop name="invite" />; Design's still under reduced motion), steps 2-3 <GuestCard>.
-// Copy is the board's, minus the code-expiry sentence (guest invite codes don't expire). Generic names only (Design).
+// Copy is the board's, with PM's final guest wording (16 Oct 20:48): the invite code works once, within 2 minutes;
+// guest access never expires. Generic names only (Design).
 // Reduced motion, narrow screens and keyboard focus inside: a plain list (ScrollStack restores the document flow).
 const GUESTS = [
-  ['Invite a guest', 'Guests scan the QR with their phone camera, or type the code.'],
+  ['Invite a guest', 'Guests scan the QR with their phone camera, or type the code. The invite code works once, within 2 minutes. Guest access never expires.'],
   ['Their phone, full remote', 'Arrows, media, volume, YouTube search and links, on their own Android phone.'],
   ['Your list', 'Remove guests any time, or limit one to Media and volume only.']
 ];

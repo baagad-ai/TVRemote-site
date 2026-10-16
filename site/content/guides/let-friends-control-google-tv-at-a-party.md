@@ -14,9 +14,7 @@ Open the TV's Guest access list in The Remote and tap Invite. Your friend enters
 
 They can scan the QR code with their phone's camera or type the code.
 
-Invites work on your home Wi-Fi only, so your friend needs to be on the same Wi-Fi as the TV. The invite code is only used for joining.
-
-A TV can have up to 10 guests.
+Invites work on your home Wi-Fi only, so your friend needs to be on the same Wi-Fi as the TV. The invite code works once, within 2 minutes. Guest access never expires.
 
 ## What your friends can do
 
@@ -32,7 +30,7 @@ If a friend only needs to turn it up or pause it, you can limit that guest to **
 
 Open the TV's Guest access list and tap Remove next to anyone you want off it. You can do this any time. Removal is done by The Remote, not in the TV's own settings.
 
-You don't have to clean up the list. Guest access doesn't expire, but The Remote removes a guest by itself only after they've been off your home Wi-Fi and haven't connected for 7 days in a row. Every Primary remote can invite and remove guests, so anyone else at home with their own Primary remote can tidy the list too.
+You don't have to clean up the list. Guest access never expires, but The Remote removes a guest by itself only after they've been off your home Wi-Fi and haven't connected for 7 days in a row. Every Primary remote can invite and remove guests, so anyone else at home with their own Primary remote can tidy the list too.
 
 ## No server, no account
 
