@@ -1182,7 +1182,7 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 .pin-loop{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:4px;background:var(--ink)}
 @media (max-width:430px){.pin-loop{aspect-ratio:4/5}}
 .pin-loop-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .3s ease}
-.pin-loop.is-3d .pin-loop-poster img,.pin-loop.is-2d .pin-loop-poster img{opacity:0}
+.pin-loop.is-3d .pin-loop-poster img,.pin-loop.is-2d .pin-loop-poster img{opacity:0;visibility:hidden;transition:none} /* PM 23:31: gone from the glb's first frame */
 .pin-loop-host{position:absolute;inset:0;visibility:hidden}
 .pin-loop.is-3d .pin-loop-host{visibility:visible}
 .pin-loop-host canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -1218,8 +1218,13 @@ body[data-route=landing] main .b-pin.is-loop h2{font-size:clamp(34px,4.2vw,48px)
 @keyframes bGrain{0%{transform:translate(0,0)}17%{transform:translate(-23px,14px)}33%{transform:translate(17px,-31px)}50%{transform:translate(-37px,-9px)}67%{transform:translate(29px,25px)}83%{transform:translate(-11px,38px)}100%{transform:translate(0,0)}}
 html.is-save-data .b-grain::after{animation:none}
 .b-closing{position:relative}
-.b-closing .b-grain.is-band{opacity:0!important;mix-blend-mode:multiply}
-.b-closing:not(.is-anim) .b-grain.is-band{opacity:.35!important} /* grain only as the reduced-motion / Save-Data fallback; the band-v2 video carries the motion */
+.b-closing .b-grain.is-band{opacity:.3!important;mix-blend-mode:multiply}
+.b-closing:not(.is-anim) .b-grain.is-band{opacity:.35!important}
+/* PM 23:31: the band grain steps at EVERY width (reduced motion / Save-Data: still). */
+@media (prefers-reduced-motion:no-preference){.b-closing .b-grain.is-band::after{opacity:1;animation:bGrain .75s steps(6) infinite}}
+html.is-save-data .b-closing .b-grain.is-band::after{animation:none}
+/* PM 23:31: loops pause off-screen. */
+.is-off .b-pulse,.is-off .b-chip,.is-off .b-grain::after{animation-play-state:paused!important} /* grain only as the reduced-motion / Save-Data fallback; the band-v2 video carries the motion */
 .b-closing .b-grain.is-band::after{filter:invert(1)}
 .b-closing-grid{position:relative}
 .b-closing-still{position:relative}

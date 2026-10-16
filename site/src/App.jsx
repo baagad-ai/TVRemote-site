@@ -73,5 +73,15 @@ function useEntryReveal() {
     return () => io.disconnect();
   }, [ready, motion]);
 }
-function Landing({ config }) { useEntryReveal(); return <><Header /><main id="main" tabIndex={-1}><Hero /><ProofMarquee /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><DownloadFinale /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
+// PM 23:31: Will it work? and every grain parent get .is-off while off-screen, so their CSS loops pause (like the marquee).
+function useOffscreenPause() {
+  const { ready } = useEnvironment();
+  useEffect(() => {
+    if (!ready) return;
+    const io = new IntersectionObserver(es => { for (const e of es) e.target.classList.toggle('is-off', !e.isIntersecting); });
+    const nodes = new Set([...document.querySelectorAll('.b-split')]); document.querySelectorAll('.b-grain').forEach(g => g.parentElement && nodes.add(g.parentElement));
+    nodes.forEach(n => io.observe(n)); return () => io.disconnect();
+  }, [ready]);
+}
+function Landing({ config }) { useEntryReveal(); useOffscreenPause(); return <><Header /><main id="main" tabIndex={-1}><Hero /><ProofMarquee /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><DownloadFinale /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
 export default function App({ route = 'landing', config }) { return <EnvironmentProvider><SmoothScroll /><DownloadProvider config={config}><a className="skip-link" href="#main">Skip to content</a>{route === 'not-found' ? <NotFound config={config} /> : route === 'privacy' ? <Privacy /> : route.startsWith('guides') ? <GuidesPage slug={route.split('/')[1]} /> : <Landing config={config} />}</DownloadProvider></EnvironmentProvider>; }

@@ -33,7 +33,7 @@ export function Rooms() {
   const wrap = useRef(null), sw = useRef(null), inView = useInView(wrap, { threshold: .4 });
   const pick = id => { if (id === room) return; setRoom(id); setSwap(s => ({ from: s.to, to: id, n: s.n + 1, on: false })); };
   useEffect(() => { if (swap.n && !swap.on) { const t = requestAnimationFrame(() => setSwap(s => ({ ...s, on: true }))); return () => cancelAnimationFrame(t); } }, [swap]);
-  const playing = motion && inView;
+  const playing = motion && inView && !navigator.connection?.saveData;
   return <section ref={wrap} className="b-rooms" id="inside" aria-labelledby="rooms-title">
     <div className="b-rooms-media" onPointerDown={e => { sw.current = [e.clientX, e.clientY]; }} onPointerUp={e => { const [x, y] = sw.current || [], dx = e.clientX - x; sw.current = null; if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - y)) { const i = ROOM_LIST.findIndex(([k]) => k === room); pick(ROOM_LIST[(i + (dx < 0 ? 1 : ROOM_LIST.length - 1)) % ROOM_LIST.length][0]); } }}>
       {motion ? <div inert className="b-rooms-pixwrap"><PixelTransition fallback={<RoomMedia id={room} play={false} />} key={swap.n} firstContent={<RoomMedia id={swap.from} play={playing && !swap.on && swap.from === room} />} secondContent={<RoomMedia id={swap.to} play={playing && swap.on} />} active={swap.on} trigger="click" gridSize={10} pixelColor="#0b0e0d" animationStepDuration={.5} aspectRatio="auto" className="b-rooms-pixels" /></div>

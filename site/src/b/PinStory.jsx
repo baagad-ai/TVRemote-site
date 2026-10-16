@@ -117,8 +117,8 @@ export const loopStepAt = t => (t < L_SEND ? 0 : t < L_OK ? 1 : t < L_BACK ? 2 :
 function PinLoop({ onStep, pinIdx }) {
   const tExt = pinIdx == null ? undefined : 0;
   const { gpu } = useEnvironment(), box = useRef(null), host = useRef(null), tvEl = useRef(null), phEl = useRef(null), api = useRef(null), cv = useRef(null), sig = useRef('');
-  const inView = useInView(box, { threshold: .15 }), [mode, setMode] = useState('poster');
-  const lease = useGpuLease(gpu && inView && mode !== '2d' && Boolean(PIN.model), 'pin');
+  const near = useInView(box, { rootMargin: '100% 0px' }), [mode, setMode] = useState('poster'); // PM 23:31: the glb loads one viewport early
+  const lease = useGpuLease(gpu && near && mode !== '2d' && Boolean(PIN.model), 'pin');
   const pinRef = useRef(pinIdx); pinRef.current = pinIdx;
   const tc = useLoopClock(box, 0, tExt == null), t = tExt ?? tc, fr = loopFrame(t), tRef = useRef(0); tRef.current = t;
   useEffect(() => { if (!gpu) setMode('2d'); }, [gpu]);
