@@ -22,11 +22,16 @@ test('production refuses inactive, invalid and unverified APK identities', () =>
 
 test('Pages only invokes private metrics endpoint; preview has no production database binding', () => {
   const routes = JSON.parse(fs.readFileSync(new URL('_routes.json', import.meta.url)));
-  assert.deepEqual(routes, { version: 1, include: ['/api/metrics', '/api/download-count'], exclude: [] });
+  assert.deepEqual(routes, { version: 1, include: ['/api/metrics', '/api/download-count', '/api/events'], exclude: [] });
   const config = JSON.parse(fs.readFileSync(new URL('../wrangler.jsonc', import.meta.url)));
   assert.equal(config.d1_databases[0].binding, 'METRICS_DB');
   assert.equal(config.env.preview.vars.METRICS_ENABLED, 'false');
   assert.deepEqual(config.env.preview.d1_databases, []);
+  // Wildcard origins are a preview-only convenience; production stays an exact origin list.
+  assert.equal(config.vars.EVENTS_ALLOW_ORIGIN_WILDCARD, undefined);
+  assert.doesNotMatch(config.vars.METRICS_ALLOWED_ORIGINS, /\*/);
+  assert.equal(config.env.preview.vars.METRICS_ALLOWED_RELEASES, config.vars.METRICS_ALLOWED_RELEASES);
+  assert.doesNotMatch(JSON.stringify(config.env.preview), new RegExp(config.d1_databases[0].database_id));
 });
 
 test('self-hosted APK staging verifies exact immutable path, source bytes, SHA and Pages size limit', () => {
