@@ -1,6 +1,6 @@
 // 9 · Download finale (CONCEPT-B-GUIDE.md §9, board gen.py:250-262). Grid 1.1fr .9fr: h2 + lede left, the APK card
 // right (Star Border CTA that loops only in view, the live counter in its fixed slot, the requirement, the QR for
-// desktop visitors, install and checksum details, all from the release config as before). Under both, the board's
+// desktop visitors; PM 21:33: the checksum moved to the FAQ, 'How do I check the APK checksum?'). Under both, the board's
 // full-width 4-step row (3px top rule, 40px Outfit number), staggering in once, each with a coded SVG phone UI
 // (StepPhones.jsx) whose control presses once as the step lands. React Bits Stepper is a one-step-at-a-time wizard
 // (Back / Next footer), so the board's static 4-column row is drawn here with the same stagger. Wording and counter unchanged.
@@ -28,7 +28,6 @@ export default function DownloadFinale() {
             <div className="b-card-cta"><StarBorder as="div" className="star-cta" color="#d4fa7b" duration={6} thickness={1} radius={999} hover="none" clickPulse={false} backgroundColor="transparent" borderColor="transparent" textColor="#0b0e0d"><DownloadLink /></StarBorder></div>
             <LiveCount className="is-card" />
             {release.minSdk === 26 && <p className="b-small">Requires Android 8.0 or later on your phone.</p>}
-            <details className="b-details"><summary>Check the APK checksum</summary><p>Compare the downloaded file's SHA-256 with this release checksum.</p><code>{release.sha256}</code><p>A matching checksum confirms these file bytes; it does not replace Android's installation and signature checks.</p></details>
           </> : <><h3>Download is being prepared.</h3><p className="b-small">The verified Android APK will appear here when it is ready. No signup or email is needed. Check the <a href="#compatibility">TV requirements</a> while you wait.</p></>}
         </div>
       </div>

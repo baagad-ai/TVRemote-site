@@ -100,7 +100,7 @@ const html=read('index.html'),privacy=read('privacy/index.html');
 for(const route of routes) assert(!/data-beta-request-form|beta-enrollment|Google Play account email|Request beta access|turnstile|beta-request\.js/i.test(read(route)),route+' must not expose the retired signup flow');
 assert.match(html,/id="download"/);assert.match(html,/data-mobile-cta-bar[^>]*inert/);
 const release=approvedRelease(loadConfig());
-if(release) {assert(html.includes(`href="${release.url.replaceAll('&','&amp;')}"`));assert.match(html,/data-download-cta="hero"/);assert(html.includes(release.sha256));}
+if(release) {{const sum=faq.find(x=>x.q==='How do I check the APK checksum?');assert(sum&&sum.a.includes(release.sha256)&&sum.a.includes(`The Remote ${release.version}:`)&&sum.a.includes(`the-remote-${release.id}.apk`),'FAQ checksum entry must carry the release config sha256, version and file name');assert(!html.includes('Check the APK checksum'),'no checksum row in the download card');}assert(html.includes(`href="${release.url.replaceAll('&','&amp;')}"`));assert.match(html,/data-download-cta="hero"/);assert(html.includes(release.sha256));}
 else {assert.match(html,/Download is being prepared/);assert(!html.includes('data-download-cta='));}
 assert.match(privacy,/Cloudflare Web Analytics/);assert.match(privacy,/click/i);assert.match(privacy,/D1/);
 assert.match(read('styles.css'),/prefers-reduced-motion/);assert.match(read('styles.css'),/:focus-visible/);assert.match(read('styles.css'),/safe-area-inset-bottom/);

@@ -211,7 +211,7 @@ body[data-route=landing] .faq-list summary{display:flex;justify-content:space-be
 body[data-route=landing] .faq-list summary::-webkit-details-marker{display:none}
 body[data-route=landing] .faq-list summary::after{content:'+';color:var(--lime);font-size:17px}
 body[data-route=landing] .faq-list details[open] summary::after{content:'\2212'}
-body[data-route=landing] .faq-list p{margin:0 0 20px;color:var(--body)}
+body[data-route=landing] .faq-list p{margin:0 0 20px;color:var(--body);overflow-wrap:anywhere}
 /* Lime close band (board: margin-top 110; grid 1fr 640px, min-height 460; h2 76/11ch ink, left-aligned; still 640x460 r28). */
 .b-closing{margin-top:110px;background:var(--lime);color:var(--ink);overflow:hidden}
 .b-closing-grid{display:grid;grid-template-columns:1fr 640px;align-items:center;min-height:460px;gap:40px}
