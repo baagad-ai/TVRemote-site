@@ -1,7 +1,6 @@
 const buttons = new Set(['nav', 'hero', 'footer', 'guide', 'download']);
 // The only campaign sources sent with a click. Nothing else from the URL is read or kept.
 export const SOURCES = ['linkedin', 'x', 'instagram', 'qr', 'qr_site', 'threads'];
-const SOURCE_KEY = 'remote_source';
 
 /** The allow-listed source for this value, or null. */
 export function allowedSource(value) {
@@ -10,20 +9,10 @@ export function allowedSource(value) {
   return SOURCES.includes(source) ? source : null;
 }
 
-/** Keeps an allow-listed utm_source from the landing URL for this tab only (sessionStorage). */
-export function rememberSource(environment = globalThis) {
-  try {
-    const source = allowedSource(new URLSearchParams(environment.location?.search || '').get('utm_source'));
-    if (source) environment.sessionStorage?.setItem(SOURCE_KEY, source);
-  } catch { /* Storage can be unavailable; clicks still work without a source. */ }
-}
-
-/** The source to send with a click: this page's utm_source, else the one kept for this tab. */
+/** The source to send with a click: this page's own utm_source only. Nothing is stored on the device. */
 export function currentSource(environment = globalThis) {
-  try {
-    rememberSource(environment);
-    return allowedSource(environment.sessionStorage?.getItem(SOURCE_KEY) ?? null);
-  } catch { return null; }
+  try { return allowedSource(new URLSearchParams(environment.location?.search || '').get('utm_source')); }
+  catch { return null; }
 }
 
 export function approvedRelease(config) {

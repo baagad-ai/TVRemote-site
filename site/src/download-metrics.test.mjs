@@ -53,7 +53,6 @@ test('privacy signals suppress click telemetry without affecting the download', 
   assert.equal(calls, 0);
 });
 
-function memoryStorage() { const map = new Map(); return { getItem: k => map.get(k) ?? null, setItem: (k, v) => map.set(k, String(v)) }; }
 test('client source allow-list: linkedin, x, instagram, qr, qr_site, threads in any case; junk and missing send nothing', () => {
   assert.equal(allowedSource('linkedin'), 'linkedin');
   assert.equal(allowedSource('X'), 'x');
@@ -68,31 +67,25 @@ test('client source allow-list: linkedin, x, instagram, qr, qr_site, threads in 
   assert.equal(allowedSource(' THREADS '), 'threads');
   for (const value of ['facebook', '', null, undefined, 42, 'linkedin.com', 'x'.repeat(40), 'qrcode', 'qr-code', 'q r', 'qr-site', 'qrsite', 'qr_site2', 'thread', 'threads.net']) assert.equal(allowedSource(value), null);
 });
-test('utm_source is kept for the tab and only an allow-listed value is sent', () => {
-  const sessionStorage = memoryStorage();
+test('only this page\'s allow-listed utm_source is sent, and nothing is stored', () => {
   const sent = [];
-  const env = (search) => ({ location: { search }, sessionStorage, navigator: { platform: 'Win32' }, fetch: (url, init) => { sent.push(JSON.parse(init.body)); return Promise.resolve(); } });
+  const touched = [];
+  const spyStorage = { getItem: () => { touched.push('get'); return null; }, setItem: () => touched.push('set') };
+  const env = (search) => ({ location: { search }, sessionStorage: spyStorage, localStorage: spyStorage, navigator: { platform: 'Win32' }, fetch: (url, init) => { sent.push(JSON.parse(init.body)); return Promise.resolve(); } });
   recordDownloadClick(release, 'hero', env('?utm_source=junk&utm_medium=social'));
   assert.equal('source' in sent.at(-1), false);
   recordDownloadClick(release, 'hero', env('?utm_source=LinkedIn&utm_medium=social&utm_campaign=launch'));
   assert.equal(sent.at(-1).source, 'linkedin');
-  // A later page in the same tab without the query still sends the kept source, and nothing else from the URL.
-  recordDownloadClick(release, 'guide', env(''));
   assert.deepEqual(Object.keys(sent.at(-1)).sort(), ['button', 'event', 'platform', 'release', 'source']);
-  assert.equal(sent.at(-1).source, 'linkedin');
-  assert.equal(currentSource({ location: { search: '' }, sessionStorage: memoryStorage() }), null);
-  // A QR code landing (utm_source=QR) is kept and sent as qr, like the social sources.
-  const qrSent = [];
-  const qrEnv = (search, sessionStorage) => ({ location: { search }, sessionStorage, navigator: { platform: 'Linux armv8l', userAgent: 'Android 15' }, fetch: (url, init) => { qrSent.push(JSON.parse(init.body)); return Promise.resolve(); } });
-  const qrStorage = memoryStorage();
-  recordDownloadClick(release, 'hero', qrEnv('?utm_source=QR&utm_medium=print', qrStorage));
-  recordDownloadClick(release, 'download', qrEnv('', qrStorage));
-  assert.deepEqual(qrSent.map(event => event.source), ['qr', 'qr']);
-  // The website's own QR tile (utm_source=qr_site) stays separate from the film's qr.
-  const siteStorage = memoryStorage();
-  recordDownloadClick(release, 'hero', qrEnv('?utm_source=qr_site', siteStorage));
-  assert.equal(qrSent.at(-1).source, 'qr_site');
-  // No storage or location at all: the click still goes out without a source.
+  // A later page without the query sends no source: nothing was kept on the device.
+  recordDownloadClick(release, 'guide', env(''));
+  assert.equal('source' in sent.at(-1), false);
+  recordDownloadClick(release, 'hero', env('?utm_source=QR&utm_medium=print'));
+  assert.equal(sent.at(-1).source, 'qr');
+  recordDownloadClick(release, 'hero', env('?utm_source=qr_site'));
+  assert.equal(sent.at(-1).source, 'qr_site');
+  assert.deepEqual(touched, []);
+  // No location at all: the click still goes out without a source.
   const bare = [];
   recordDownloadClick(release, 'hero', { navigator: {}, fetch: (u, init) => { bare.push(JSON.parse(init.body)); return Promise.resolve(); } });
   assert.equal('source' in bare[0], false);
