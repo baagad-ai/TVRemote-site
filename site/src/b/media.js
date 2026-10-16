@@ -8,9 +8,11 @@ export const PROD_NAMES = {
   heroWebm: 'hero-loop.webm', heroMp4: 'hero-loop.mp4',                // seamless 8-10 s loop, 1600x900, <= 500 KB each (390: poster only)
   hero1600: 'hero-1600.webp', hero960: 'hero-960.webp', hero640: 'hero-640.webp', hero4x5: 'hero-390-4x5.webp', // 1600 <= 120 KB (LCP)
   pinModel: 'pin-tv-phone.glb', pinContract: 'pin-contract.json',      // <= 300 KB; PhoneScreen + TVScreen; cam_search/cam_results/cam_link
-  // Pin stills (reduced motion / no WebGL / 390): Build's 16:10 renders on desktop, 4:5 phone-over-TV below 900px.
-  pinSearch: 'pin-step-1-16x10.webp', pinResults: 'pin-step-2-16x10.webp', pinLink: 'pin-step-3-16x10.webp',
-  pinSearch4x5: 'pin-step-1.webp', pinResults4x5: 'pin-step-2.webp', pinLink4x5: 'pin-step-3.webp',
+  // Pin stills, re-rendered by Build from our 3D with Design's code-drawn screens (due 20:35-22:00 IST 16 Oct, into
+  // /workspace/site-fix-1016/loops-incoming/; copy here). The earlier pin-step-*.webp had real app captures on the phone
+  // and were removed (PM 16 Oct). Until these land, PinStory draws an interim still in code (SVG TV + phoneScreenSvg).
+  pinFallback: 'pin-fallback-step-1-1440.webp',                        // desktop: step 1 under the canvas, 560x620 scene box (2x)
+  pinStill1: 'pin-still-1-390.webp', pinStill2: 'pin-still-2-390.webp', pinStill3: 'pin-still-3-390.webp', // 390 / reduced motion, phone over TV
   livingWebm: 'rooms-living.webm', livingMp4: 'rooms-living.mp4', living1440: 'rooms-living-1440.webp', living4x5: 'rooms-living-4x5.webp',
   bedroomWebm: 'rooms-bedroom.webm', bedroomMp4: 'rooms-bedroom.mp4', bedroom1440: 'rooms-bedroom-1440.webp', bedroom4x5: 'rooms-bedroom-4x5.webp',
   kitchenWebm: 'rooms-kitchen.webm', kitchenMp4: 'rooms-kitchen.mp4', kitchen1440: 'rooms-kitchen-1440.webp', kitchen4x5: 'rooms-kitchen-4x5.webp' // Build, due ~21:15 IST 16 Oct
@@ -18,8 +20,9 @@ export const PROD_NAMES = {
 // Build's current 3d-prod renders are off-board and being re-rendered (16 Oct). A 3d-prod file is used ONLY when its
 // slot key is listed here AND the file exists. Add a key (e.g. hero1600: true) once Design has checked that file
 // against the approved board. Empty = every slot uses Design's approved assets / placeholders.
-// Baagad 16 Oct 19:32 IST: the pin is our live 3D scene (Build's pin-tv-phone.glb). Other slots stay off.
-export const PROD_WHITELIST = { pinModel: true };
+// Baagad 16 Oct 19:32 IST: the pin is our live 3D scene (Build's pin-tv-phone.glb). PM 19:44: the pin fallback / 390
+// still slots point at Build's re-renders (code-drawn screens) and switch on when the files land. Other slots stay off.
+export const PROD_WHITELIST = { pinModel: true, pinFallback: true, pinStill1: true, pinStill2: true, pinStill3: true };
 export const prod = key => PROD_WHITELIST[key] === true && present[PROD_NAMES[key]] ? `assets/3d-prod/${PROD_NAMES[key]}` : null;
 // Design's approved board assets (assets/board/, exported from concepts/img and concepts/render) until a whitelisted
 // Build file replaces a slot. Rooms: the board's one rooms render serves every chip until Build's matching room
@@ -30,7 +33,7 @@ export const HERO = {
   crop: prod('hero4x5') || 'assets/board/hero-390.webp',
   webm: prod('heroWebm'), mp4: prod('heroMp4')
 };
-export const PIN = { model: prod('pinModel'), contract: prod('pinContract') };
+export const PIN = { model: prod('pinModel'), contract: prod('pinContract'), fallback: prod('pinFallback'), stills: [prod('pinStill1'), prod('pinStill2'), prod('pinStill3')] };
 const BOARD_ROOMS = 'assets/board/remote-rooms-1200.webp';
 const room = k => ({ poster: prod(`${k}1440`) || BOARD_ROOMS, crop: prod(`${k}4x5`) || BOARD_ROOMS, webm: prod(`${k}Webm`), mp4: prod(`${k}Mp4`), board: !prod(`${k}1440`) });
 export const ROOMS = { living: room('living'), bedroom: room('bedroom'), kitchen: room('kitchen') };

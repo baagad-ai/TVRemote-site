@@ -14,14 +14,15 @@ import SplitText from '../components/SplitText';
 import { PIN } from './media';
 import { useEnvironment } from '../environment';
 import { useGpuLease, lowEnd } from './lease';
-import { PhoneLoop, phoneScreenUrl } from './slots';
+import { PhoneLoop, phoneScreenSvg } from './slots';
+import DrawnTV from './DrawnTV';
 
 gsap.registerPlugin(ScrollTrigger);
 const SENT = 'YouTube search action sent. Check the TV.';
 export const STEPS = [
-  { id: 'search', title: 'Type a YouTube search on your phone keyboard.', tv: 'assets/board/tv-home-1440.webp', tvAlt: 'The drawn TV with YouTube open and an empty search box.', phoneAlt: 'The Remote on a phone: the YouTube search sheet for Living Room TV, with lofi hip being typed on the phone keyboard.' },
-  { id: 'results', title: `Send it. \u201c${SENT}\u201d`, tv: 'assets/board/tv-results-f0-1440.webp', tvAlt: 'The drawn TV showing YouTube results for lofi beats, with the first result highlighted.', phoneAlt: `The Remote's remote screen for Living Room TV with the line \u201c${SENT}\u201d`, chip: SENT },
-  { id: 'link', title: 'Share a YouTube link. Review it, pick the TV, open it.', tv: 'assets/board/tv-playing-1440.webp', tvAlt: 'The drawn TV playing the shared YouTube video.', phoneAlt: "The Remote's share sheet: a YouTube link, Living Room TV selected, and an Open on Living room button." }
+  { id: 'search', title: 'Type a YouTube search on your phone keyboard.', tv: 'assets/board/tv-home-1440.webp', tvAlt: 'The drawn TV with YouTube open and an empty search box.', drawn: 'home', phoneAlt: 'The Remote on a phone: the YouTube search sheet for Living Room TV, with lofi hip being typed on the phone keyboard.' },
+  { id: 'results', title: `Send it. \u201c${SENT}\u201d`, tv: 'assets/board/tv-results-f0-1440.webp', tvAlt: 'The drawn TV showing YouTube results for lofi beats, with the first result highlighted.', drawn: 'results', phoneAlt: `The Remote's remote screen for Living Room TV with the line \u201c${SENT}\u201d`, chip: SENT },
+  { id: 'link', title: 'Share a YouTube link. Review it, pick the TV, open it.', tv: 'assets/board/tv-playing-1440.webp', tvAlt: 'The drawn TV playing the shared YouTube video.', drawn: 'playing', phoneAlt: "The Remote's share sheet: a YouTube link, Living Room TV selected, and an Open on Living room button." }
 ];
 // Held plateaus (step index while holding) and eased moves between them.
 const HOLD = [[0, .2], [.4, .6], [.8, 1]]; // snap points 0 / .5 / 1 sit inside the holds
@@ -44,15 +45,21 @@ function Scene({ v, idx, eager = false, sceneRef }) {
   const cam = { s: lerp(a.s, b.s, t), x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t) };
   const op = k => (k === idx ? 1 : 0);
   return <div ref={sceneRef} className="pin-scene" style={{ '--cam-s': cam.s.toFixed(4), '--cam-x': `${cam.x.toFixed(2)}px`, '--cam-y': `${cam.y.toFixed(2)}px` }}>
-    <div className="pin-tv">{STEPS.map((s, k) => <img key={s.id} src={s.tv} alt="" width="1440" height="810" loading={eager ? 'eager' : 'lazy'} decoding="async" style={{ opacity: k === 0 ? 1 : op(k) }} />)}<span className="b-tag pin-tag">Illustrated TV · results open after Send</span></div>
-    <div className="pin-phone">{STEPS.map((s, k) => <div key={s.id} className="pin-phone-layer" style={{ opacity: k === 0 ? 1 : op(k) }}><PhoneLoop name="typing" step={k} playing={false} /></div>)}</div>
+    {/* Fallback under the canvas (no WebGL, before the pin holds the context): Build's step-1 still when it lands,
+        else a code-drawn TV (SVG, lime glow) + the phone with its phoneScreenSvg screen, following the steps. */}
+    {PIN.fallback && <img className="pin-fallback" src={PIN.fallback} alt="" width="1120" height="1240" decoding="async" />}
+    <div className={`pin-tv${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-tv-layer" style={{ opacity: k === 0 ? 1 : op(k) }}><DrawnTV state={s.drawn} focus={0} idPrefix={`pin${k}`} /></div>)}<span className="b-tag pin-tag">Illustrated TV · results open after Send</span></div>
+    <div className={`pin-phone${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-phone-layer" style={{ opacity: k === 0 ? 1 : op(k) }}><PhoneLoop name="typing" step={k} playing={false} /></div>)}</div>
     <p className="pin-bubble" style={{ opacity: idx === 1 ? 1 : 0 }}>{SENT}</p>
   </div>;
 }
+// 390 / reduced-motion stills: Build's re-render per step when it lands (PIN.stills), else a code-drawn interim (the
+// drawn TV crop at the right, the phone with phoneScreenSvg('typing', step) overlapping at the left). No app captures.
 export function PinStill({ index }) {
-  const s = STEPS[index];
+  const s = STEPS[index], built = PIN.stills[index];
+  if (built) return <figure className="pin-still is-built"><img src={built} alt={`${s.tvAlt} ${s.phoneAlt}`} width="780" height="975" loading="lazy" decoding="async" /></figure>;
   return <figure className="pin-still">
-    <div className="pin-still-tv"><img src={s.tv} alt={s.tvAlt} width="1440" height="810" loading="lazy" decoding="async" /></div>
+    <div className="pin-still-tv" role="img" aria-label={s.tvAlt}><DrawnTV state={s.drawn} focus={0} idPrefix={`still${index}`} /></div>
     <div className="pin-still-phone" role="img" aria-label={s.phoneAlt}><PhoneLoop name="typing" step={index} /></div>
   </figure>;
 }
@@ -73,12 +80,12 @@ export default function PinStory() {
   useEffect(() => {
     if (!lease) return;
     const ctrl = new AbortController(); let api = null;
-    import('./pin-scene.js').then(({ createPinScene }) => createPinScene(host.current, { modelUrl: PIN.model, tvTextures: STEPS.map(s => s.tv), phoneTextures: STEPS.map((_, i) => phoneScreenUrl('typing', i)), signal: ctrl.signal }))
+    import('./pin-scene.js').then(({ createPinScene }) => createPinScene(host.current, { modelUrl: PIN.model, tvTextures: STEPS.map(s => s.tv), phoneTextures: STEPS.map((_, i) => phoneScreenSvg('typing', i)), signal: ctrl.signal }))
       .then(a => { api = a; live.current = a; setIs3d(true); push(vRef.current); }).catch(() => setIs3d(false));
     return () => { ctrl.abort(); api?.dispose(); live.current = null; setIs3d(false); };
   }, [lease]);
   const push = value => { const node = sceneRef.current, api = live.current; if (!node || !api) return; const tv = node.querySelector('.pin-tv').getBoundingClientRect(), ph = node.querySelector('.pin-phone').getBoundingClientRect(), hr = host.current.getBoundingClientRect(), g = host.current.firstChild.style;
-    g.left = `${tv.left - hr.left}px`; g.top = `${tv.top - hr.top}px`; g.width = `${tv.width}px`; g.height = `${tv.height}px`; api.update(value, idxRef.current, { left: tv.left + 10, top: tv.top + 10, width: tv.width - 20, height: tv.height - 20 }, { left: ph.left + 8, top: ph.top + 8, width: ph.width - 16, height: ph.height - 16 }); };
+    g.left = `${tv.left - hr.left}px`; g.top = `${tv.top - hr.top}px`; g.width = `${tv.width}px`; g.height = `${tv.height}px`; api.update(value, idxRef.current, { left: tv.left, top: tv.top, width: tv.width, height: tv.height }, { left: ph.left + 8, top: ph.top + 8, width: ph.width - 16, height: ph.height - 16 }); };
   useEffect(() => { vRef.current = v; idxRef.current = idx; requestAnimationFrame(() => push(v)); }, [v, idx, is3d]);
   useEffect(() => {
     if (!ready) return;

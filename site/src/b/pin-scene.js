@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { rasterizeScreen } from './screen-texture.js';
 
 const VERT = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
 const FRAG = 'uniform sampler2D mapA; uniform sampler2D mapB; uniform float mixv; varying vec2 vUv; void main(){ gl_FragColor = mix(texture2D(mapA, vUv), texture2D(mapB, vUv), mixv);\n#include <colorspace_fragment>\n}';
@@ -21,26 +22,46 @@ export async function createPinScene(host, { modelUrl, tvTextures, phoneTextures
   await MeshoptDecoder.ready;
   const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parseAsync(buffer, '');
   const root = gltf.scene;
-  const tvScreen = root.getObjectByName('TVScreen'), phoneScreen = root.getObjectByName('PhoneScreen'), phone = root.getObjectByName('PinPhone'), tv = root.getObjectByName('PinTV');
-  if (!tvScreen || !phoneScreen || !phone || !tv) throw Error('Scene contract mismatch');
-  for (const name of ['BiasStrip']) root.getObjectByName(name)?.removeFromParent();
+  // Build's 19:30 export: PhoneScreen / PinPhoneBody / PinPhoneGlass are separate root nodes and the TV body is part of
+  // the PinConsole mesh. Older exports nest them under PinPhone / PinTV (PinConsoleTV). Both are accepted.
+  const tvScreen = root.getObjectByName('TVScreen'), phoneScreen = root.getObjectByName('PhoneScreen');
+  if (!tvScreen || !phoneScreen) throw Error('Scene contract mismatch');
+  root.getObjectByName('BiasStrip')?.removeFromParent();
+  let phone = root.getObjectByName('PinPhone');
+  if (!phone) { phone = new THREE.Group(); phone.name = 'PinPhone'; root.add(phone); root.updateMatrixWorld(true); for (const n of ['PhoneScreen', 'PinPhoneBody', 'PinPhoneGlass', 'PinPhoneChassis', 'PinPhonePower', 'PinPhoneVolume']) { const o = root.getObjectByName(n); if (o) phone.attach(o); } }
+  const tv = root.getObjectByName('PinTV');
   for (const child of [...(root.getObjectByName('PinConsoleTV')?.children || [])]) if (child !== tv) child.visible = false;
   root.updateMatrixWorld(true);
   const tvBox = new THREE.Box3().setFromObject(tvScreen), tvSize = tvBox.getSize(new THREE.Vector3()), tvCenter = tvBox.getCenter(new THREE.Vector3());
-  // Phone: upright, facing the camera with a slight turn (board: phone held in front of the TV, left of centre).
-  const baseScale = phone.scale.x; phone.quaternion.setFromEuler(new THREE.Euler(-.05, .16, .015));
+  // Board: the flat TV only, no cabinet. When the TV is merged into the console mesh, clip everything below the TV.
+  const clip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -(tvBox.min.y - tvSize.y * .035))];
+  const consoleMesh = root.getObjectByName('PinConsole');
+  if (consoleMesh) consoleMesh.traverse(n => { if (n.isMesh) { n.material = n.material.clone(); n.material.clippingPlanes = clip; } });
+  // The TV's outer box (screen + bezel): the visible TV body's vertices above the clip plane, near the screen plane.
+  // The camera maps THIS box onto the board's TV box (720px incl. the bezel), so the 3D TV lands on it exactly.
+  const body = tvBox.clone(), v3 = new THREE.Vector3(), y0 = tvBox.min.y - tvSize.y * .035;
+  (consoleMesh || root.getObjectByName('PinTV'))?.traverse(n => { if (!n.isMesh) return; const pos = n.geometry.attributes.position; for (let i = 0; i < pos.count; i++) { v3.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); if (v3.y >= y0 && Math.abs(v3.z - tvCenter.z) < tvSize.x * .08) body.expandByPoint(v3); } });
+  const bodySize = body.getSize(new THREE.Vector3()), bodyCenter = body.getCenter(new THREE.Vector3());
+  // PM 16 Oct: the phone body / bezel is the board's near-black (#050706, the board's .frame), set in code, not in the GLB.
+  const BEZEL = new THREE.MeshPhysicalMaterial({ color: new THREE.Color('#050706'), roughness: .38, metalness: 0, clearcoat: .35, clearcoatRoughness: .3 });
+  phone.traverse(n => { if (n.isMesh && n !== phoneScreen && !/glass/i.test(n.name)) { n.material = BEZEL; } });
+  // Phone: Build's baked orientation (upright, facing the camera with a slight turn), as on the board.
+  const baseScale = phone.scale.x;
   root.updateMatrixWorld(true);
   const pBox = new THREE.Box3().setFromObject(phoneScreen), phoneW = pBox.getSize(new THREE.Vector3()).x;
 
-  const loader = new THREE.TextureLoader(), disposeList = [];
-  const load = url => new Promise((res, rej) => loader.load(url, t => { t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 4; disposeList.push(t); res(t); }, undefined, rej));
+  const loader = new THREE.TextureLoader(), disposeList = [BEZEL];
+  const prep = t => { t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 4; disposeList.push(t); return t; };
+  // A phone screen given as an SVG string (phoneScreenSvg) is rasterized with Work Sans embedded (screen-texture.js).
+  const load = src => src.startsWith('<svg') ? rasterizeScreen(src).then(c => prep(new THREE.CanvasTexture(c)))
+    : new Promise((res, rej) => loader.load(src, t => res(prep(t)), undefined, rej));
   const tvMaps = await Promise.all(tvTextures.map(load)), phoneMaps = await Promise.all(phoneTextures.map(load));
   if (signal?.aborted) { disposeList.forEach(x => x.dispose()); throw Error('aborted'); }
 
   const canvas = document.createElement('canvas'); canvas.className = 'pin-canvas';
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1;
+  renderer.localClippingEnabled = true; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1;
   const scene = new THREE.Scene(), pmrem = new THREE.PMREMGenerator(renderer), room = new RoomEnvironment();
   const env = pmrem.fromScene(room, .04); scene.environment = env.texture; scene.environmentIntensity = .45; room.dispose();
   const key = new THREE.DirectionalLight(0xeeeee6, 1.2); key.position.set(-3, 5, 6); scene.add(key);
@@ -58,10 +79,10 @@ export async function createPinScene(host, { modelUrl, tvTextures, phoneTextures
     frame = 0; if (disposed || !state) return;
     const { v, tvRect, phoneRect } = state, hr = host.getBoundingClientRect();
     // Solve a frontal camera: TV screen width -> pixels per unit at the TV plane; centre -> camera x/y.
-    const s = tvRect.width / tvSize.x, half = Math.tan(THREE.MathUtils.degToRad(FOV / 2)), d = H / (2 * s * half);
+    const s = tvRect.width / bodySize.x, half = Math.tan(THREE.MathUtils.degToRad(FOV / 2)), d = H / (2 * s * half);
     const tx = tvRect.left + tvRect.width / 2 - hr.left, ty = tvRect.top + tvRect.height / 2 - hr.top;
-    const cx = tvCenter.x - (tx - W / 2) / s, cy = tvCenter.y + (ty - H / 2) / s;
-    camera.aspect = W / H; camera.position.set(cx, cy, tvCenter.z + d); camera.quaternion.identity(); camera.updateProjectionMatrix();
+    const cx = bodyCenter.x - (tx - W / 2) / s, cy = bodyCenter.y + (ty - H / 2) / s;
+    camera.aspect = W / H; camera.position.set(cx, cy, bodyCenter.z + d); camera.quaternion.identity(); camera.updateProjectionMatrix();
     // Phone at PHONE_Z in front of the TV: scale so its screen spans phoneRect, then centre it on phoneRect.
     const sp = s * d / (d - PHONE_Z), k = phoneRect.width / (phoneW * sp);
     phone.scale.setScalar(baseScale * k);

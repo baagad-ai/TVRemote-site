@@ -1,0 +1,50 @@
+/* ---------- 3 · Swipe and tap (CONCEPT-B-GUIDE.md §3, board gen.py:226-243). Section bg = the 30% panel mix; the cards sit
+   straight on it (--panel, 1px --line, r28, padding 22). Grid 300px 1fr 1fr 1fr: phone tile first (2 rows), TV tile 2 cols,
+   then the 7 gesture tiles. No box around the scene beyond the board's own tile. ---------- */
+.b-trackpad{background:var(--bg30)}
+.b-split-head{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end}
+.b-split-head .b-lede{margin:0}
+.b-trackpad h2{letter-spacing:-.05em}
+.b-bento{display:grid;grid-template-columns:300px 1fr 1fr 1fr;gap:16px;margin-top:46px}
+.b-tile{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:28px;overflow:hidden}
+.b-tile-pad{grid-row:span 2;padding:24px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.b-pad{width:230px;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:40px}
+.b-pad:focus-visible{outline:3px solid var(--lime);outline-offset:4px}
+.b-pad .b-phoneloop{pointer-events:none}
+.b-pad-caption{margin:0;text-align:center}
+.b-mini{min-height:44px;padding:8px 16px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--muted);font:500 14px/1 Work Sans,Work Sans Fallback,system-ui,sans-serif;cursor:pointer}
+.b-tp-pause{position:absolute;top:12px;right:12px;z-index:2;width:32px;height:32px;display:grid;place-items:center;padding:0;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,#151b16 60%,#0b0e0d);color:var(--paper);cursor:pointer}
+.b-tp-pause:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.b-tile-tv{grid-column:span 2;padding:0;background:color-mix(in srgb,#151b16 30%,#0b0e0d);aspect-ratio:16/9}
+.b-tvtile-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.b-tv-ring{position:absolute;will-change:transform}
+.b-tv-ring-pulse{position:absolute;inset:0;display:block;transform-origin:50% 50%}
+.b-tv-star.star-border{position:absolute;inset:0;padding:0;width:100%;height:100%;box-shadow:inset 0 0 0 3px var(--lime),0 0 24px rgb(212 250 123/.3)}
+.b-tv-tag{position:absolute;left:18px;bottom:16px;z-index:2}
+.b-gest{padding:22px}
+.b-gest h3{font-size:21px!important;letter-spacing:-.03em!important;margin-top:10px!important}
+.b-gest .b-small{margin-top:6px}
+.b-gest.is-soon{border-style:dashed}
+.b-gest.is-soon h3{margin-top:22px!important}
+.b-tag.is-soon{background:rgb(238 238 230/.08);color:rgb(238 238 230/.82)}
+.b-glyph{height:52px;display:flex;align-items:center}
+.b-glyph i{width:18px;height:18px;border-radius:20px;background:var(--paper);display:inline-block;margin-right:6px;box-shadow:0 0 0 6px rgb(212 250 123/.2)}
+.b-glyph b{display:inline-block;width:70px;height:3px;background:linear-gradient(90deg,transparent,var(--lime));margin-left:8px;border-radius:3px}
+@media (max-width:999px){
+  .b-split-head{grid-template-columns:1fr;gap:28px}
+  .b-bento{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .b-tile-tv{grid-column:1/-1;order:-2}
+  .b-tile-pad{grid-row:auto;grid-column:1/-1;order:-1;flex-direction:row;justify-content:flex-start}
+  .b-tile-pad .b-pad{width:150px;flex:none}
+}
+/* 390 (board mobile B "03 · Bento / demo": the TV results full width on top, then a 150px phone + the caption; tiles 2-up). */
+@media (max-width:899px){
+  .b-split-head .b-lede{display:none}
+  .b-bento{margin-top:20px;gap:14px}
+  .b-tile-tv{border-radius:10px;border:6px solid #050706}
+  .b-tv-tag{display:none}
+  .b-tile-pad{background:transparent;border:0;padding:0;gap:14px 20px;align-items:center;flex-wrap:wrap}
+  .b-tile-pad .b-pad-caption{flex:1;text-align:left;font-size:16px;line-height:1.7}
+  .b-tp-pause{top:0;right:0}
+  .b-gest{padding:18px}.b-gest h3{font-size:18px!important}
+}
