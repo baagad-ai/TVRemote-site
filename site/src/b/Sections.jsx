@@ -47,13 +47,13 @@ export function Rooms() {
 // on the left; three step cards in the repo's ScrollStack (native scroll) settling at 0 / 70 / 140 px with scale .92 /
 // .96 / 1, released before the gallery. Each card: tag, h3 40px, lede, and Design's code-drawn phone (240px) on the right:
 // step 1 the live invite loop (<PhoneLoop name="invite" />; Design's still under reduced motion), steps 2-3 <GuestCard>.
-// Copy is the board's, with PM's final guest wording (16 Oct 20:48): the invite code works once, within 2 minutes;
-// guest access never expires. Generic names only (Design).
+// Copy is the board's, with PM's final guest paragraph (16 Oct 20:58) verbatim across cards 1 and 3: the invite
+// sentences on the invite card, the removal + limit sentences on "Your list". Generic names only (Design).
 // Reduced motion, narrow screens and keyboard focus inside: a plain list (ScrollStack restores the document flow).
 const GUESTS = [
-  ['Invite a guest', 'Guests scan the QR with their phone camera, or type the code. The invite code works once, within 2 minutes. Guest access never expires.'],
+  ['Invite a guest', "Guests scan the QR with their phone camera, or type the code. An invite works once and runs out after 2 minutes. If it runs out, invite again for a new one. The access it gives never expires."],
   ['Their phone, full remote', 'Arrows, media, volume, YouTube search and links, on their own Android phone.'],
-  ['Your list', 'Remove guests any time, or limit one to Media and volume only.']
+  ['Your list', "The Remote removes a guest by itself only when they're off your Wi-Fi and haven't connected for 7 days in a row. You can remove a guest any time; if they're away, it takes effect next time they're on your Wi-Fi. You can also limit a guest to media and volume only."]
 ];
 const guestStackTop = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header')) || 84) + 32;
 export function Guests() {

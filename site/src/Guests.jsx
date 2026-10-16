@@ -5,9 +5,9 @@ import { slot, SLOTS } from './slots';
 // mobile, no carousel. Real phone captures only, through image slots: a step's phone renders only when
 // its file exists in assets/showcase (see src/slots.js); otherwise the step is text-only.
 const steps = [
-  { label: 'Invite', file: SLOTS.guestsInvite, alt: 'Inviting a guest to Living Room TV from a Primary remote in The Remote.', points: [<>Invites work on your home Wi-Fi only. Unused invite codes expire after 2 minutes and are only used for joining.</>] },
+  { label: 'Invite', file: SLOTS.guestsInvite, alt: 'Inviting a guest to Living Room TV from a Primary remote in The Remote.', points: [<>Invites work on your home Wi-Fi only. An invite works once and runs out after 2 minutes. If it runs out, invite again for a new one. The access it gives never expires.</>] },
   { label: 'Their phone, full remote', file: SLOTS.guestsGuest, alt: "A guest's own phone with The Remote connected to Living Room TV.", points: [<>Guests get everything on the remote by default: the arrows, media keys, volume, YouTube search, link sharing, Power and the apps list. They can’t rename the TV, change its room, manage guests or unpair it.</>] },
-  { label: 'Your list', file: SLOTS.guestsPrimary, alt: 'The Guest access list for Living Room TV on a Primary remote, with an Invite button.', points: [<>Every Primary remote can invite and remove guests. If a phone is away, the list shows Removal pending until both phones are on your Wi-Fi. Guests who stop coming around are removed over time.</>, <><strong>Or just the basics.</strong> You can limit a guest to Media and volume only: play/pause, volume and mute.</>] }
+  { label: 'Your list', file: SLOTS.guestsPrimary, alt: 'The Guest access list for Living Room TV on a Primary remote, with an Invite button.', points: [<>Every Primary remote can invite and remove guests. You can remove a guest any time; if they're away, it takes effect next time they're on your Wi-Fi. The Remote removes a guest by itself only when they're off your Wi-Fi and haven't connected for 7 days in a row.</>, <><strong>Or just the basics.</strong> You can limit a guest to Media and volume only: play/pause, volume and mute.</>] }
 ];
 export default function GuestsSection() {
   return <section className="feature-section steps-section guests-section page-width" id="guests" aria-labelledby="guests-title">

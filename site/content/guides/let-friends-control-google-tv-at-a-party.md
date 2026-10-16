@@ -14,7 +14,7 @@ Open the TV's Guest access list in The Remote and tap Invite. Your friend enters
 
 They can scan the QR code with their phone's camera or type the code.
 
-Invites work on your home Wi-Fi only, so your friend needs to be on the same Wi-Fi as the TV. The invite code works once, within 2 minutes. Guest access never expires.
+Invites work on your home Wi-Fi only, so your friend needs to be on the same Wi-Fi as the TV. An invite works once and runs out after 2 minutes. If it runs out, invite again for a new one. The access it gives never expires.
 
 ## What your friends can do
 
@@ -24,13 +24,13 @@ Guests can't manage the TV. They can't rename it, change its room, manage guests
 
 ## Give someone just the volume
 
-If a friend only needs to turn it up or pause it, you can limit that guest to **Media and volume only**. That allows only play/pause, volume and mute. The limit is set per guest, so everyone else keeps the full remote.
+If a friend only needs to turn it up or pause it, you can limit that guest to **media and volume only**. That allows only play/pause, volume and mute. The limit is set per guest, so everyone else keeps the full remote.
 
 ## When the party's over
 
-Open the TV's Guest access list and tap Remove next to anyone you want off it. You can do this any time. Removal is done by The Remote, not in the TV's own settings.
+Open the TV's Guest access list and tap Remove next to anyone you want off it. You can remove a guest any time; if they're away, it takes effect next time they're on your Wi-Fi. Removal is done by The Remote, not in the TV's own settings.
 
-You don't have to clean up the list. Guest access never expires, but The Remote removes a guest by itself only after they've been off your home Wi-Fi and haven't connected for 7 days in a row. Every Primary remote can invite and remove guests, so anyone else at home with their own Primary remote can tidy the list too.
+You don't have to clean up the list. The access an invite gives never expires. The Remote removes a guest by itself only when they're off your Wi-Fi and haven't connected for 7 days in a row. Every Primary remote can invite and remove guests, so anyone else at home with their own Primary remote can tidy the list too.
 
 ## No server, no account
 

@@ -28,6 +28,7 @@ export const STEPS = [
 const HOLD = [[0, .2], [.4, .6], [.8, 1]]; // snap points 0 / .5 / 1 sit inside the holds
 const sine = t => -(Math.cos(Math.PI * t) - 1) / 2;
 // Texture swaps happen when a camera move has finished (never during it): step index changes at .4 and .8.
+export const SNAP = [0, .5, 1]; // one snap point per step, inside its hold
 export const stepIndex = p => (p >= HOLD[2][0] ? 2 : p >= HOLD[1][0] ? 1 : 0);
 export function stepValue(p) { // continuous 0..2 with plateaus
   if (p <= HOLD[0][1]) return 0;
@@ -112,7 +113,9 @@ export default function PinStory() {
     const settle = self => { if (stepIndex(self.progress) === 1 && Math.abs(self.progress - .5) < .01) setSentBoth(true); };
     // Guide §2: pin, end +=300%, scrub 0.5, snap 0/.5/1 (0.35 s power2.out) — each snap point is inside a hold.
     const st = ScrollTrigger.create({ trigger: stage.current, pin: true, pinSpacing: true, start: 'top top', end: '+=300%', scrub: .5, anticipatePin: 1, invalidateOnRefresh: true,
-      snap: { snapTo: [0, .5, 1], duration: .35, ease: 'power2.out', delay: .15, onComplete: () => settle(st) },
+      // QA 16 Oct: the snap follows the label. It goes to the snap point of the step the label shows (stepIndex of the
+      // real scroll progress, the same thresholds .4 / .8), never a velocity-projected neighbour: label 02 -> snaps to 02.
+      snap: { snapTo: (_, self) => SNAP[stepIndex(self.progress)], inertia: false, duration: .35, ease: 'power2.out', delay: .15, onComplete: () => settle(st) },
       onUpdate: self => { setV(stepValue(self.progress)); setIdx(stepIndex(self.progress)); if (stepIndex(self.progress) !== 1) setSentBoth(false); },
       onToggle: self => { if (self.isActive) document.dispatchEvent(new CustomEvent('remote:loop', { detail: { k: 'pin', el: node } })); } });
     setV(stepValue(st.progress)); setIdx(stepIndex(st.progress)); settle(st);

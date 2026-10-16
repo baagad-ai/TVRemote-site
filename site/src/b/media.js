@@ -5,12 +5,12 @@
 /* global __PROD_FILES__ */
 const present = typeof __PROD_FILES__ === 'undefined' ? {} : __PROD_FILES__;
 export const PROD_NAMES = {
-  // Hero (Build's 3d-prod/README.md names): 16:9 loop 1280x720 + 390 portrait loop 540x960, posters = loop frame 0.
+  // Hero (Build's final reframe, 16 Oct 20:56 IST): 16:9 loop 1600x900 (framing baked in) + 390 4:5 loop 720x900,
+  // posters = loop frame 0. The 9:16 files were retired (git rm) and are no longer slots.
   heroWebm: 'hero-loop.webm', heroMp4: 'hero-loop.mp4',                // seamless 10.0 s loop, <= 500 KB each
-  heroWebm390: 'hero-loop-390-9x16.webm', heroMp4390: 'hero-loop-390-9x16.mp4', // 390: copy above, phone + TV corner below
   hero1920: 'hero-1920.webp', hero1600: 'hero-1600.webp', hero960: 'hero-960.webp', hero640: 'hero-640.webp', // 1600 <= 120 KB (LCP)
-  heroWebm4x5: 'hero-loop-390-4x5.webm', heroMp44x5: 'hero-loop-390-4x5.mp4', // 390 4:5 loop (PM 20:29), poster hero-390-4x5.webp
-  hero9x16: 'hero-390-9x16.webp', hero4x5: 'hero-390-4x5.webp',      // 390 posters: 9:16 / 4:5 (the 390 scene is a 4:5 box)
+  heroWebm4x5: 'hero-loop-390-4x5.webm', heroMp44x5: 'hero-loop-390-4x5.mp4', // 390 4:5 loop 720x900
+  hero4x5: 'hero-390-4x5.webp',                                         // 390 poster for the 4:5 box
   pinModel: 'pin-tv-phone.glb', pinContract: 'pin-contract.json',      // <= 300 KB; PhoneScreen + TVScreen; cam_search/cam_results/cam_link
   // Pin stills, re-rendered by Build from our 3D with Design's code-drawn screens (due 20:35-22:00 IST 16 Oct, into
   // /workspace/site-fix-1016/loops-incoming/; copy here). The earlier pin-step-*.webp had real app captures on the phone
@@ -31,7 +31,7 @@ export const PROD_NAMES = {
 // section switches to Build's final files as soon as they are copied in; until then the stand-ins below stay.
 // Copy only files Build has marked final (never a partial encode, never the rejected single-room renders).
 export const PROD_WHITELIST = Object.fromEntries(['pinModel', 'pinFallback', 'pinStill1', 'pinStill2', 'pinStill3',
-  'heroWebm', 'heroMp4', 'heroWebm390', 'heroMp4390', 'heroWebm4x5', 'heroMp44x5', 'hero1920', 'hero1600', 'hero960', 'hero640', 'hero9x16', 'hero4x5',
+  'heroWebm', 'heroMp4', 'heroWebm4x5', 'heroMp44x5', 'hero1920', 'hero1600', 'hero960', 'hero640', 'hero4x5',
   ...['living', 'bedroom', 'kitchen'].flatMap(k => [`${k}Webm`, `${k}Mp4`, `${k}1440`, `${k}4x5`]), 'diorama1440', 'diorama4x5'].map(k => [k, true]));
 export const prod = key => PROD_WHITELIST[key] === true && present[PROD_NAMES[key]] ? `assets/3d-prod/${PROD_NAMES[key]}` : null;
 // Design's approved board assets (assets/board/, exported from concepts/img and concepts/render) until a whitelisted
@@ -44,9 +44,7 @@ export const HERO = {
   // files exist, until then the poster alone. The board's own 390 crop only while no Build poster is present.
   crop: prod('hero4x5') || 'assets/board/hero-390.webp',
   webm: prod('heroWebm'), mp4: prod('heroMp4'),
-  webm4x5: prod('heroWebm4x5'), mp44x5: prod('hero4x5') && prod('heroMp44x5'),
-  // 9:16 files: whitelisted with stable names, not used by the 4:5 scene.
-  webm390: prod('heroWebm390'), mp4390: prod('heroMp4390'), poster390: prod('hero9x16')
+  webm4x5: prod('heroWebm4x5'), mp44x5: prod('hero4x5') && prod('heroMp44x5')
 };
 export const PIN = { model: prod('pinModel'), contract: prod('pinContract'), fallback: prod('pinFallback'), stills: [prod('pinStill1'), prod('pinStill2'), prod('pinStill3')] };
 const BOARD_ROOMS = 'assets/board/remote-rooms-1200.webp';

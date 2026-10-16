@@ -10,7 +10,7 @@ Google's help page says it plainly: "Guest mode is no longer supported. Guests c
 
 Any phone you've paired with the TV, using the code the TV shows, is a Primary remote for that TV. A Primary remote invites guests: open the TV's Guest access list in The Remote and tap Invite. Your guest enters the invite code on their phone. They can scan the QR code with their phone's camera or type the code.
 
-Invites work on your home Wi-Fi only. The invite code works once, within 2 minutes. Guest access never expires.
+Invites work on your home Wi-Fi only. An invite works once and runs out after 2 minutes. If it runs out, invite again for a new one. The access it gives never expires.
 
 If a TV doesn't accept the shared guest key, The Remote switches just that guest to their own TV code, which the TV shows once.
 
@@ -26,17 +26,17 @@ By default, a guest gets everything on the remote: the arrows, media keys, volum
 
 Guests can't manage the TV. They can't rename it, change its room, manage guests or unpair it.
 
-You can limit a guest to **Media and volume only**. That allows only play/pause, volume and mute. The limit is set per guest.
+You can also limit a guest to **media and volume only**. That allows only play/pause, volume and mute. The limit is set per guest.
 
 ## See and remove guests
 
 Each TV has its own guest list. Every Primary remote can invite and remove guests.
 
-Tap Remove to take a guest off the list. You can do this any time. Removal is done by The Remote, not in the TV's own settings.
+Tap Remove to take a guest off the list. You can remove a guest any time; if they're away, it takes effect next time they're on your Wi-Fi. Removal is done by The Remote, not in the TV's own settings.
 
 ## Guests who stop visiting drop off by themselves
 
-Guest access never expires. The Remote removes a guest by itself only after they've been off your home Wi-Fi and haven't connected for 7 days in a row. You can still remove anyone yourself whenever you like.
+The access an invite gives never expires. The Remote removes a guest by itself only when they're off your Wi-Fi and haven't connected for 7 days in a row. You can still remove anyone yourself whenever you like.
 
 ## Where The Remote fits
 

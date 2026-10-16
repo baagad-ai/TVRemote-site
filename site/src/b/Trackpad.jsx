@@ -17,8 +17,9 @@ import { YouTubeLogo } from './DrawnTV';
 import { PhoneLoop } from './slots';
 import { useLoopClock, clamp } from './phone/clock.js';
 
-// Board TV tile geometry (viewBox 1600 x 900, measured from the board's tv-results-f2 frame).
-const TX = 150, TY = 247, TW = 421, TH = 248, PX = 446, PY = 360, COLS = 3, RING = 6;
+// Board TV tile geometry (viewBox 1600 x 900, measured from the board's tv-results-f2 frame). TY is 12 units above the
+// board's 247 so the second row's lower caption bar (was y 897-911) ends at 899 inside the viewBox (QA 16 Oct: 4px clip).
+const TX = 150, TY = 235, TW = 421, TH = 248, PX = 446, PY = 360, COLS = 3, RING = 6;
 const tileXY = i => [TX + (i % COLS) * PX, TY + Math.floor(i / COLS) * PY];
 const PANEL = '#151b16', LINE = '#354032', PAPER = '#eeeee6', MUTED = '#b0b9a2';
 // The 10 s beats (seconds). Design's PhoneLoop.jsx (SWIPE_R 1, TAP 3.4, SWIPE_L 5.8, SW_D .8, TV_D .25) does not export
@@ -33,18 +34,18 @@ export const scaleAt = t => pulseAt(t, BEATS.ok);
 
 function BoardTV() {
   return <svg className="b-tvtile-svg" viewBox="0 0 1600 900" aria-hidden="true">
-    {[186, 277, 369, 459, 550].map(y => <rect key={y} x="37" y={y} width="54" height="54" rx="14" fill={LINE} opacity=".55" />)}
+    {[186, 277, 369, 459, 550].map(y => <rect key={y} x="37" y={y} width="54" height="54" rx="14" fill={PANEL} stroke={LINE} strokeWidth="3" />)}
     <rect x="150" y="77" width="768" height="69" rx="34.5" fill={PANEL} stroke={LINE} strokeWidth="3" />
     <circle cx="190" cy="108" r="13" fill="none" stroke={PAPER} strokeWidth="4" /><path d="M200 118l12 12" stroke={PAPER} strokeWidth="4" strokeLinecap="round" />
-    <text x="232" y="123" fill={PAPER} opacity=".85" fontFamily="Work Sans, Work Sans Fallback, Arial, sans-serif" fontSize="34">lofi beats</text>
+    <text x="232" y="123" fill={PAPER} fontFamily="Work Sans, Work Sans Fallback, Arial, sans-serif" fontSize="34">lofi beats</text>
     <YouTubeLogo x={1248} y={88} height={46} />
     <text x="150" y="224" fill={MUTED} fontFamily="Work Sans, Work Sans Fallback, Arial, sans-serif" fontSize="28">Results</text>
     {Array.from({ length: 6 }, (_, i) => { const [x, y] = tileXY(i); return <g key={i}>
-      <rect x={x} y={y} width={TW} height={TH} rx="16" fill={LINE} opacity=".9" />
-      <circle cx={x + TW - 62} cy={y + 62} r="38" fill={PAPER} opacity=".1" />
-      <rect x={x + 22} y={y + TH - 62} width="200" height="26" rx="13" fill={PAPER} opacity=".09" />
+      <rect x={x} y={y} width={TW} height={TH} rx="16" fill={PANEL} stroke={LINE} strokeWidth="3" />
+      <circle cx={x + TW - 62} cy={y + 62} r="38" fill={LINE} />
+      <rect x={x + 22} y={y + TH - 62} width="200" height="26" rx="13" fill={LINE} />
       <rect x={x} y={y + TH + 14} width="316" height="16" rx="8" fill={LINE} />
-      <rect x={x} y={y + TH + 42} width="205" height="14" rx="7" fill={LINE} opacity=".7" />
+      <rect x={x} y={y + TH + 42} width="205" height="14" rx="7" fill={PANEL} stroke={LINE} strokeWidth="3" />
     </g>; })}
   </svg>;
 }
