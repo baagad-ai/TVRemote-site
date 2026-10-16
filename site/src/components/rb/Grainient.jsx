@@ -13,7 +13,7 @@ const STIR_LIFE = 1.3;
 const STIR_STEP = 0.06;
 const TWIRL_LIFE = 2.6;
 const INTRO_SECONDS = 1.6;
-const DEFAULT_COLORS = ['#120f17', '#2a0f0a', '#9a3412', '#f97316', '#fed7aa'];
+const DEFAULT_COLORS = ['#0b0e0d', '#151b16', '#354032', '#d4fa7b', '#eeeee6'];
 const TYPES = { linear: 0, radial: 1 };
 const LIFT = 0.2;
 
@@ -346,7 +346,7 @@ const Grainient = ({
       let rgb = [0, 0, 0];
       if (probe) {
         probe.clearRect(0, 0, 1, 1);
-        probe.fillStyle = '#000000';
+        probe.fillStyle = '#0b0e0d';
         probe.fillStyle = key;
         probe.fillRect(0, 0, 1, 1);
         const [r, g, b] = probe.getImageData(0, 0, 1, 1).data;

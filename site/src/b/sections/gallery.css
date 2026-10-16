@@ -9,7 +9,7 @@
 .b-arc{list-style:none;margin:0;padding:111px 0 0;display:flex;gap:26px;justify-content:center;height:100%}
 .b-arc li{flex:none;width:225px;aspect-ratio:440/932;transform:translateY(calc(max(var(--i),calc(var(--i)*-1))*34px)) rotate(calc(var(--i)*4deg))}
 .b-arc.is-flat li{transform:none} /* reduced motion: a flat row (guide) */
-.b-arc img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 40px 50px rgb(0 0 0/.55))}
+.b-arc img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 40px 50px rgb(11 14 13/.55))}
 @media (max-width:899px){
   .b-gallery{padding-bottom:44px}
   .b-gallery-box{height:auto;margin-top:28px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding-bottom:30px}

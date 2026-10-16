@@ -18,8 +18,13 @@ export function Header({ privacy = false }) {
 export function Footer({ privacy = false }) {
   return <footer className="site-footer page-width"><a className="brand" href={privacy ? '../' : '#top'}><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="28" height="28" loading="lazy" decoding="async" /><span>The Remote.</span></a><a href={privacy ? '../' : 'privacy/'}>{privacy ? 'Back to home' : 'Privacy policy'} ↗</a><a href="#top">Back to top ↑</a><p className="footer-trademark">{TRADEMARK}</p></footer>;
 }
+// FAQ (board 09b): the board's four questions first; every other answer stays on the page (and in the FAQPage schema)
+// under one "More questions" toggle. Tracking ids keep each item's faq.json position.
+const BOARD_FAQ = ['Is The Remote really free?', 'Which TVs does it work with?', 'Do guests need my phone?', 'Does it keep my searches?'];
+const faqItem = item => { const i = faq.indexOf(item); return <details key={item.q} data-track="faq-open" data-track-item={`faq-${String(i + 1).padStart(2, '0')}`}><summary>{item.q}</summary><p>{item.a}</p></details>; };
 function Questions() {
-  return <section className="questions-section page-width" id="faq" aria-labelledby="faq-title"><div><p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />Questions, answered</p><h2 id="faq-title">Free, no account, <em>installs from this site.</em></h2></div><div className="faq-list">{faq.map((item, i) => <details key={item.q} data-track="faq-open" data-track-item={`faq-${String(i + 1).padStart(2, '0')}`}><summary>{item.q}</summary><p>{item.a}</p></details>)}</div></section>;
+  const top = BOARD_FAQ.map(q => faq.find(item => item.q === q)), rest = faq.filter(item => !top.includes(item));
+  return <section className="questions-section page-width" id="faq" aria-labelledby="faq-title"><div><p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />Questions, answered</p><h2 id="faq-title">Free, no account, installs from this site.</h2></div><div className="faq-list">{top.map(faqItem)}<details className="faq-more"><summary>More questions</summary><div className="faq-more-list">{rest.map(faqItem)}</div></details></div></section>;
 }
 function MobileCta() {
   const ref = useRef(null), [visible, setVisible] = useState(false), { ready } = useEnvironment();

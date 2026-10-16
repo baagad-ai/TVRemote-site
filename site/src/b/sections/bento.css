@@ -26,7 +26,7 @@
 .b-gest .b-small{margin-top:6px}
 .b-gest.is-soon{border-style:dashed}
 .b-gest.is-soon h3{margin-top:22px!important}
-.b-tag.is-soon{background:rgb(238 238 230/.08);color:rgb(238 238 230/.82)}
+.b-tag.is-soon{background:var(--line);color:var(--paper)}
 .b-glyph{height:52px;display:flex;align-items:center}
 .b-glyph i{width:18px;height:18px;border-radius:20px;background:var(--paper);display:inline-block;margin-right:6px;box-shadow:0 0 0 6px rgb(212 250 123/.2)}
 .b-glyph b{display:inline-block;width:70px;height:3px;background:linear-gradient(90deg,transparent,var(--lime));margin-left:8px;border-radius:3px}
@@ -41,7 +41,7 @@
 @media (max-width:899px){
   .b-split-head .b-lede{display:none}
   .b-bento{margin-top:20px;gap:14px}
-  .b-tile-tv{border-radius:10px;border:6px solid #050706}
+  .b-tile-tv{border-radius:10px;border:6px solid #0b0e0d}
   .b-tv-tag{display:none}
   .b-tile-pad{background:transparent;border:0;padding:0;gap:14px 20px;align-items:center;flex-wrap:wrap}
   .b-trackpad{padding-top:12px} /* board: the heading sits ~30px higher than the 44px mobile section padding */

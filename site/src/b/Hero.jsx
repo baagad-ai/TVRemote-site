@@ -15,7 +15,7 @@ import { HERO } from './media';
 
 const H1 = 'Your phone. Your TV. One remote.';
 export function StarCta({ button = 'hero', inView = true }) {
-  return <StarBorder as="div" className="star-cta" color="#d4fa7b" duration={6} thickness={1} radius={999} hover="none" clickPulse={false} backgroundColor="transparent" borderColor="rgba(238,238,230,.0)" textColor="#0b0e0d"><DownloadLink button={button} /></StarBorder>;
+  return <StarBorder as="div" className="star-cta" color="#d4fa7b" duration={6} thickness={1} radius={999} hover="none" clickPulse={false} backgroundColor="transparent" borderColor="transparent" textColor="#0b0e0d"><DownloadLink button={button} /></StarBorder>;
 }
 export default function Hero() {
   const { ready, motion, gpu } = useEnvironment(), root = useRef(null), media = useRef(null), video = useRef(null);

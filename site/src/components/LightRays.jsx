@@ -5,7 +5,7 @@ import { Renderer, Program, Triangle, Mesh } from 'ogl';
 import { acquireGPU } from '../gpu-budget';
 // Adapted for this website from the pinned React Bits source. See SOURCE-PROVENANCE.md.
 
-const DEFAULT_COLOR = '#ffffff';
+const DEFAULT_COLOR = '#eeeee6';
 
 const hexToRgb = hex => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);

@@ -30,7 +30,7 @@ function PixelTransition({
   firstContent,
   secondContent,
   gridSize = 10,
-  pixelColor = '#ffffff',
+  pixelColor = '#eeeee6',
   mosaic = 0,
   animationStepDuration = 0.4,
   pattern = 'random',
@@ -93,7 +93,7 @@ function PixelTransition({
       originX: 0.5,
       originY: 0.5,
       edge: 'left',
-      tones: ['#ffffff'],
+      tones: ['#eeeee6'],
       toneKey: '',
       dpr: 1
     };

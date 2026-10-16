@@ -15,46 +15,46 @@ const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : us
 
 const THEMES = {
   dark: {
-    '--stepper-frame': 'rgba(38, 35, 46, 0.66)',
-    '--stepper-frame-edge': 'rgba(255, 255, 255, 0.08)',
-    '--stepper-frame-highlight': 'rgba(255, 255, 255, 0.07)',
-    '--stepper-frame-shadow': '0 22px 44px -20px rgba(0, 0, 0, 0.8), 0 6px 16px -8px rgba(0, 0, 0, 0.5)',
-    '--stepper-tile': 'linear-gradient(180deg, #3a3644 0%, #27242f 100%)',
-    '--stepper-tile-edge': 'rgba(255, 255, 255, 0.07)',
-    '--stepper-tile-highlight': 'rgba(255, 255, 255, 0.12)',
-    '--stepper-tile-shadow': '0 4px 10px -4px rgba(0, 0, 0, 0.7)',
-    '--stepper-well': 'rgba(255, 255, 255, 0.07)',
-    '--stepper-track': 'rgba(255, 255, 255, 0.1)',
-    '--stepper-ink': '#f4f4f5',
-    '--stepper-muted': 'rgba(244, 244, 245, 0.55)',
-    '--stepper-faint': 'rgba(255, 255, 255, 0.22)',
-    '--stepper-ring': 'rgba(244, 244, 245, 0.3)',
-    '--stepper-solid': '#f4f4f5',
-    '--stepper-solid-ink': '#18181b',
+    '--stepper-frame': 'rgba(21, 27, 22, 0.66)',
+    '--stepper-frame-edge': 'rgba(238, 238, 230, 0.08)',
+    '--stepper-frame-highlight': 'rgba(238, 238, 230, 0.07)',
+    '--stepper-frame-shadow': '0 22px 44px -20px rgba(11, 14, 13, 0.8), 0 6px 16px -8px rgba(11, 14, 13, 0.5)',
+    '--stepper-tile': 'linear-gradient(180deg, #354032 0%, #354032 100%)',
+    '--stepper-tile-edge': 'rgba(238, 238, 230, 0.07)',
+    '--stepper-tile-highlight': 'rgba(238, 238, 230, 0.12)',
+    '--stepper-tile-shadow': '0 4px 10px -4px rgba(11, 14, 13, 0.7)',
+    '--stepper-well': 'rgba(238, 238, 230, 0.07)',
+    '--stepper-track': 'rgba(238, 238, 230, 0.1)',
+    '--stepper-ink': '#eeeee6',
+    '--stepper-muted': 'rgba(238, 238, 230, 0.55)',
+    '--stepper-faint': 'rgba(238, 238, 230, 0.22)',
+    '--stepper-ring': 'rgba(238, 238, 230, 0.3)',
+    '--stepper-solid': '#eeeee6',
+    '--stepper-solid-ink': '#151b16',
     '--stepper-hover': 'brightness(1.12)',
-    '--stepper-hover-fill': 'rgba(255, 255, 255, 0.04)',
+    '--stepper-hover-fill': 'rgba(238, 238, 230, 0.04)',
     '--stepper-solid-hover': 'brightness(0.9)',
     '--stepper-press': 'brightness(0.85)'
   },
   light: {
-    '--stepper-frame': 'rgba(240, 240, 243, 0.8)',
-    '--stepper-frame-edge': 'rgba(24, 24, 27, 0.07)',
-    '--stepper-frame-highlight': 'rgba(255, 255, 255, 0.95)',
-    '--stepper-frame-shadow': '0 22px 44px -22px rgba(24, 24, 27, 0.3), 0 6px 16px -10px rgba(24, 24, 27, 0.16)',
-    '--stepper-tile': 'linear-gradient(180deg, #ffffff 0%, #f6f6f8 100%)',
-    '--stepper-tile-edge': 'rgba(24, 24, 27, 0.08)',
-    '--stepper-tile-highlight': 'rgba(255, 255, 255, 1)',
-    '--stepper-tile-shadow': '0 4px 10px -5px rgba(24, 24, 27, 0.25)',
-    '--stepper-well': 'rgba(24, 24, 27, 0.05)',
-    '--stepper-track': 'rgba(24, 24, 27, 0.08)',
-    '--stepper-ink': '#27272a',
-    '--stepper-muted': 'rgba(39, 39, 42, 0.55)',
-    '--stepper-faint': 'rgba(24, 24, 27, 0.16)',
-    '--stepper-ring': 'rgba(24, 24, 27, 0.28)',
-    '--stepper-solid': '#27272a',
-    '--stepper-solid-ink': '#ffffff',
+    '--stepper-frame': 'rgba(238, 238, 230, 0.8)',
+    '--stepper-frame-edge': 'rgba(21, 27, 22, 0.07)',
+    '--stepper-frame-highlight': 'rgba(238, 238, 230, 0.95)',
+    '--stepper-frame-shadow': '0 22px 44px -22px rgba(21, 27, 22, 0.3), 0 6px 16px -10px rgba(21, 27, 22, 0.16)',
+    '--stepper-tile': 'linear-gradient(180deg, #eeeee6 0%, #eeeee6 100%)',
+    '--stepper-tile-edge': 'rgba(21, 27, 22, 0.08)',
+    '--stepper-tile-highlight': 'rgba(238, 238, 230, 1)',
+    '--stepper-tile-shadow': '0 4px 10px -5px rgba(21, 27, 22, 0.25)',
+    '--stepper-well': 'rgba(21, 27, 22, 0.05)',
+    '--stepper-track': 'rgba(21, 27, 22, 0.08)',
+    '--stepper-ink': '#151b16',
+    '--stepper-muted': 'rgba(21, 27, 22, 0.55)',
+    '--stepper-faint': 'rgba(21, 27, 22, 0.16)',
+    '--stepper-ring': 'rgba(21, 27, 22, 0.28)',
+    '--stepper-solid': '#151b16',
+    '--stepper-solid-ink': '#eeeee6',
     '--stepper-hover': 'brightness(0.97)',
-    '--stepper-hover-fill': 'rgba(24, 24, 27, 0.035)',
+    '--stepper-hover-fill': 'rgba(21, 27, 22, 0.035)',
     '--stepper-solid-hover': 'brightness(1.3)',
     '--stepper-press': 'brightness(0.92)'
   }
@@ -72,12 +72,12 @@ const readableOn = color => {
     .trim()
     .replace('#', '');
   if (hex.length === 3) hex = hex.replace(/./g, c => c + c);
-  if (!/^[0-9a-f]{6}$/i.test(hex)) return '#ffffff';
+  if (!/^[0-9a-f]{6}$/i.test(hex)) return '#eeeee6';
   const [r, g, b] = [0, 2, 4].map(index => {
     const c = parseInt(hex.slice(index, index + 2), 16) / 255;
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
   });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? '#18181b' : '#ffffff';
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? '#151b16' : '#eeeee6';
 };
 
 const ease = () =>

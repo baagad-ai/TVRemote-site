@@ -1,13 +1,13 @@
 /* ---------- 5 · Guests (CONCEPT-B-GUIDE.md §5, board mock_guests_stack): bg = the 50% panel mix; grid 440px 1fr gap 70;
    the heading column is sticky while the cards stack; cards --panel, 1px --line, r28, padding 36, inner grid 1fr 240px gap 40,
-   shadow 0 -20px 60px -20px #000, settling at 0 / 70 / 140 px with scale .92 / .96 / 1 (transform-origin top). ---------- */
+   shadow 0 -20px 60px -20px #0b0e0d, settling at 0 / 70 / 140 px with scale .92 / .96 / 1 (transform-origin top). ---------- */
 .b-guests{background:var(--bg50);overflow:clip} /* clip, not hidden: hidden makes the section a scroll container and breaks the sticky heading */
 .b-guests-grid{display:grid;grid-template-columns:440px 1fr;gap:70px;align-items:start}
 .b-guests-head{position:sticky;top:calc(var(--header) + 40px)}
 .b-guests-head h2{letter-spacing:-.05em}
-.b-guest-card{display:grid;grid-template-columns:1fr 240px;gap:40px;padding:36px;margin-bottom:28px;background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:0 -20px 60px -20px #000;transform-origin:top center}
+.b-guest-card{display:grid;grid-template-columns:1fr 240px;gap:40px;padding:36px;margin-bottom:28px;background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:0 -20px 60px -20px #0b0e0d;transform-origin:top center}
 .b-guest-card h3{font-size:40px!important;letter-spacing:-.03em!important;margin-top:16px!important}
-.b-guest-card .b-lede{color:rgb(238 238 230/.86)}
+.b-guest-card .b-lede{color:var(--paper)}
 .b-guest-phone{width:240px;align-self:start}
 .b-guests-stack [data-stack-active=true] .b-guest-card{margin-bottom:180px}
 .b-guests-stack [data-stack-active=true] .b-guest-card:last-of-type{margin-bottom:0}

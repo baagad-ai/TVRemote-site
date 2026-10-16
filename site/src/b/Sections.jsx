@@ -120,10 +120,10 @@ export function TypeSplit() {
   useEffect(() => { if (seen) setDrawn(true); }, [seen]);
   const LEDE = "The Remote works with Android TV and Google TV devices that support Android TV Remote Service v2. Your phone needs Android 8.0 or later. There's no iPhone version.";
   return <section ref={ref} className={`b-section b-split ${drawn ? 'is-drawn' : ''}`} id="compatibility" aria-labelledby="compatibility-title"><div className="b-wrap b-split-grid">
-    <div><Eyebrow>Will it work?</Eyebrow><h2 id="compatibility-title">Works with Android{'\u00a0'}TV <em>and Google{'\u00a0'}TV.</em></h2>
+    <div><Eyebrow>Will it work?</Eyebrow><h2 id="compatibility-title"><span className="b-h2-l1">Works with Android{'\u00a0'}TV</span> <em>and Google{'\u00a0'}TV.</em></h2>
       <div className="b-line" aria-hidden="true"><span className="b-chip is-on">Phone</span><svg viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip">Home Wi-Fi</span><svg className="is-fade" viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip">Living Room TV</span></div></div>
     <div className="b-split-copy">{ready && motion ? <ScrollReveal fallback={<p className="b-lede">{LEDE}</p>} as="p" baseOpacity={.2} enableBlur={false} baseRotation={0} containerClassName="b-reveal" textClassName="b-lede">{LEDE}</ScrollReveal> : <p className="b-lede">{LEDE}</p>}
-      <p className="b-small">Remote commands go to your paired TV over the local network, without a developer cloud relay. The Remote doesn&rsquo;t keep a search history.</p><a className="b-text-link" href="privacy/">How your data is handled ↗</a></div>
+      <p className="b-small">Remote commands go to your paired TV over the local network, without a developer cloud relay. The Remote doesn&rsquo;t keep a search history.</p></div>
   </div></section>;
 }
 // 9c · Lime close band: copy left, the approved room still 640x460 r28 on the right.

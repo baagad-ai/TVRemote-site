@@ -9,16 +9,16 @@ import { useEffect, useRef } from 'react';
 
 const THEMES = {
   dark: {
-    surface: '#0c0c0f',
-    text: '#fafafa',
-    track: 'rgba(255, 255, 255, 0.1)',
-    light: '#ffffff'
+    surface: '#0b0e0d',
+    text: '#eeeee6',
+    track: 'rgba(238, 238, 230, 0.1)',
+    light: '#eeeee6'
   },
   light: {
-    surface: '#ffffff',
-    text: '#18181b',
-    track: 'rgba(24, 24, 27, 0.12)',
-    light: '#18181b'
+    surface: '#eeeee6',
+    text: '#151b16',
+    track: 'rgba(21, 27, 22, 0.12)',
+    light: '#151b16'
   }
 };
 
@@ -40,7 +40,7 @@ let colorContext = null;
 const toRgb = color => {
   colorContext = colorContext ?? document.createElement('canvas').getContext('2d');
   if (!colorContext) return WHITE;
-  colorContext.fillStyle = '#000000';
+  colorContext.fillStyle = '#0b0e0d';
   colorContext.fillStyle = color;
   const value = String(colorContext.fillStyle);
   if (value.startsWith('#')) {
