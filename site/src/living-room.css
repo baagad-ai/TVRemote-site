@@ -1050,6 +1050,7 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 .pin-loop-tv{left:3%;width:86%;top:42%} /* 23:15: the whole TV inside the canvas at every width */
 .pin-loop-phone{left:10%;width:19%;top:70%}
 @media (max-width:430px){.pin-loop-tv{left:5%;width:90%;top:34%}.pin-loop-phone{left:60%;width:24%;top:66%}} /* 23:02: the whole TV and phone inside the 4:5 canvas, 360-430 */
+@media (max-width:374px){.pin-loop-tv{left:9%;width:82%}} /* 23:22 Design: <= 374 px the camera pulls back so the TV keeps >= 6% clear space each side */
 .b-pin.is-loop .b-pin-step{display:flex;color:var(--muted);padding:14px 0;border-top:1px solid var(--line)}
 .b-pin.is-loop .b-pin-step .b-step-no{color:var(--muted)}
 .b-pin.is-loop .b-pin-step.is-on{color:var(--paper)}
