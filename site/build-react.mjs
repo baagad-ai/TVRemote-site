@@ -25,7 +25,10 @@ const prodFiles = {};
 for (const name of await fs.readdir(path.join(root, 'assets/3d-prod')).catch(() => [])) if (!name.startsWith('.') && !name.endsWith('.md')) prodFiles[name] = (await fs.stat(path.join(root, 'assets/3d-prod', name))).size;
 const define = { __SHOWCASE_FILES__: JSON.stringify(showcase), __PROD_FILES__: JSON.stringify(prodFiles) };
 // One stylesheet: the base site styles, then Concept B's landing styles (src/living-room.css).
-await fs.writeFile(path.join(root, 'styles.css'), (await fs.readFile(path.join(root, 'src/site.css'), 'utf8')) + '\n' + (await fs.readFile(path.join(root, 'src/living-room.css'), 'utf8')));
+// Then each Concept B section's own stylesheet (src/b/sections/<section>.css) in page order, when present.
+const SECTION_CSS = ['hero', 'pin', 'bento', 'rooms', 'guests', 'gallery', 'proof', 'finale'];
+const sectionCss = (await Promise.all(SECTION_CSS.map(name => fs.readFile(path.join(root, 'src/b/sections', name + '.css'), 'utf8').catch(() => '')))).filter(Boolean).join('\n');
+await fs.writeFile(path.join(root, 'styles.css'), (await fs.readFile(path.join(root, 'src/site.css'), 'utf8')) + '\n' + (await fs.readFile(path.join(root, 'src/living-room.css'), 'utf8')) + (sectionCss ? '\n' + sectionCss : ''));
 await build({ entryPoints: [path.join(root, 'src/render.jsx')], outfile: path.join(scratch, 'render.cjs'), bundle: true, platform: 'node', format: 'cjs', packages: 'external', external: ['./scene-runtime.js'], jsx: 'automatic', define, logLevel: 'warning' });
 const { render } = createRequire(import.meta.url)(path.join(scratch, 'render.cjs'));
 const browserBuild = await build({ metafile: true, entryPoints: { app: path.join(root, 'src/client.jsx') }, outdir: path.join(root, 'runtime'), bundle: true, splitting: true, format: 'esm', platform: 'browser', target: 'es2022', jsx: 'automatic', minify: true, sourcemap: false, chunkNames: 'chunk-[hash]', define: { ...define, 'process.env.NODE_ENV': '"production"' }, legalComments: 'eof', logLevel: 'warning' });

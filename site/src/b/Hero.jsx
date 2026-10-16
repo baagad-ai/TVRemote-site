@@ -4,7 +4,7 @@
 // lease while the hero is >= 30% visible, React Bits BlurText on the h1 (words, from top, 0.8 s), Star Border CTA,
 // 8% image parallax. Reduced motion: the still, plain h1, no parallax. The QR lives in the download card, not here.
 import { useEffect, useRef, useState } from 'react';
-import BlurText from '../components/rb/BlurText';
+import { BlurText } from '../components/rb/lazy';
 import StarBorder from '../components/rb/StarBorder';
 import Grainient from '../components/rb/Grainient';
 import { LiveCount } from './counter';
@@ -55,7 +55,7 @@ export default function Hero() {
     <div className="b-wrap b-hero-copy">
       <p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />No ads. No account. Nothing to sign in to.</p>
       {ready && motion
-        ? <BlurText as="h1" id="hero-title" text={H1} className="b-h1" animateBy="words" direction="top" delay={60} stepDuration={.4} trigger="load" wordClassName={[, , 'is-lime', 'is-lime']} breakAfter={[1, 3]} />
+        ? <BlurText fallback={<h1 id="hero-title" className="b-h1">Your phone.<br /><em>Your TV.</em><br />One remote.</h1>} as="h1" id="hero-title" text={H1} className="b-h1" animateBy="words" direction="top" delay={60} stepDuration={.4} trigger="load" wordClassName={[, , 'is-lime', 'is-lime']} breakAfter={[1, 3]} />
         : <h1 id="hero-title" className="b-h1">Your phone.<br /><em>Your TV.</em><br />One remote.</h1>}
       <p className="b-lede">A free phone remote for Android{'\u00a0'}TV and Google{'\u00a0'}TV. Type a YouTube search on your phone; the results open on your TV.</p>
       <div className="b-hero-actions"><StarCta inView={inView} /><a className="b-ghost" href="#search-proof">Watch it work <span aria-hidden="true">↓</span></a></div>

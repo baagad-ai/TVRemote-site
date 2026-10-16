@@ -1,9 +1,6 @@
 // Concept B sections 4-9 and the lime close (CONCEPT-B-GUIDE.md §4-9, board gen.py:115-124, 193-268).
 import { useEffect, useRef, useState } from 'react';
-import PixelTransition from '../components/rb/PixelTransition';
-import CircularGallery from '../components/rb/CircularGallery';
-import AnimatedList from '../components/rb/AnimatedList';
-import ScrollReveal from '../components/rb/ScrollReveal';
+import { PixelTransition, CircularGallery, AnimatedList, ScrollReveal } from '../components/rb/lazy';
 import ScrollStack, { ScrollStackItem } from '../components/ScrollStack';
 import { LiveCount } from './counter';
 import { DownloadLink } from '../Download';
@@ -32,7 +29,7 @@ export function Rooms() {
   const playing = motion && inView;
   return <section ref={wrap} className="b-rooms" id="inside" aria-labelledby="rooms-title">
     <div className="b-rooms-media">
-      {motion ? <div inert className="b-rooms-pixwrap"><PixelTransition key={swap.n} firstContent={<RoomMedia id={swap.from} play={playing && !swap.on && swap.from === room} />} secondContent={<RoomMedia id={swap.to} play={playing && swap.on} />} active={swap.on} trigger="click" gridSize={10} pixelColor="#0b0e0d" animationStepDuration={.5} aspectRatio="auto" className="b-rooms-pixels" /></div>
+      {motion ? <div inert className="b-rooms-pixwrap"><PixelTransition fallback={<RoomMedia id={room} play={false} />} key={swap.n} firstContent={<RoomMedia id={swap.from} play={playing && !swap.on && swap.from === room} />} secondContent={<RoomMedia id={swap.to} play={playing && swap.on} />} active={swap.on} trigger="click" gridSize={10} pixelColor="#0b0e0d" animationStepDuration={.5} aspectRatio="auto" className="b-rooms-pixels" /></div>
         : <RoomMedia id={room} play={false} />}
     </div>
     <div className="b-rooms-vignette" aria-hidden="true" />
@@ -76,6 +73,7 @@ const SHOTS = [
   ['guests-guest-remote', 'Guest remote', "A guest's own phone with The Remote connected to Living Room TV."],
   ['trackpad-pad', 'Trackpad', 'The trackpad for Living Room TV: the whole screen is a pad.']
 ];
+const GalleryArc = () => <ul className="b-arc">{SHOTS.map(([n, , alt], i) => <li key={n} style={{ '--i': i - 3 }}><img src={`assets/board/gallery-${n}.webp`} alt={alt} width="440" height="953" loading="lazy" decoding="async" /></li>)}</ul>;
 export function Gallery() {
   const { ready, gpu, motion } = useEnvironment(), ref = useRef(null), inView = useInView(ref, { threshold: .3 }), [desktop, setDesktop] = useState(false);
   useEffect(() => { if (!ready) return; const q = matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)'), u = () => setDesktop(q.matches && !lowEnd()); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
@@ -83,20 +81,21 @@ export function Gallery() {
   return <section className="b-section b-gallery" id="screens" aria-labelledby="gallery-title">
     <div className="b-wrap"><Eyebrow>The real app</Eyebrow><h2 id="gallery-title">Every screen, <em>as it ships.</em></h2></div>
     <div ref={ref} className={`b-gallery-box ${lease ? 'is-live' : ''}`}>
-      {lease ? <CircularGallery items={SHOTS.map(([n, text, alt]) => ({ image: `assets/board/gallery-${n}.webp`, text, alt }))} bend={1.4} itemSize={.62} itemAspect={440 / 953} gap={.1} showTitles={false} shadow={0} fadeEdges={0} textColor="#eeeee6" borderRadius={.07} scrollEase={.05} autoScroll={0} openOnClick={false} snap={false} intro={false} dpr={1.5} className="b-circular" />
-        : <ul className="b-arc">{SHOTS.map(([n, , alt], i) => <li key={n} style={{ '--i': i - 3 }}><img src={`assets/board/gallery-${n}.webp`} alt={alt} width="440" height="953" loading="lazy" decoding="async" /></li>)}</ul>}
+      {lease ? <CircularGallery fallback={<GalleryArc />} items={SHOTS.map(([n, text, alt]) => ({ image: `assets/board/gallery-${n}.webp`, text, alt }))} bend={1.4} itemSize={.62} itemAspect={440 / 953} gap={.1} showTitles={false} shadow={0} fadeEdges={0} textColor="#eeeee6" borderRadius={.07} scrollEase={.05} autoScroll={0} openOnClick={false} snap={false} intro={false} dpr={1.5} className="b-circular" />
+        : <GalleryArc />}
     </div>
   </section>;
 }
 // 7 · Proof: React Bits AnimatedList rows (spring in once, 70 ms stagger) + the live counter, unchanged.
 const FACTS = ['Free', 'No ads', 'No account', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
+const StaticFacts = () => <ul className="b-facts">{FACTS.map(f => <li key={f}><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></li>)}</ul>;
 const LIST_VARS = { '--al-tile': '#151b16', '--al-tile-edge': '#354032', '--al-tile-highlight': 'transparent', '--al-tile-shadow': 'none', '--al-ink': '#eeeee6', '--al-muted': '#b0b9a2', '--al-ring': 'transparent', '--al-ring-fill': 'transparent', '--al-hover': 'none', '--al-press': 'none', '--al-active': 'none' };
 export function Proof() {
   const { ready, motion } = useEnvironment();
   return <section className="b-section b-proof" aria-labelledby="proof-title"><div className="b-wrap b-proof-grid">
     <div><Eyebrow>Straight facts</Eyebrow><h2 id="proof-title">No catch. <em>Just a remote.</em></h2><LiveCount className="is-proof" /><p className="b-small b-note">The live counter is the only number on the page.</p></div>
-    {ready && motion ? <AnimatedList className="b-facts-list" items={FACTS} renderItem={f => <><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></>} frame={false} showGradients={false} displayScrollbar={false} selectOnHover={false} enableArrowNavigation={false} animation="pop" animateOnce stagger={.07} radius={28} gap={12} width={520} maxHeight="none" style={LIST_VARS} />
-      : <ul className="b-facts">{FACTS.map(f => <li key={f}><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></li>)}</ul>}
+    {ready && motion ? <AnimatedList fallback={<StaticFacts />} className="b-facts-list" items={FACTS} renderItem={f => <><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></>} frame={false} showGradients={false} displayScrollbar={false} selectOnHover={false} enableArrowNavigation={false} animation="pop" animateOnce stagger={.07} radius={28} gap={12} width={520} maxHeight="none" style={LIST_VARS} />
+      : <StaticFacts />}
   </div></section>;
 }
 // 8 · Compatibility split: the Phone -> Home Wi-Fi -> Living Room TV line draws once (0.8 s); React Bits ScrollReveal
@@ -108,7 +107,7 @@ export function TypeSplit() {
   return <section ref={ref} className={`b-section b-split ${drawn ? 'is-drawn' : ''}`} id="compatibility" aria-labelledby="compatibility-title"><div className="b-wrap b-split-grid">
     <div><Eyebrow>Will it work?</Eyebrow><h2 id="compatibility-title">Works with Android{'\u00a0'}TV <em>and Google{'\u00a0'}TV.</em></h2>
       <div className="b-line" aria-hidden="true"><span className="b-chip is-on">Phone</span><svg viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip">Home Wi-Fi</span><svg className="is-fade" viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip">Living Room TV</span></div></div>
-    <div className="b-split-copy">{ready && motion ? <ScrollReveal as="p" baseOpacity={.2} enableBlur={false} baseRotation={0} containerClassName="b-reveal" textClassName="b-lede">{LEDE}</ScrollReveal> : <p className="b-lede">{LEDE}</p>}
+    <div className="b-split-copy">{ready && motion ? <ScrollReveal fallback={<p className="b-lede">{LEDE}</p>} as="p" baseOpacity={.2} enableBlur={false} baseRotation={0} containerClassName="b-reveal" textClassName="b-lede">{LEDE}</ScrollReveal> : <p className="b-lede">{LEDE}</p>}
       <p className="b-small">Remote commands go to your paired TV over the local network, without a developer cloud relay. The Remote doesn&rsquo;t keep a search history.</p><a className="b-text-link" href="privacy/">How your data is handled ↗</a></div>
   </div></section>;
 }
