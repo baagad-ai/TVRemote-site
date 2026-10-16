@@ -1295,6 +1295,8 @@ html.is-save-data .b-closing .b-grain.is-band::after{animation:none}
 /* PM 23:11: rooms at 1440: the copy column stops short of the render (no copy over the living-room glow). */
 @media (min-width:1200px){body[data-route=landing] main .b-rooms-copy>.b-lede{max-width:min(30ch,360px)!important}} /* 23:27 PM: the paragraph only; chips stay on one row */
 
+.site-footer .footer-sha,body[data-route=landing] .site-footer .footer-sha{flex-basis:100%;grid-column:1/-1;margin:0;color:var(--paper);font-size:12px!important;line-height:1.6;overflow-wrap:anywhere}.footer-sha code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--paper);background:none;padding:0;border:0;overflow-wrap:anywhere;word-break:break-all}
+
 /* ---------- 3 · Swipe and tap (CONCEPT-B-GUIDE.md §3, board gen.py:226-243). Section bg = the 30% panel mix; the cards sit
    straight on it (--panel, 1px --line, r28, padding 22). Grid 300px 1fr 1fr 1fr: phone tile first (2 rows), TV tile 2 cols,
    then the 7 gesture tiles. No box around the scene beyond the board's own tile. ---------- */

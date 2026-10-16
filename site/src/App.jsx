@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { EnvironmentProvider, useEnvironment } from './environment';
-import { DownloadLink, DownloadProvider } from './Download';
+import { DownloadLink, DownloadProvider, useRelease } from './Download';
 import DownloadFinale from './b/Download';
 import Privacy from './Privacy';
 import NotFound from './NotFound';
@@ -16,7 +16,8 @@ export function Header({ privacy = false }) {
   return <header className="site-header page-width"><a className="brand" href={privacy ? '../' : '#top'} aria-label="The Remote, home"><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="32" height="32" /><span>The Remote<span className="brand-period">.</span></span></a><nav aria-label="Main navigation">{privacy ? <a data-track="nav" href="../">Home ↗</a> : <><a data-track="nav" href="#search-proof">How it works</a><a data-track="nav" href="#inside">Your rooms</a><a data-track="nav" href="#guests">Guests</a><a data-track="nav" href="#trackpad">Trackpad</a><a data-track="nav" href="#compatibility">Will it work?</a><a data-track="nav" href="guides/">Guides</a></>}</nav>{!privacy && <DownloadLink button="nav" className="header-cta b-pill"><span className="b-hide-m">Download the app</span><span className="b-show-m">Download</span></DownloadLink>}</header>;
 }
 export function Footer({ privacy = false }) {
-  return <footer className="site-footer page-width"><a className="brand" href={privacy ? '../' : '#top'}><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="28" height="28" loading="lazy" decoding="async" /><span>The Remote.</span></a><a href={privacy ? '../' : 'privacy/'}>{privacy ? 'Back to home' : 'Privacy policy'} ↗</a><a href="#top">Back to top ↑</a><p className="footer-trademark">{TRADEMARK}</p></footer>;
+  const release = useRelease(); // PM 23:41 option 1: one footer line with the full APK SHA-256 (Design spec)
+  return <footer className="site-footer page-width"><a className="brand" href={privacy ? '../' : '#top'}><img src={`${privacy ? '../' : ''}assets/focus-key.svg`} alt="" width="28" height="28" loading="lazy" decoding="async" /><span>The Remote.</span></a><a href={privacy ? '../' : 'privacy/'}>{privacy ? 'Back to home' : 'Privacy policy'} ↗</a><a href="#top">Back to top ↑</a><p className="footer-trademark">{TRADEMARK}</p>{!privacy && release?.sha256 && <p className="footer-sha">APK SHA-256 <code>{release.sha256}</code></p>}</footer>;
 }
 // FAQ (board 09b): the board's four questions first; every other answer stays on the page (and in the FAQPage schema)
 // under one "More questions" toggle. Tracking ids keep each item's faq.json position.
