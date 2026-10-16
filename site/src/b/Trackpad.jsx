@@ -2,9 +2,9 @@
 // the phone tile FIRST (2 rows; it is also the demo pad), the drawn TV tile (2 cols: YouTube logo + results), then the
 // board's 7 gesture tiles (Pointer "Coming soon", dashed). WebGL slot: free (DOM + SVG). No screenshots, no video.
 // Auto demo, one 10.00 s timeline (Design's clock, phone/clock.js) drives BOTH the phone (<PhoneLoop name="trackpad"
-// t={t} />) and the TV focus from the same t: rest on tile 1 | 1.0 s swipe right (0.8 s glide), the TV focus moves to
-// tile 2 two frames after the glide ends | 3.4 s tap = OK, pulse 1 -> 1.06 -> 1 in 0.3 s, then the video plays on the
-// TV | 5.8 s two-finger tap = Back, the TV returns to the results | 7.6 s swipe left, focus back to tile 1 | rest to 10.0 s. Every value is a pure function of t, so t = 10 renders as t = 0.
+// t={t} />) and the TV focus from the same t: rest on tile 1 | 1.5 s swipe right (0.8 s glide), the TV focus moves to
+// tile 2 two frames after the glide ends | 4.0 s tap = OK, pulse 1 -> 1.06 -> 1 in 0.3 s, then the video plays on the
+// TV | 6.5 s two-finger tap = Back: the results fade back in and the ring slides home to tile 1 (0.4 s) | rest to 10 s. Every value is a pure function of t, so t = 10 renders as t = 0.
 // Moves: the focus ring (React Bits Star Border) slides one tile in 0.25 s power2.out (GSAP), settling on the tile.
 // Visitors: a swipe on the pad (>= 24 px, direction locked) or an arrow key moves the focus one tile; a tap / Enter is
 // OK; an edge gives a 6 px nudge back over 0.18 s, no wrap. No cursor, finger dot or trail on the TV, no long press.
@@ -22,14 +22,15 @@ import { useLoopClock, clamp } from './phone/clock.js';
 const TX = 150, TY = 235, TW = 421, TH = 248, PX = 446, PY = 360, COLS = 3, RING = 6;
 const tileXY = i => [TX + (i % COLS) * PX, TY + Math.floor(i / COLS) * PY];
 const PANEL = '#151b16', LINE = '#354032', PAPER = '#eeeee6', MUTED = '#b0b9a2';
-// The 10 s beats (seconds). Design's PhoneLoop.jsx (SWIPE_R 1, TAP 3.4, SWIPE_L 5.8, SW_D .8, TV_D .25) does not export
+// The 10 s beats (seconds). Design's PhoneLoop.jsx (SWIPE_R 1.5, TAP 4.0, BACK 6.5, SW_D .8, TV_D .25) does not export
 // its constants, so they are mirrored here: the TV focus moves 2 frames after each 0.8 s glide ends (1.867 s, 6.667 s,
 // done 2.117 s / 6.917 s); the OK pulse is unchanged, 33 ms after the press (3.433 s).
-export const BEATS = { right: 1.0, ok: 3.4, back: 5.8, left: 7.6 }, GLIDE = .8, FOCUS_LAG = .067, OK_LAG = 1 / 30, STILL_T = 3.65; // STILL_T = Design's trackpad still (just after OK, focus on tile 2)
+export const BEATS = { right: 1.5, ok: 4.0, back: 6.5 }, GLIDE = .8, FOCUS_LAG = .067, OK_LAG = 1 / 30, STILL_T = 4.15; // STILL_T = Design's trackpad still (just after OK, focus on tile 2)
 const out2 = x => 1 - (1 - clamp(x)) ** 2; // power2.out
 const slide = (t, at) => out2((t - at - GLIDE - FOCUS_LAG) / .25);
 const pulseAt = (t, at) => { const x = t - at - OK_LAG; return x < 0 || x > .3 ? 1 : x < .15 ? 1 + .06 * out2(x / .15) : 1 + .06 * (1 - out2((x - .15) / .15)); };
-export const focusAt = t => slide(t, BEATS.right) - slide(t, BEATS.left); // 0 = tile 1, 1 = tile 2 (column)
+// Design 22:23: Back also takes the focus home: the ring slides tile 2 -> 1 over 0.4 s while the results fade back in.
+export const focusAt = t => slide(t, BEATS.right) - out2((t - BEATS.back - FOCUS_LAG) / .4); // 0 = tile 1, 1 = tile 2 (column)
 export const scaleAt = t => pulseAt(t, BEATS.ok);
 // Baagad 16 Oct: OK plays the focused video on the TV (crossfade in right after the OK pulse) and the two-finger-tap
 // Back returns to the YouTube results (crossfade out 2 frames after the press). 0 = results, 1 = playing.
@@ -113,7 +114,7 @@ export function Bento() {
         <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">{paused ? <path d="M4 2.5v11l9-5.5z" fill="currentColor" /> : <path d="M4 2.5h2.6v11H4zM9.4 2.5H12v11H9.4z" fill="currentColor" />}</svg></button>}
       <p className="visually-hidden" aria-live="polite">{status}</p>
     </div>
-    <div className="b-tile b-tile-tv" role="img" aria-label={`Illustrated TV: YouTube results for lofi beats. Result ${focus + 1} of 6 is focused.`}>
+    <div className="b-tile b-tile-tv" role="img" aria-label={`Drawn TV: YouTube results for lofi beats. Result ${focus + 1} of 6 is focused.`}>
       <BoardTV />
       {auto && playAt(t) > 0 && <PlayingTV k={playAt(t)} p={.08 + .12 * clamp((t - BEATS.ok - .2) / (BEATS.back - BEATS.ok))} />}
       <div ref={ringEl} className="b-tv-ring" style={ringBox} aria-hidden="true">

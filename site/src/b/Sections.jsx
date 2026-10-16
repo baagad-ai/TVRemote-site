@@ -93,17 +93,47 @@ const ARC_ITEMS = [...SHOTS.slice(3), ...SHOTS.slice(0, 3)].map(([n, text, alt])
 // Plane height = 0.6 x box height x itemSize: 477px tall = the board's ~225px-wide phone in the 700px box.
 const GALLERY_SIZE = 477 / (.6 * 700);
 const GalleryArc = ({ flat = false }) => <ul className={`b-arc${flat ? ' is-flat' : ''}`}>{SHOTS.map(([n, , alt], i) => <li key={n} style={{ '--i': i - 3 }}><img src={`assets/b/gallery-${n}.webp`} alt={alt} width="440" height="932" loading="lazy" decoding="async" /></li>)}</ul>;
+// Baagad 16 Oct: under 900 px the gallery moves on its own too (no snap): a transform track of the phones, two copies
+// (the second aria-hidden), ~24 px/s, draggable either way (touch or mouse), resuming 1.5 s after the drag ends; it
+// pauses off-screen, on hover, and with the 32 px pause control (WCAG 2.2.2). Reduced motion: a static row you scroll.
+function GalleryTrack({ paused }) {
+  const box = useRef(null), track = useRef(null);
+  useEffect(() => {
+    const el = box.current, tr = track.current; let raf = 0, last = 0, x = 0, w = 1, drag = null, resumeAt = 0, inView = false, hover = false;
+    const measure = () => { w = tr.firstChild.getBoundingClientRect().width || 1; };
+    const place = () => { x = ((x % w) + w) % w; tr.style.transform = `translate3d(${-x}px,0,0)`; };
+    const tick = now => { const dt = last ? Math.min(.05, (now - last) / 1000) : 0; last = now; if (!drag && !paused.current && !hover && now >= resumeAt) x += 24 * dt; place(); raf = requestAnimationFrame(tick); };
+    const run = () => { if (!raf && inView && !document.hidden) { last = 0; raf = requestAnimationFrame(tick); } }, stop = () => { cancelAnimationFrame(raf); raf = 0; };
+    const io = new IntersectionObserver(([e]) => { inView = e.isIntersecting; inView ? run() : stop(); }); io.observe(el);
+    const ro = new ResizeObserver(measure); ro.observe(tr); measure();
+    const down = e => { drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, start: x, moved: false }; };
+    const move = e => { if (!drag || drag.id !== e.pointerId) return; const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+      if (!drag.moved) { if (Math.hypot(dx, dy) < 6) return; if (Math.abs(dy) > Math.abs(dx)) { drag = null; return; } drag.moved = true; el.setPointerCapture?.(e.pointerId); }
+      x = drag.start - dx; place(); };
+    const up = e => { if (drag && drag.id === e.pointerId) { drag = null; resumeAt = performance.now() + 1500; } };
+    const enter = e => { if (e.pointerType === 'mouse') hover = true; }, leave = () => { hover = false; };
+    const vis = () => (document.hidden ? stop() : run());
+    el.addEventListener('pointerdown', down); el.addEventListener('pointermove', move); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    el.addEventListener('pointerenter', enter); el.addEventListener('pointerleave', leave); document.addEventListener('visibilitychange', vis);
+    return () => { stop(); io.disconnect(); ro.disconnect(); el.removeEventListener('pointerdown', down); el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); el.removeEventListener('pointerenter', enter); el.removeEventListener('pointerleave', leave); document.removeEventListener('visibilitychange', vis); };
+  }, []);
+  return <div ref={box} className="b-gtrack"><div ref={track} className="b-gtrack-inner"><GalleryArc /><div aria-hidden="true"><GalleryArc /></div></div></div>;
+}
+const PauseBtn = ({ paused, onClick, what }) => <button type="button" className="b-marq-btn b-pause-btn" aria-pressed={paused} aria-label={`${paused ? 'Play' : 'Pause'} ${what}`} onClick={onClick}>
+  <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">{paused ? <path d="M4 2.5v11l9-5.5z" fill="currentColor" /> : <path d="M4 2.5h2.6v11H4zM9.4 2.5H12v11H9.4z" fill="currentColor" />}</svg></button>;
 export function Gallery() {
   const { ready, gpu, motion } = useEnvironment(), ref = useRef(null), inView = useInView(ref, { threshold: .3 }), [desktop, setDesktop] = useState(false);
   // Baagad 16 Oct: the live gallery runs at 900 px and wider on touch too (tablets swipe it), and under reduced motion
   // (no auto-scroll there, drag still works). It auto-scrolls slowly and resumes 1.5 s after a drag / swipe / wheel.
   useEffect(() => { if (!ready) return; const q = matchMedia('(min-width: 900px)'), u = () => setDesktop(q.matches && !lowEnd()); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
   const lease = useGpuLease(ready && (gpu || (!motion && !navigator.connection?.saveData)) && desktop && inView, 'circular-gallery');
+  const [paused, setPaused] = useState(false), pausedRef = useRef(false); pausedRef.current = paused;
   return <section className="b-section b-gallery" id="screens" aria-labelledby="gallery-title">
     <div className="b-wrap"><Eyebrow>The real app</Eyebrow><h2 id="gallery-title">Every screen, <em>as it ships.</em></h2></div>
     <div ref={ref} className={`b-gallery-box ${lease ? 'is-live' : ''}`}>
-      {lease ? <CircularGallery fallback={<GalleryArc />} items={ARC_ITEMS} bend={2.2} itemSize={GALLERY_SIZE} itemAspect={GALLERY_ASPECT} gap={.115} showTitles={false} shadow={0} fadeEdges={0} textColor="#eeeee6" borderRadius={.109} scrollEase={.05} autoScroll={motion ? .6 : 0} openOnClick={false} snap={false} intro={false} dpr={1.5} className="b-circular" />
-        : <GalleryArc flat={ready && !motion} />}
+      {ready && motion && <div className="b-gallery-ctl"><PauseBtn paused={paused} onClick={() => setPaused(p => !p)} what="screen gallery" /></div>}
+      {lease ? <CircularGallery fallback={<GalleryArc />} items={ARC_ITEMS} bend={2.2} itemSize={GALLERY_SIZE} itemAspect={GALLERY_ASPECT} gap={.115} showTitles={false} shadow={0} fadeEdges={0} textColor="#eeeee6" borderRadius={.109} scrollEase={.05} autoScroll={motion && !paused ? .6 : 0} openOnClick={false} snap={false} intro={false} dpr={1.5} className="b-circular" />
+        : ready && motion && !desktop ? <GalleryTrack paused={pausedRef} /> : <GalleryArc flat={ready && !motion} />}
     </div>
   </section>;
 }
@@ -115,7 +145,7 @@ export function Gallery() {
 const MARQ = ['Free', 'No ads', 'No account', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
 const MarqCopy = ({ hidden }) => <ul className="b-marq-copy" aria-hidden={hidden || undefined}>{MARQ.map(f => <li key={f}><span>{f}</span><span className="b-marq-sep" aria-hidden="true">✦</span></li>)}</ul>;
 export function ProofMarquee() {
-  const { ready, motion } = useEnvironment(), band = useRef(null), copy = useRef(null), [dur, setDur] = useState(60), [off, setOff] = useState(false);
+  const { ready, motion } = useEnvironment(), band = useRef(null), copy = useRef(null), [dur, setDur] = useState(60), [off, setOff] = useState(false), [paused, setPaused] = useState(false);
   useEffect(() => {
     if (!ready || !motion || !copy.current) return;
     const measure = () => setDur(Math.max(10, copy.current.getBoundingClientRect().width / 40));
@@ -124,8 +154,11 @@ export function ProofMarquee() {
     return () => { ro.disconnect(); io.disconnect(); };
   }, [ready, motion]);
   const still = ready && !motion;
-  return <section ref={band} className={`b-marq${still ? ' is-still' : ''}${off ? ' is-off' : ''}`} aria-label="Straight facts">
+  // WCAG 2.2.2 (Design spec): a 32 px pause / play circle at the band's right end, above the track on a short panel fade.
+  return <section ref={band} className={`b-marq${still ? ' is-still' : ''}${off ? ' is-off' : ''}${paused ? ' is-paused' : ''}`} aria-label="Straight facts">
     <div className="b-marq-track" style={{ '--marq-dur': `${dur.toFixed(2)}s` }}><div ref={copy} className="b-marq-unit"><MarqCopy /></div>{!still && <div className="b-marq-unit" aria-hidden="true"><MarqCopy hidden /></div>}</div>
+    {ready && motion && <div className="b-marq-ctl"><button type="button" className="b-marq-btn" aria-pressed={paused} aria-label={paused ? 'Play facts ticker' : 'Pause facts ticker'} onClick={() => setPaused(x => !x)}>
+      <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">{paused ? <path d="M4 2.5v11l9-5.5z" fill="currentColor" /> : <path d="M4 2.5h2.6v11H4zM9.4 2.5H12v11H9.4z" fill="currentColor" />}</svg></button></div>}
   </section>;
 }
 // 7 · Proof (Baagad 16 Oct): six facts, none ever dim. When the band comes into view (IntersectionObserver, once) the
@@ -148,7 +181,8 @@ export function Proof() {
     <ul ref={list} className="b-facts">{FACTS.map((f, i) => <li key={f} className={i < ticked ? 'is-ticked' : ''}><span className="b-check" aria-hidden="true">✓</span><span>{f}</span></li>)}</ul>
   </div></section>;
 }
-// 8 · Compatibility split: the Phone -> Home Wi-Fi -> Living Room TV line draws once (0.8 s); React Bits ScrollReveal
+// 8 · Compatibility split: the Phone -> Home Wi-Fi -> Living Room TV line draws once (0.8 s), then one lime pulse runs
+// the line every 10 s and each chip brightens as it arrives (CSS, transform/opacity/stroke only); React Bits ScrollReveal
 // on the paragraph. The privacy sentence is the approved one, verbatim.
 export function TypeSplit() {
   const ref = useRef(null), seen = useInView(ref, { threshold: .4 }), [drawn, setDrawn] = useState(false), { ready, motion } = useEnvironment();
@@ -156,7 +190,7 @@ export function TypeSplit() {
   const LEDE = "The Remote works with Android TV and Google TV devices that support Android TV Remote Service v2. Your phone needs Android 8.0 or later. There's no iPhone version.";
   return <section ref={ref} className={`b-section b-split ${drawn ? 'is-drawn' : ''}`} id="compatibility" aria-labelledby="compatibility-title"><div className="b-wrap b-split-grid">
     <div><Eyebrow>Will it work?</Eyebrow><h2 id="compatibility-title"><span className="b-h2-l1">Works with Android{'\u00a0'}TV</span> <em>and Google{'\u00a0'}TV.</em></h2>
-      <div className="b-line" aria-hidden="true"><span className="b-chip is-on">Phone</span><svg viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip">Home Wi-Fi</span><svg className="is-fade" viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip">Living Room TV</span></div></div>
+      <div className="b-line" aria-hidden="true"><span className="b-chip is-on b-hop-1">Phone</span><svg viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /><line className="b-pulse" x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip b-hop-2">Home Wi-Fi</span><svg className="is-fade" viewBox="0 0 100 2" preserveAspectRatio="none"><line x1="0" y1="1" x2="100" y2="1" /><line className="b-pulse is-2" x1="0" y1="1" x2="100" y2="1" /></svg><span className="b-chip b-hop-3">Living Room TV</span></div></div>
     <div className="b-split-copy">{ready && motion ? <ScrollReveal fallback={<p className="b-lede">{LEDE}</p>} as="p" baseOpacity={.2} enableBlur={false} baseRotation={0} containerClassName="b-reveal" textClassName="b-lede">{LEDE}</ScrollReveal> : <p className="b-lede">{LEDE}</p>}
       <p className="b-small">Remote commands go to your paired TV over the local network, without a developer cloud relay. The Remote doesn&rsquo;t keep a search history.</p></div>
   </div></section>;

@@ -12,7 +12,16 @@
 .b-arc img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 40px 50px rgb(11 14 13/.55))}
 @media (max-width:899px){
   .b-gallery{padding-bottom:44px}
-  .b-gallery-box{height:auto;margin-top:28px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding-bottom:30px}
+  .b-gallery-box{height:auto;margin-top:28px;overflow-x:auto;overflow-y:hidden;padding-bottom:30px} /* no snap (Baagad 16 Oct) */
   .b-arc{justify-content:flex-start;gap:16px;padding:0 20px;height:auto}
-  .b-arc li{width:200px;transform:none;scroll-snap-align:center}
+  .b-arc li{width:200px;transform:none}
+  .b-gallery-box:has(.b-gtrack){overflow:clip;padding-top:44px}
+  .b-gtrack{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab}
+  .b-gtrack-inner{display:flex;width:max-content;will-change:transform}
+  .b-gtrack-inner>div{flex:none}
+  .b-gtrack .b-arc{padding:0 16px 0 0;gap:16px}
+  .b-gtrack img{pointer-events:none;-webkit-user-drag:none}
 }
+/* The gallery's 32 px pause control (marquee pattern), top right of the gallery box. */
+.b-gallery-ctl{position:absolute;top:12px;right:max(16px,calc((100vw - var(--wrap))/2));z-index:3}
+@media (prefers-reduced-motion:reduce){.b-gallery-ctl{display:none}}

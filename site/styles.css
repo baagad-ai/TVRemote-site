@@ -267,12 +267,12 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 
 /* ---------- 4 · Rooms (board mock_rooms: 760px; render right:-40 top:-20 h820 saturate(.9); radial vignette; copy 180 down). ---------- */
 .b-rooms{position:relative;height:760px;overflow:hidden;background:var(--ink)}
-.b-rooms-media{position:absolute;inset:0;z-index:0}
+.b-rooms-media{position:absolute;z-index:0;top:-20px;right:-40px;height:820px;width:calc(820px * 1440 / 760)} /* guide l.95: right -40, top -20, 820 tall (the 1440x760 loop at its own aspect) */
 .b-rooms-pixwrap,.b-rooms-pixels{position:absolute;inset:0}
 .b-rooms-pixels.pixelated-image-card{width:100%;height:100%;outline:none}
 .room-media{position:absolute;inset:0}
 .room-media img,.room-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.b-rooms-vignette{display:none}
+.b-rooms-vignette{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(60% 70% at 65% 50%,transparent 40%,#0b0e0d 80%)}
 .b-rooms-copy{position:relative;z-index:2;padding-top:180px;pointer-events:none}.b-rooms-copy>*{pointer-events:auto}
 .b-rooms .b-lede{max-width:38ch}
 .b-chips{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
@@ -420,7 +420,7 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
   .b-line{flex-wrap:wrap;row-gap:10px}.b-line svg{min-width:24px}
   .b-rooms{height:auto;padding-bottom:44px;display:flex;flex-direction:column}
   .b-rooms-copy{order:1;padding-top:44px}
-  .b-rooms-media{order:2;position:relative;inset:auto;width:100%;aspect-ratio:4/5;margin-top:24px}
+  .b-rooms-media{order:2;position:relative;inset:auto;width:100%;height:auto;aspect-ratio:4/5;margin-top:24px}
   .b-rooms-vignette{display:none}
   .b-closing{margin-top:44px}
   body[data-route=landing] main .b-closing h2{font-size:48px}
@@ -1141,6 +1141,70 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
   .b-marq-copy{flex-wrap:wrap;white-space:normal;row-gap:10px;padding:0 max(20px,calc((100vw - var(--wrap))/2))}
   .b-marq-copy li:last-child .b-marq-sep{display:none}
 }
+.b-marq.is-paused .b-marq-track{animation-play-state:paused}
+.b-marq-ctl{position:absolute;top:0;right:0;bottom:0;z-index:2;display:flex;align-items:center;padding:0 max(16px,calc((100vw - var(--wrap))/2 - 24px)) 0 56px;background:linear-gradient(to right,transparent,var(--panel) 40px)}
+.b-marq-btn{width:32px;height:32px;padding:0;display:grid;place-items:center;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--lime);cursor:pointer}
+.b-marq-btn:hover{border-color:var(--lime)}
+.b-marq-btn:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.b-marq-ctl{display:none}}
+/* Rooms 900-1199 px, landscape tablets (Design, PM 22:13): the board composition kept: copy on the left, the room render
+   from 40% bleeding off the right edge, so the copy never sits on the render; height grows with the copy, so the
+   pairing phone is never clipped. Stacking stays for portrait / narrow screens (<= 899 px). */
+@media (min-width:900px) and (max-width:1199px){
+  .b-rooms{height:auto;min-height:min(760px,100svh)}
+  .b-rooms-copy{padding-top:96px;padding-bottom:56px}
+  .b-rooms-copy>*{max-width:36%}
+  .b-rooms .b-lede{max-width:36%}
+  .b-rooms-media{left:40%;top:0;right:0;height:100%;width:auto}
+  .room-media img,.room-media video{object-position:30% 50%}
+}
+/* Will it work? (Design, PM 22:14): after the 0.8 s draw, one lime pulse every 10 s: a short dash runs segment 1
+   (0.3-0.9 s of the cycle), then segment 2 (1.1-1.7 s); Phone, Home Wi-Fi and Living Room TV brighten briefly as it
+   arrives. Reduced motion: the line drawn, nothing moves. */
+.b-line svg line.b-pulse{stroke:var(--lime);stroke-width:4;stroke-linecap:round;stroke-dasharray:10 200;stroke-dashoffset:10;opacity:0;vector-effect:non-scaling-stroke}
+@keyframes b-pulse-1{0%,3%{stroke-dashoffset:10;opacity:0}3.5%{opacity:1}9%{stroke-dashoffset:-100;opacity:1}9.5%,100%{stroke-dashoffset:-100;opacity:0}}
+@keyframes b-pulse-2{0%,11%{stroke-dashoffset:10;opacity:0}11.5%{opacity:1}17%{stroke-dashoffset:-100;opacity:1}17.5%,100%{stroke-dashoffset:-100;opacity:0}}
+.b-split.is-drawn .b-line .b-pulse{animation:b-pulse-1 10s linear .9s infinite}
+.b-split.is-drawn .b-line .b-pulse.is-2{animation-name:b-pulse-2}
+.b-split.is-drawn .b-hop-1,.b-split.is-drawn .b-hop-2,.b-split.is-drawn .b-hop-3{animation-duration:10s;animation-iteration-count:infinite;animation-timing-function:linear}
+.b-split.is-drawn .b-hop-1{animation-name:b-hop-a;animation-delay:.9s}
+.b-split.is-drawn .b-hop-2{animation-name:b-hop-b;animation-delay:.9s}
+.b-split.is-drawn .b-hop-3{animation-name:b-hop-c;animation-delay:.9s}
+@keyframes b-hop-a{0%{box-shadow:0 0 0 0 var(--lime)}1.5%{box-shadow:0 0 0 3px var(--lime)}4%,100%{box-shadow:0 0 0 0 var(--lime)}}
+@keyframes b-hop-b{0%,8.5%{box-shadow:0 0 0 0 var(--lime)}10%{box-shadow:0 0 0 3px var(--lime)}12.5%,100%{box-shadow:0 0 0 0 var(--lime)}}
+@keyframes b-hop-c{0%,16.5%{box-shadow:0 0 0 0 var(--lime)}18%{box-shadow:0 0 0 3px var(--lime)}20.5%,100%{box-shadow:0 0 0 0 var(--lime)}}
+@media (prefers-reduced-motion:reduce){.b-line .b-pulse{display:none}.b-split.is-drawn .b-hop-1,.b-split.is-drawn .b-hop-2,.b-split.is-drawn .b-hop-3{animation:none}}
+/* Search loop (touch / < 1200 px, PM 22:13): the three.js loop beside the copy at 900+ px, above it below that; 16:10
+   above 390 px, 4:5 at 390 (the stills' framing). Poster until the first 3D frame. The steps light with the loop. */
+.b-pin.is-loop .b-pin-stage{padding-block:56px}
+.b-pin.is-loop .b-pin-grid{display:grid;grid-template-columns:1fr;gap:28px;align-items:center}
+@media (min-width:900px){.b-pin.is-loop .b-pin-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:40px}}
+.pin-loop{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:4px;background:var(--ink)}
+@media (max-width:390px){.pin-loop{aspect-ratio:4/5}}
+.pin-loop-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .3s ease}
+.pin-loop.is-3d .pin-loop-poster img,.pin-loop.is-2d .pin-loop-poster img{opacity:0}
+.pin-loop-host{position:absolute;inset:0;visibility:hidden}
+.pin-loop.is-3d .pin-loop-host{visibility:visible}
+.pin-loop-host canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pin-loop-2d{position:absolute;inset:0;display:grid;place-items:center;padding:4%}
+.pin-loop-2d .phone-loop{width:100%;height:auto}
+/* TV and phone placement boxes (height 0: only width and centre are read), matching Build's stills' composition. */
+.pin-loop-tv,.pin-loop-phone{position:absolute;height:0;pointer-events:none}
+.pin-loop-tv{left:-6%;width:92%;top:43%}
+.pin-loop-phone{left:10%;width:19%;top:70%}
+@media (max-width:390px){.pin-loop-tv{left:-8%;width:123%;top:41%}.pin-loop-phone{left:37%;width:25%;top:59%}}
+.b-pin.is-loop .b-pin-step{display:flex;color:var(--muted);padding:14px 0;border-top:1px solid var(--line)}
+.b-pin.is-loop .b-pin-step .b-step-no{color:var(--muted)}
+.b-pin.is-loop .b-pin-step.is-on{color:var(--paper)}
+.b-pin.is-loop .b-pin-step.is-on .b-step-no{color:var(--lime)}
+.b-pin.is-loop .b-step-bar{display:block}
+.b-pin.is-loop .b-step-title{font-size:17px}
+.b-pin.is-loop .b-pin-stage{padding-block:40px!important;min-height:0}
+body[data-route=landing] main .b-pin.is-loop h2{font-size:clamp(34px,4.2vw,48px);margin-bottom:12px}
+.b-pin.is-loop .b-eyebrow{margin-bottom:14px}
+.b-pin.is-loop .b-lede{margin:0}
+.b-pin.is-loop .b-pin-steps{margin-top:18px}
+.b-pin.is-loop .b-pin-step{padding:10px 0}
 
 /* ---------- 3 · Swipe and tap (CONCEPT-B-GUIDE.md §3, board gen.py:226-243). Section bg = the 30% panel mix; the cards sit
    straight on it (--panel, 1px --line, r28, padding 22). Grid 300px 1fr 1fr 1fr: phone tile first (2 rows), TV tile 2 cols,
@@ -1235,7 +1299,16 @@ body[data-route=landing] .faq-more-list summary{font-size:16px!important}
 .b-arc img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 40px 50px rgb(11 14 13/.55))}
 @media (max-width:899px){
   .b-gallery{padding-bottom:44px}
-  .b-gallery-box{height:auto;margin-top:28px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding-bottom:30px}
+  .b-gallery-box{height:auto;margin-top:28px;overflow-x:auto;overflow-y:hidden;padding-bottom:30px} /* no snap (Baagad 16 Oct) */
   .b-arc{justify-content:flex-start;gap:16px;padding:0 20px;height:auto}
-  .b-arc li{width:200px;transform:none;scroll-snap-align:center}
+  .b-arc li{width:200px;transform:none}
+  .b-gallery-box:has(.b-gtrack){overflow:clip;padding-top:44px}
+  .b-gtrack{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab}
+  .b-gtrack-inner{display:flex;width:max-content;will-change:transform}
+  .b-gtrack-inner>div{flex:none}
+  .b-gtrack .b-arc{padding:0 16px 0 0;gap:16px}
+  .b-gtrack img{pointer-events:none;-webkit-user-drag:none}
 }
+/* The gallery's 32 px pause control (marquee pattern), top right of the gallery box. */
+.b-gallery-ctl{position:absolute;top:12px;right:max(16px,calc((100vw - var(--wrap))/2));z-index:3}
+@media (prefers-reduced-motion:reduce){.b-gallery-ctl{display:none}}

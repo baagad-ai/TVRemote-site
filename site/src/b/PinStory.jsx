@@ -13,7 +13,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SplitText from '../components/SplitText';
 import { PIN } from './media';
 import { useEnvironment } from '../environment';
-import { useGpuLease, lowEnd } from './lease';
+import { useGpuLease, useInView, lowEnd } from './lease';
+import { useLoopClock } from './phone/clock.js';
 import { PhoneLoop, phoneScreenSvg } from './slots';
 import DrawnTV from './DrawnTV';
 
@@ -65,6 +66,41 @@ export function PinStill({ index }) {
     <div className="pin-still-tv" role="img" aria-label={s.tvAlt}><DrawnTV state={s.drawn} focus={0} idPrefix={`still${index}`} /></div>
     <div className="pin-still-phone" role="img" aria-label={s.phoneAlt}><PhoneLoop name="typing" step={index} /></div>
   </figure>;
+}
+// PM 22:13 (touch / under 1200 px): no pin. The SAME three.js scene (pin-tv-phone.glb, PhoneScreen / TVScreen) plays one
+// 10 s seamless loop while on screen, with Build's pin-design textures: typed search | 1.5 s Send (phone "sent", the TV
+// shows the results 2 frames later) | 3.5 s Share a YouTube link (share sheet) | 5.5 s Open (the TV plays it 2 frames
+// later) | hold | 9.0 s back to the typed search | rest to 10 s (t = 10 renders as t = 0). Three presses, 2 s apart.
+// One renderer (the 'pin' GPU lease), DPR <= 1.5, demand rendering, paused off-screen (useLoopClock + the lease).
+// No WebGL / the scene fails: Design's 2D <PhoneLoop name="typing" tv /> (same clock idea). Reduced motion / Save-Data:
+// the stills (the caller). The poster (Build's step-1 still) shows until the first 3D frame has rendered.
+const LOOP_TEX = { tv: ['search-typing-1440', 'results-f0-1440', 'playing-1440'].map(n => `assets/3d-prod/textures/loop-tv-${n}.png`), phone: ['1-typed', '2-sent', '3-share'].map(n => `assets/3d-prod/textures/loop-phone-${n}.png`) };
+const L_SEND = 1.5, L_SHARE = 3.5, L_OPEN = 5.5, L_BACK = 9, TV_LAG = .033;
+export const loopState = t => ({ phone: t >= L_BACK ? 0 : t >= L_SHARE ? 2 : t >= L_SEND ? 1 : 0, tv: t >= L_BACK ? 0 : t >= L_OPEN + TV_LAG ? 2 : t >= L_SEND + TV_LAG ? 1 : 0 });
+function PinLoop({ onStep }) {
+  const { gpu } = useEnvironment(), box = useRef(null), host = useRef(null), tvEl = useRef(null), phEl = useRef(null), api = useRef(null);
+  const inView = useInView(box, { threshold: .15 }), [mode, setMode] = useState('poster');
+  const lease = useGpuLease(gpu && inView && mode !== '2d' && Boolean(PIN.model), 'pin');
+  const t = useLoopClock(box, 0, true), st = loopState(t);
+  useEffect(() => { if (!gpu) setMode('2d'); }, [gpu]);
+  const push = () => { const a = api.current; if (!a || !tvEl.current) return; const k = loopState(tRef.current); a.update(0, k.tv, k.phone, tvEl.current.getBoundingClientRect(), phEl.current.getBoundingClientRect()); };
+  const tRef = useRef(0); tRef.current = t;
+  useEffect(() => {
+    if (!lease) return;
+    const ctrl = new AbortController();
+    import('./pin-scene.js').then(({ createPinScene }) => createPinScene(host.current, { modelUrl: PIN.model, tvTextures: LOOP_TEX.tv, phoneTextures: LOOP_TEX.phone, signal: ctrl.signal }))
+      .then(a => { api.current = a; push(); requestAnimationFrame(() => requestAnimationFrame(() => { if (!ctrl.signal.aborted) setMode('3d'); })); })
+      .catch(() => { if (!ctrl.signal.aborted) setMode('2d'); });
+    return () => { ctrl.abort(); api.current?.dispose(); api.current = null; host.current?.replaceChildren(); setMode(m => (m === '3d' ? 'poster' : m)); };
+  }, [lease]);
+  useEffect(() => { push(); }, [t, mode]);
+  useEffect(() => { onStep(st.phone); }, [st.phone]);
+  return <div ref={box} className={`pin-loop is-${mode}`} aria-hidden="true">
+    <picture className="pin-loop-poster">{PIN.wide[0] && <source media="(min-width: 391px)" srcSet={PIN.wide[0]} width="1600" height="1000" />}<img src={PIN.stills[0] || PIN.wide[0]} alt="" width="780" height="975" decoding="async" /></picture>
+    <span ref={tvEl} className="pin-loop-tv" /><span ref={phEl} className="pin-loop-phone" />
+    <div ref={host} className="pin-loop-host" />
+    {mode === '2d' && <div className="pin-loop-2d"><PhoneLoop name="typing" tv /></div>}
+  </div>;
 }
 export default function PinStory() {
   const { ready, motion, gpu } = useEnvironment(), root = useRef(null), stage = useRef(null);
@@ -147,12 +183,16 @@ export default function PinStory() {
     items.forEach(li => io.observe(li));
     return () => { cancelAnimationFrame(raf); removeEventListener('scroll', queue); removeEventListener('resize', queue); io.disconnect(); };
   }, [pinned]);
-  const step = pinned ? idx : stackIdx;
-  return <section ref={root} className={`b-pin ${pinned ? 'is-pinned' : 'is-stacked'}${!pinned && ready && motion ? ' is-reveal' : ''}${is3d ? ' is-3d' : ''}`} id="search-proof" data-active-step={step + 1} data-track-section="search" aria-labelledby="pin-title">
+  // Touch / < 1200 px with motion (and no Save-Data): the 10 s three.js loop instead of the three stills.
+  const loopMode = !pinned && ready && motion && !focusMode && !(typeof navigator !== 'undefined' && navigator.connection?.saveData);
+  const [loopStep, setLoopStep] = useState(0);
+  const step = pinned ? idx : loopMode ? loopStep : stackIdx;
+  return <section ref={root} className={`b-pin ${pinned ? 'is-pinned' : 'is-stacked'}${loopMode ? ' is-loop' : ''}${!pinned && ready && motion ? ' is-reveal' : ''}${is3d ? ' is-3d' : ''}`} id="search-proof" data-active-step={step + 1} data-track-section="search" aria-labelledby="pin-title">
     <span id="share-story" className="b-anchor" aria-hidden="true" />
     <div ref={stage} className="b-pin-stage">
       {pinned && <div ref={host} className="pin-canvas-host" aria-hidden="true"><span className="pin-glow" /></div>}
       <div className="b-wrap b-pin-grid">
+        {loopMode && <div className="b-pin-loopcol"><PinLoop onStep={setLoopStep} /></div>}
         {pinned && <div className="b-pin-media" aria-hidden="true"><Scene v={v} idx={idx} phoneIdx={phoneIdx} eager sceneRef={sceneRef} /></div>}
         <div className="b-pin-copy">
           <p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />01 / YouTube search</p>
@@ -160,9 +200,9 @@ export default function PinStory() {
           <p className="b-lede">Type the search on your phone keyboard. The results open on your TV.</p>
           <ol className="b-pin-steps">{STEPS.map((s, i) => <li key={s.id} className={`b-pin-step${step === i ? ' is-on' : ''}${seen & (1 << i) ? ' is-seen' : ''}`} aria-current={step === i ? 'step' : undefined}>
             <span className="b-step-no">0{i + 1}</span>
-            <SplitText tag="span" text={s.title} className="b-step-title" textAlign="left" splitType="lines" enabled={motion} delay={40} duration={.6} ease="power3.out" from={{ opacity: 0, y: 18 }} to={{ opacity: 1, y: 0 }} />
+            <SplitText tag="span" text={s.title} className="b-step-title" textAlign="left" splitType="lines" enabled={motion && pinned} delay={40} duration={.6} ease="power3.out" from={{ opacity: 0, y: 18 }} to={{ opacity: 1, y: 0 }} />
             <span className="b-step-bar" aria-hidden="true" />
-            {!pinned && <div className="b-pin-stacked-still"><PinStill index={i} /></div>}
+            {!pinned && !loopMode && <div className="b-pin-stacked-still"><PinStill index={i} /></div>}
           </li>)}</ol>
           
         </div>

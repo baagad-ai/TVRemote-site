@@ -35,10 +35,10 @@ export const typingStep = s => s === 1 ? <><RemoteHome /><Sent /></> : s === 2 ?
 // outline halo plus the finger-count dots (1 of 3 lit); lifts at 3.65 s and fades over 200 ms. No step bars (those are for
 // swipe-and-hold), no "repeating" label, no hold timer, no cursor. Exit (X) top-left. Everything is gone by 7.8 s,
 // so t = 10 renders the same as t = 0.
-// Marketing 16 Oct (Baagad): the loop now shows four beats: 1.0 swipe right | 3.4 tap = OK (the video plays on the TV) |
-// 5.8 two-finger tap = Back (the TV returns to the YouTube results) | 7.6 swipe left (focus home to tile 1) | rest to 10.
-const SWIPE_R = 1, TAP = 3.4, TAP_UP = 3.65, BACK = 5.8, BACK_UP = 6.05, SWIPE_L = 7.6, SW_D = .8, TV_D = .25, PY = 400, MUTE = PAPER;
-const CHIPS = [[SWIPE_R, 'Swipe → ', 'Right'], [TAP, 'Tap → ', 'OK'], [BACK, '2-finger tap → ', 'Back'], [SWIPE_L, 'Swipe → ', 'Left']];
+// Marketing 16 Oct (Design 22:23): three beats: 1.5 swipe right | 4.0 tap = OK (the video plays on the TV) | 6.5
+// two-finger tap = Back (the results fade back in, the TV focus slides home to tile 1 over 0.4 s) | rest to 10.
+const SWIPE_R = 1.5, TAP = 4.0, TAP_UP = 4.25, BACK = 6.5, BACK_UP = 6.75, SW_D = .8, TV_D = .25, PY = 400, MUTE = PAPER;
+const CHIPS = [[SWIPE_R, 'Swipe → ', 'Right'], [TAP, 'Tap → ', 'OK'], [BACK, '2-finger tap → ', 'Back']];
 const Pad = ({ children }) => <><StatusBar /><circle cx="37" cy="56" r="20" fill={PANEL} stroke={LINE} /><I n="close" x={37} y={56} s={.8} />
   <circle cx="80" cy="50" r="12" fill={PANEL} stroke={LINE} strokeWidth="1" /><I n="tv" x={80} y={51} s={.7} c={LIME} /><Tx x={100} y={54} s={12} w={600}>Living Room TV</Tx><circle cx="84" cy="69" r="2.6" fill={LIME} /><Muted x={92} y={72} s={9.5}>Connected</Muted>
   <rect x="14" y="89" width="332" height="640" rx="26" fill={INK} stroke={LINE} />
@@ -69,13 +69,13 @@ function twoTap(t) {
 }
 function trackpad(t) {
   // TV focus moves 2 frames after the finger lifts (swipe end), over the board's 0.25 s.
-  const fx = seg(t, SWIPE_R + SW_D + .067, TV_D) - seg(t, SWIPE_L + SW_D + .067, TV_D);
+  const fx = seg(t, SWIPE_R + SW_D + .067, TV_D) - seg(t, BACK + .067, .4);
   const chips = CHIPS.map(([a, l, b], i) => { const next = CHIPS[i + 1]?.[0] ?? 99, k = seg(t, a, .25, sine) * (1 - seg(t, Math.min(a + 1.6, next - .05), .4, sine)); if (k <= 0) return null;
     return <g key={b} opacity={k} transform={`translate(0 ${(1 - k) * -6})`}><rect x={b === 'Back' ? 100 : 120} y="100" width={b === 'Back' ? 160 : 120} height="30" rx="15" fill={LIME} fillOpacity=".14" stroke={LIME} strokeWidth="1.4" /><Tx x={180} y={119.5} s={11.5} w={600} a="middle">{l}<tspan fill={LIME}>{b}</tspan></Tx></g>; });
-  return { tv: <TV results={1} fx={fx} fy={0} pulse={bump(t, TAP + .033, .25, .1, .35)} />, phone: <Pad>{chips}{swipe(t, SWIPE_R, 110, 250)}{tap(t)}{twoTap(t)}{swipe(t, SWIPE_L, 250, 110)}</Pad> };
+  return { tv: <TV results={1} fx={fx} fy={0} pulse={bump(t, TAP + .033, .25, .1, .35)} />, phone: <Pad>{chips}{swipe(t, SWIPE_R, 110, 250)}{tap(t)}{twoTap(t)}</Pad> };
 }
 // Gallery still: mid swipe right (dot trail, finger ring, chevrons + "Swipe → Right" chip).
-export const TrackpadStill = () => trackpad(1.55).phone;
+export const TrackpadStill = () => trackpad(2.05).phone;
 // invite (Build's flow): rest on the guest list | 1.5 tap "Invite a guest" (button lights) -> the invite screen eases in
 // (1.53-2.23) with the QR + code, "Waiting for guest…" | 3.9 Copy code lights, "Code copied" | 6.2 Done lights -> eases
 // back to the list (6.23-6.93), sliding like the app's own navigation | rest. The spinner turns 8 whole turns per loop.
@@ -85,7 +85,7 @@ function invite(t) {
     {k < 1 && <g transform={`translate(${-90 * k} 0)`}><GuestList inviteLit={bump(t, 1.5, .15, .15, .4)} />{k > 0 && <rect width={W} height={H} fill={INK} opacity={.6 * k} />}</g>}
     {k > 0 && <g transform={`translate(${W * (1 - k)} 0)`}><rect width={W} height={H} fill={INK} /><InviteScreen copyLit={bump(t, 3.9, .15, .15, .4)} copied={seg(t, 3.95, .4) * (1 - seg(t, 5.5, .5))} doneLit={bump(t, 6.2, .15, .15, .4)} spin={(t * 288) % 360} /></g>}</> };
 }
-const SCENES = { typing: [typing, 7.2, 'Type a YouTube search on your phone and send it; the results open on the TV.'], trackpad: [trackpad, 3.65, 'The trackpad: swipe to move the TV focus, tap for OK.'], invite: [invite, 3, 'Invite a guest: a QR code and a short code for their phone.'] };
+const SCENES = { typing: [typing, 7.2, 'Type a YouTube search on your phone and send it; the results open on the TV.'], trackpad: [trackpad, 4.15, 'The trackpad: swipe to move the TV focus, tap for OK.'], invite: [invite, 3, 'Invite a guest: a QR code and a short code for their phone.'] };
 // Marketing patch (16 Oct, §3 bento): optional `t` = an external clock (seconds in [0, 10)), so the bento's TV focus and
 // this phone render from ONE timeline in the same frame. Without `t` the component runs its own clock, as Design shipped it.
 export default function PhoneLoop({ name = 'typing', step, playing, tv = false, frame = false, className = '', t: tExt }) {
@@ -103,7 +103,7 @@ export default function PhoneLoop({ name = 'typing', step, playing, tv = false, 
 // chip), 2 tap OK (finger ring + chip, focus on tile 2). invite: 0 guest list, 1 invite screen. Fonts: an SVG used as an <img>/texture can't load web fonts, so text falls
 // back to the system sans there (the live component uses the page's Work Sans / Outfit).
 import { toSvg } from './svgString.js';
-const STILL = { trackpad: [0, 1.55, 3.65], invite: [0, 3] };
+const STILL = { trackpad: [0, 2.05, 4.15], invite: [0, 3] };
 // remote (hero phone): 0 rest, 1 d-pad RIGHT pressed + lit, 2 OK pressed + lit, 3 d-pad LEFT pressed + lit (same press style as typing's Search).
 export const REMOTE_LIT = [{}, { right: 1 }, { ok: 1 }, { left: 1 }];
 export const remoteStep = s => <RemoteHome lit={REMOTE_LIT[s] || {}} />;
