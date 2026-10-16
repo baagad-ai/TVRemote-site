@@ -7,7 +7,6 @@ The trackpad turns your phone's screen into a full-screen pad for your Android T
 | Gesture | What it does on the TV |
 |---|---|
 | Tap | OK |
-| Long press | Long OK |
 | Swipe up, down, left or right | Moves one step that way |
 | Swipe, then hold | Keep your finger still at the end and it keeps moving that way, one step at a time. Lift to stop. If Repeat is off in Settings, each swipe is one step. |
 | Two-finger tap | Back |
@@ -44,7 +43,7 @@ The first time you open the pad, a short practice coach shows the main gestures.
 
 ## You can remap gestures, within limits
 
-On the Gestures screen you can move actions to other gestures. You can only choose from the remote's own actions, such as OK, Back, Home, Play/Pause and skip back/forward. Long OK stays on long press. Power is never a gesture, so a stray swipe can't turn the TV off.
+On the Gestures screen you can move actions to other gestures. You can only choose from the remote's own actions, such as OK, Back, Home, Play/Pause and skip back/forward. Power is never a gesture, so a stray swipe can't turn the TV off.
 
 ## If the TV disconnects
 

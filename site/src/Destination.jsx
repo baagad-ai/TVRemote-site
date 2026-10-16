@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useEnvironment, useVisible } from './environment';
+import { scrollIdle } from './scroll-idle';
 
 export default function Destination({ room }) {
   const { gpu, motion } = useEnvironment(), [visibleRef, visible] = useVisible(.15), surface = useRef(null), runtime = useRef(null), roomRef = useRef(room);
@@ -10,6 +11,8 @@ export default function Destination({ room }) {
     const controller = new AbortController();
     (async () => {
       try {
+        await scrollIdle();
+        if (canceled) return;
         const module = await import('./destination-runtime');
         if (canceled) return;
         const scene = await module.createDestination(surface.current, () => roomRef.current, controller.signal);

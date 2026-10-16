@@ -22,8 +22,6 @@ Once you're on the right item, tap anywhere on the pad for OK. There's no small 
 
 Back is often the button people miss on a phone screen. On the pad, tap with two fingers anywhere for Back, or use your phone's own back gesture. A three-finger tap is Play/Pause, and a three-finger swipe up goes Home. Swipe left or right with two fingers to skip back or forward (how far varies by app). Your phone's volume keys change the TV's volume while the pad is open.
 
-Press and hold on the pad for Long OK, the long press some TV menus use for extra options.
-
 ## Nothing else to hit by accident
 
 While connected, the pad has one button: Exit, in the corner. Power is never a gesture, so a stray swipe can't turn the TV off. If you'd rather move an action to a different gesture, the Gestures screen has help and remapping, limited to the remote's own actions. The full list is in [Trackpad gestures in The Remote](https://theremote-site.pages.dev/guides/tv-remote-app-trackpad-gestures/).

@@ -12,7 +12,7 @@ The Your TVs widget shows how many TVs you've picked for it and a button for eac
 
 ## How to add a widget on Android
 
-1. Long-press an empty spot on your home screen.
+1. Touch and hold an empty spot on your home screen.
 2. Tap **Widgets**.
 3. Find **The Remote** and pick the widget you want.
 4. Drag it onto your home screen.

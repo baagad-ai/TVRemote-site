@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { siteUrl, loadConfig } from './deployment-config.mjs';
 import { approvedRelease } from './src/download-metrics.mjs';
+const faq=JSON.parse(fs.readFileSync(new URL('./src/faq.json', import.meta.url),'utf8'));
 const root=path.dirname(fileURLToPath(import.meta.url));
 const canonical=siteUrl(process.env.SITE_URL);
 const articles=JSON.parse(fs.readFileSync(path.join(root,'src/guides.json'),'utf8'));
@@ -70,16 +71,30 @@ for(const route of routes){
 }
 const html=read('index.html'),privacy=read('privacy/index.html');
 {
- // Landing plan (PM-locked): order, one eager image, lazy + async + explicit size everywhere else, one phone in Everyday controls.
- const order=['id="search-proof"','class="pin-story','id="guests"','id="trackpad"','id="controls-title"','id="compatibility"'].map(m=>html.indexOf(m));
- assert(order.every((v,i)=>v>=0&&(i===0||v>order[i-1])),'landing order must be hero, pinned story, guests, trackpad, everyday controls, compatibility');
+ // Landing plan: Concept B "Living Room" (approved 16 Oct 2026). Order, one eager image (the hero poster), lazy + async +
+ // explicit size everywhere else, one pinned section, the trademark line, and the claim guardrails.
+ const order=['class="b-hero"','id="search-proof"','id="trackpad"','id="inside"','id="guests"','id="screens"','id="compatibility"','id="download"','id="faq"'].map(m=>html.indexOf(m));
+ assert(order.every((v,i)=>v>=0&&(i===0||v>order[i-1])),'landing order must follow Concept B: hero, pin, trackpad, rooms, guests, gallery, compatibility, download, FAQ');
  const imgs=[...html.matchAll(/<img\b[^>]*>/g)].map(m=>m[0]);
  const eager=imgs.filter(t=>/loading="eager"/.test(t));
- assert.equal(eager.length,1,'only the hero image loads eagerly');assert.match(eager[0],/showcase\/remote-home\.png/);
+ assert.equal(eager.length,1,'only the hero image loads eagerly');assert.match(eager[0],/fetchPriority="high"|fetchpriority="high"/i);
  for(const t of imgs){assert(/\swidth="\d+"/.test(t)&&/\sheight="\d+"/.test(t),'image needs width and height: '+t.slice(0,90));if(!/loading="eager"/.test(t)&&!/width="32" height="32"/.test(t))assert(/loading="lazy"/.test(t)&&/decoding="async"/.test(t),'image must be lazy and async: '+t.slice(0,90));}
- assert.equal((html.match(/class="native-phone control-phone"/g)||[]).length,1,'Everyday controls has exactly one phone');
- assert.match(html,/<details class="tv-detail-proof" open=""><summary>Type with your phone(?:'|&#x27;)s keyboard<\/summary>/,'Typing panel is first and open');
+ assert.equal((html.match(/class="b-pin /g)||[]).length,1,'exactly one pinned section');
+ assert(html.includes('YouTube is a trademark of Google LLC. The Remote is not affiliated with or endorsed by Google or YouTube.'),'footer trademark line');
  assert(!/any TV search box|type into any app/i.test(html),'typing is YouTube search only');
+ for(const route of routes)assert(!/long[- ]?press|long ok/i.test(read(route).replace(/<script[\s\S]*?<\/script>/g,'')),route+': Long press is retired');
+ assert(!/Pixel 8/i.test(html),'no device names');
+ assert.equal(html.split('<meta name="google-site-verification" content="UZdeG9wcSvyzel4qHdnVUz0J00bSkjQ0E3jjGAxkb5w" />').length,2,'Search Console tag once in the homepage head');
+ assert(html.indexOf('google-site-verification')<html.indexOf('</head>'));
+ // Analytics hook points (cookie-free analytics wires to these; it must never gate the download link).
+ for(const id of ['hero','search','guests','trackpad','download'])assert.equal((html.match(new RegExp(`data-track-section="${id}"`,'g'))||[]).length,1,'data-track-section '+id);
+ assert([...html.matchAll(/<a\b[^>]*data-download-cta=[^>]*>/g)].every(m=>/data-track="download"/.test(m[0])),'download links carry data-track="download"');
+ assert.equal((html.match(/data-track="faq-open" data-track-item="faq-\d\d"/g)||[]).length,faq.length,'every FAQ item is tracked');
+ for(const k of ['install-steps','qr','nav','guide'])assert(html.includes(`data-track="${k}"`),'data-track '+k);
+ for(const m of html.matchAll(/data-track-loop="([^"]+)"/g))assert(['hero','rooms-living','rooms-bedroom'].includes(m[1]),'loop key not in Build contract: '+m[1]);
+ for(const route of routes){const page=read(route),wants=!/^(404\.html|join\/)/.test(route);assert.equal(/<script src="[^"]*analytics\.js(?:\?v=[0-9a-f]+)?" defer><\/script>/.test(page),wants,route+(wants?' loads':' must not load')+' analytics.js');}
+ assert(!/<script/.test(read('404.html')),'404 has no scripts');
+ for(const f of fs.readdirSync(path.join(root,'runtime')))assert(!/serviceWorker\.register|caches\.open|document\.cookie\s*=/.test(read('runtime/'+f)),f+': no service worker, Cache Storage or cookies');
  assert(!/long-ok/.test(html),'long-ok markers are retired');
 }
 for(const route of routes) assert(!/data-beta-request-form|beta-enrollment|Google Play account email|Request beta access|turnstile|beta-request\.js/i.test(read(route)),route+' must not expose the retired signup flow');
@@ -89,7 +104,7 @@ if(release) {assert(html.includes(`href="${release.url.replaceAll('&','&amp;')}"
 else {assert.match(html,/Download is being prepared/);assert(!html.includes('data-download-cta='));}
 assert.match(privacy,/Cloudflare Web Analytics/);assert.match(privacy,/click/i);assert.match(privacy,/D1/);
 assert.match(read('styles.css'),/prefers-reduced-motion/);assert.match(read('styles.css'),/:focus-visible/);assert.match(read('styles.css'),/safe-area-inset-bottom/);
-for(const [file,height] of [['showcase/remote-home.png',2340],['showcase/youtube-share.png',2340],['showcase/youtube-search.png',2340],['showcase/your-tvs.png',1880],['showcase/pair-name-and-room.png',2340],['showcase/trackpad-pad.png',2340]]){
+for(const [file,height] of [['showcase/remote-home.png',2340],['showcase/youtube-share.png',2340],['showcase/youtube-search.png',2340],['showcase/your-tvs.png',1880],['showcase/pair-name-and-room.png',2340],['showcase/trackpad-pad.png',2340],['showcase/guests-invite.png',2340],['showcase/guests-primary-guest-list.png',2340]]){
  const bytes=fs.readFileSync(path.join(root,'assets',file));
  assert.equal(bytes.readUInt32BE(16),1080,file);assert.equal(bytes.readUInt32BE(20),height,file);
 }

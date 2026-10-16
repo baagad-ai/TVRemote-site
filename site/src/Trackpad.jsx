@@ -6,11 +6,10 @@ import { slot, SLOTS } from './slots';
 // the text gesture grid stays visually-hidden for screen readers. When the pad is missing: SVG
 // only (same visually-hidden grid). Never app mocks here. Alt text from Design's FRAME-CHECK.md.
 // trackpad-gestures-screen was dropped permanently.
-const artAlt = 'Trackpad gestures: tap for OK, swipe to move one step, long press for Long OK, two-finger tap for Back, two-finger swipe left or right to skip back or forward, three-finger tap for Play/Pause, three-finger swipe up for Home.';
+const artAlt = 'Trackpad gestures: tap for OK, swipe to move one step, two-finger tap for Back, two-finger swipe left or right to skip back or forward, three-finger tap for Play/Pause, three-finger swipe up for Home.';
 const gestures = [
   ['Tap', 'OK'],
   ['Swipe', 'One step that way. Swipe and hold still to keep moving.'],
-  ['Long press', 'Long OK'],
   ['Two-finger tap', 'Back. Your phone’s back gesture works too.'],
   ['Two-finger swipe left', 'Skip back (varies by app)'],
   ['Two-finger swipe right', 'Skip forward (varies by app)'],

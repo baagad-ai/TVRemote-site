@@ -23,7 +23,7 @@ export default function QrHint({ spot }) {
   const [variant, setVariant] = useState(QR_DEFAULT_VARIANT);
   useEffect(() => { const preview = previewVariant(globalThis.location); if (preview) setVariant(preview); }, []);
   if (!release || !QR_VARIANTS[variant].includes(spot)) return null;
-  return <div className={`qr-hint qr-hint-${spot}`} data-qr-spot={spot}>
+  return <div className={`qr-hint qr-hint-${spot}`} data-qr-spot={spot} data-track="qr">
     <img className="qr-hint-tile" src="assets/qr-download.svg" alt="" aria-hidden="true" width="123" height="123" loading="lazy" decoding="async" />
     <p>Scan to get it on your phone.</p>
   </div>;
