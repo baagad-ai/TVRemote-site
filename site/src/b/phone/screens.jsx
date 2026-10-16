@@ -41,7 +41,7 @@ export function GuestList({ inviteLit = 0 }) {
 }
 export const GuestRemote = () => <RemoteHome guest />;
 const Dim = () => <><RemoteHome /><rect width={W} height="780" fill={INK} opacity=".55" /></>;
-export const SearchScreen = () => <><Dim /><SearchSheet text="lofi beats" caret={1} /><Keyboard /></>;
+export const SearchScreen = () => <><Dim /><SearchSheet text="lofi beats" caret={0} /><Keyboard /></>;
 export function ShareScreen() {
   return <><Dim /><rect x="0" y="420" width={W} height="362" rx="22" fill={PANEL} /><rect x="160" y="429" width="40" height="4" rx="2" fill={LINE} />
     <I n="share" x={22} y={447} s={.55} o={.7} /><Muted x={32} y={451} s={9.5}>Shared to The Remote</Muted>

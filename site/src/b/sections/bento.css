@@ -44,7 +44,10 @@
   .b-tile-tv{border-radius:10px;border:6px solid #050706}
   .b-tv-tag{display:none}
   .b-tile-pad{background:transparent;border:0;padding:0;gap:14px 20px;align-items:center;flex-wrap:wrap}
-  .b-tile-pad .b-pad-caption{flex:1;text-align:left;font-size:16px;line-height:1.7}
+  .b-trackpad{padding-top:12px} /* board: the heading sits ~30px higher than the 44px mobile section padding */
+  .b-tile-pad{flex-wrap:nowrap;margin-top:12px}
+  .b-tile-pad .b-pad{width:94px;border-radius:16px} /* board: a ~94px phone beside the caption */
+  .b-tile-pad .b-pad-caption{flex:1;text-align:left;font-size:14px;line-height:1.6}
   .b-tp-pause{top:0;right:0}
   .b-gest{padding:18px}.b-gest h3{font-size:18px!important}
 }

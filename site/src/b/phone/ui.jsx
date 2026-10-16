@@ -39,10 +39,10 @@ export const NavBar = ({ y = 757 }) => <g fill={PAPER}><path d={`M67 ${y - 6}v12
 // lit: 0..1 highlight on a pressable area, drawn on the control itself (no finger dot, no cursor)
 export const Lit = ({ k = 0, x, y, w, h, r }) => k > 0 ? <rect x={x} y={y} width={w} height={h} rx={r} fill={LIME} fillOpacity={.22 * k} stroke={LIME} strokeOpacity={k} strokeWidth="2" /> : null;
 export const TvPill = ({ wide, guest }) => wide
-  ? <g><Card x={14} y={30} w={332} h={guest ? 66 : 50} r={25} /><circle cx="40" cy="55" r="15" fill={LINE} fillOpacity=".55" /><I n="tv" x={40} y={56} s={.85} c={LIME} />
+  ? <g><Card x={14} y={30} w={332} h={guest ? 66 : 50} r={25} /><circle cx="40" cy="55" r="15" fill={INK} stroke={LINE} strokeWidth="1" /><I n="tv" x={40} y={56} s={.85} c={LIME} />
       <Tx x={66} y={50} s={13} w={600}>Living Room TV</Tx><circle cx="70" cy="63" r="2.6" fill={LIME} /><Muted x={77} y={66} s={10}>Living room · Connected</Muted>
       {guest && <g><rect x="66" y="72" width="38" height="15" rx="7.5" fill={LIME} fillOpacity=".18" stroke={LIME} /><Tx x={85} y={83} s={9} w={600} c={LIME} a="middle">Guest</Tx></g>}</g>
-  : <g><Card x={14} y={32} w={142} h={46} r={23} /><circle cx="38" cy="55" r="14" fill={LINE} fillOpacity=".55" /><I n="tv" x={38} y={56} s={.8} c={LIME} />
+  : <g><Card x={14} y={32} w={142} h={46} r={23} /><circle cx="38" cy="55" r="14" fill={INK} stroke={LINE} strokeWidth="1" /><I n="tv" x={38} y={56} s={.8} c={LIME} />
       <Tx x={60} y={51} s={12.5} w={600}>Living …</Tx><circle cx="64" cy="64" r="2.6" fill={LIME} /><Muted x={70} y={67} s={9.5}>Living …</Muted><I n="down" x={140} y={55} s={.6} /></g>;
 export const TopIcons = ({ y = 55, from = 186 }) => <g>{['hand', 'dots', 'power', 'gear'].map((n, i) => <I key={n} n={n} x={from + i * 45} y={y} s={.9} />)}</g>;
 // The remote home (remote-home.png). lit: { search, ok, right, left, up, down, back, home, play } -> 0..1
@@ -52,10 +52,10 @@ export function RemoteHome({ lit = {}, guest = false }) {
     <StatusBar />
     {guest ? <><TvPill wide guest /><TopIcons y={113} from={186} /></> : <><TvPill /><TopIcons /></>}
     <g transform={`translate(0 ${guest ? 58 : 0})`}>
-      <Card x={18} y={93} w={324} h={116} r={16} /><rect x="30" y="106" width="32" height="32" rx="9" fill={LINE} fillOpacity=".6" /><I n="grid" x={46} y={122} s={.85} c={LIME} />
+      <Card x={18} y={93} w={324} h={116} r={16} /><rect x="30" y="106" width="32" height="32" rx="9" fill={INK} stroke={LINE} strokeWidth="1" /><I n="grid" x={46} y={122} s={.85} c={LIME} />
       <Tx x={74} y={118} s={12.5} w={600}>Any app</Tx><Muted x={74} y={132} s={9.5}>Controls for whatever is on Living</Muted><Muted x={74} y={144} s={9.5}>Room TV</Muted>
       <rect x="272" y="113" width="58" height="24" rx="12" fill="none" stroke={LINE} /><I n="auto" x={287} y={125} s={.6} /><Tx x={312} y={129} s={10} a="middle">Auto</Tx>
-      {[['cc', 'Captions'], ['audio', 'Audio'], ['keys', 'More keys']].map(([n, l], i) => <g key={n}><rect x={30 + i * 102} y={158} width={94} height={40} rx="10" fill={LINE} fillOpacity=".38" /><I n={n} x={77 + i * 102} y={172} s={.7} /><Tx x={77 + i * 102} y={191} s={8.5} a="middle" w={i === 2 ? 600 : 400}>{l}</Tx></g>)}
+      {[['cc', 'Captions'], ['audio', 'Audio'], ['keys', 'More keys']].map(([n, l], i) => <g key={n}><rect x={30 + i * 102} y={158} width={94} height={40} rx="10" fill={INK} stroke={LINE} strokeWidth="1" /><I n={n} x={77 + i * 102} y={172} s={.7} /><Tx x={77 + i * 102} y={191} s={8.5} a="middle" w={i === 2 ? 600 : 400}>{l}</Tx></g>)}
       <circle cx="180" cy="316" r="97" fill={PANEL} stroke={LINE} />
       {[['up', 180, 256], ['down', 180, 376], ['left', 120, 316], ['right', 240, 316]].map(([n, x, y]) => <g key={n}><PressDisc k={lit[n]} x={x} y={y} r={22} wash={LIME} washK={.24} /><I n={n} x={x} y={y} s={.9} c={lit[n] > .5 ? LIME : undefined} /></g>)}
       <circle cx="180" cy="316" r="33" fill={LIME} /><PressDisc k={lit.ok} x={180} y={316} r={33} /><Tx x={180} y={322} s={16} w={700} c={INK} a="middle">OK</Tx>
@@ -81,16 +81,16 @@ export function Keyboard({ y = 0, keyLit = {}, sugg = ['bears', 'beats', "beat's
   return <g transform={`translate(0 ${y})`}>
     <rect x="0" y="478" width={W} height="262" fill={PANEL} />
     {sugg.map((s, i) => <Tx key={s} x={60 + i * 120} y={503} s={11.5} a="middle" w={i === 1 ? 600 : 400} o={i === 1 ? 1 : .7}>{s}</Tx>)}<path d="M120 492v16M240 492v16" stroke={LINE} />
-    {ROWS.map((row, r) => [...row].map(ch => { const [x, yy] = keyPos(ch), k = keyLit[ch] || 0; return <g key={ch}><rect x={x - 15.5} y={yy - 20} width="31" height="40" rx="6" fill={LINE} fillOpacity={.5} />{k > 0 && <rect x={x - 15.5} y={yy - 20} width="31" height="40" rx="6" fill={LIME} fillOpacity={.3 * k} stroke={LIME} strokeOpacity={k} strokeWidth="1.6" />}<Tx x={x} y={yy + 5} s={14} a="middle">{ch}</Tx></g>; }))}
-    <rect x="2" y="628" width="44" height="40" rx="6" fill={LINE} fillOpacity=".8" /><path d="M24 640l-8 8h5v7h6v-7h5z" fill={PAPER} />
-    <rect x="314" y="628" width="44" height="40" rx="6" fill={LINE} fillOpacity=".8" /><path d="M326 648l6-7h16v14h-16zM335 645l6 6M341 645l-6 6" fill="none" stroke={PAPER} strokeWidth="1.5" />
-    <rect x="2" y="678" width="56" height="40" rx="6" fill={LINE} fillOpacity=".8" /><Tx x={30} y={702} s={10.5} a="middle">?123</Tx>
-    <rect x="70" y="678" width="220" height="40" rx="6" fill={LINE} fillOpacity=".5" />{keyLit[' '] > 0 && <rect x="70" y="678" width="220" height="40" rx="6" fill={LIME} fillOpacity={.3 * keyLit[' ']} stroke={LIME} strokeOpacity={keyLit[' ']} strokeWidth="1.6" />}
+    {ROWS.map((row, r) => [...row].map(ch => { const [x, yy] = keyPos(ch), k = keyLit[ch] || 0; return <g key={ch}><rect x={x - 15.5} y={yy - 20} width="31" height="40" rx="6" fill={INK} stroke={LINE} strokeWidth="1" />{k > 0 && <rect x={x - 15.5} y={yy - 20} width="31" height="40" rx="6" fill={LIME} fillOpacity={.3 * k} stroke={LIME} strokeOpacity={k} strokeWidth="1.6" />}<Tx x={x} y={yy + 5} s={14} a="middle">{ch}</Tx></g>; }))}
+    <rect x="2" y="628" width="44" height="40" rx="6" fill={LINE} /><path d="M24 640l-8 8h5v7h6v-7h5z" fill={PAPER} />
+    <rect x="314" y="628" width="44" height="40" rx="6" fill={LINE} /><path d="M326 648l6-7h16v14h-16zM335 645l6 6M341 645l-6 6" fill="none" stroke={PAPER} strokeWidth="1.5" />
+    <rect x="2" y="678" width="56" height="40" rx="6" fill={LINE} /><Tx x={30} y={702} s={10.5} a="middle">?123</Tx>
+    <rect x="70" y="678" width="220" height="40" rx="6" fill={INK} stroke={LINE} strokeWidth="1" />{keyLit[' '] > 0 && <rect x="70" y="678" width="220" height="40" rx="6" fill={LIME} fillOpacity={.3 * keyLit[' ']} stroke={LIME} strokeOpacity={keyLit[' ']} strokeWidth="1.6" />}
     <circle cx="326" cy="698" r="18" fill={LIME} /><I n="search" x={326} y={698} s={.8} c={INK} w={2} />
   </g>;
 }
 // Bottom sheet "Search YouTube on Living Room TV" (youtube-search.png). y = slide offset, text = typed so far.
-export function SearchSheet({ y = 0, text = '', caret = 1, focus = 1, send = 0, ripple = 0 }) {
+export function SearchSheet({ y = 0, text = '', caret = 0, focus = 1, send = 0, ripple = 0 }) {
   return <g transform={`translate(0 ${y})`}>
     <rect x="0" y="343" width={W} height="440" rx="22" fill={PANEL} /><rect x="160" y="352" width="40" height="4" rx="2" fill={LINE} />
     <Tx x={16} y={386} s={12.5} w={600}>Search YouTube on Living Room TV</Tx><I n="close" x={332} y={382} s={.85} />

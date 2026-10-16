@@ -42,8 +42,8 @@ export async function createPinScene(host, { modelUrl, tvTextures, phoneTextures
   const body = tvBox.clone(), v3 = new THREE.Vector3(), y0 = tvBox.min.y - tvSize.y * .035;
   (consoleMesh || root.getObjectByName('PinTV'))?.traverse(n => { if (!n.isMesh) return; const pos = n.geometry.attributes.position; for (let i = 0; i < pos.count; i++) { v3.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); if (v3.y >= y0 && Math.abs(v3.z - tvCenter.z) < tvSize.x * .08) body.expandByPoint(v3); } });
   const bodySize = body.getSize(new THREE.Vector3()), bodyCenter = body.getCenter(new THREE.Vector3());
-  // PM 16 Oct: the phone body / bezel is the board's near-black (#050706, the board's .frame), set in code, not in the GLB.
-  const BEZEL = new THREE.MeshPhysicalMaterial({ color: new THREE.Color('#050706'), roughness: .38, metalness: 0, clearcoat: .35, clearcoatRoughness: .3 });
+  // PM 16 Oct: the phone body / bezel is ink #0b0e0d (Design's phone components), set in code, not in the GLB.
+  const BEZEL = new THREE.MeshPhysicalMaterial({ color: new THREE.Color('#0b0e0d'), roughness: .38, metalness: 0, clearcoat: .35, clearcoatRoughness: .3 });
   phone.traverse(n => { if (n.isMesh && n !== phoneScreen && !/glass/i.test(n.name)) { n.material = BEZEL; } });
   // Phone: Build's baked orientation (upright, facing the camera with a slight turn), as on the board.
   const baseScale = phone.scale.x;
@@ -73,8 +73,9 @@ export async function createPinScene(host, { modelUrl, tvTextures, phoneTextures
 
   let W = 1, H = 1, frame = 0, disposed = false, state = null;
   // Screens swap by step index with a 0.2 s crossfade (time-based), both screens in the same frame.
-  let shown = -1, fadeStart = 0;
-  const swap = i => { if (i === shown) return; const first = shown < 0; shown = i; for (const [m, maps] of [[mats.tv, tvMaps], [mats.phone, phoneMaps]]) { m.uniforms.mapA.value = first ? maps[i] : (m.uniforms.mixv.value > .5 ? m.uniforms.mapB.value : m.uniforms.mapA.value); m.uniforms.mapB.value = maps[i]; m.uniforms.mixv.value = first ? 1 : 0; } fadeStart = first ? 0 : performance.now(); };
+  // TV and phone keep their own index (step 02 keeps the typed search on the phone until its snap has finished).
+  const shown = new Map(); let fadeStart = 0;
+  const swap = (m, maps, i) => { const was = shown.has(m) ? shown.get(m) : -1; if (i === was) return; const first = was < 0; shown.set(m, i); m.uniforms.mapA.value = first ? maps[i] : (m.uniforms.mixv.value > .5 ? m.uniforms.mapB.value : m.uniforms.mapA.value); m.uniforms.mapB.value = maps[i]; m.uniforms.mixv.value = first ? 1 : 0; if (!first) { m.userData.fade = performance.now(); fadeStart = 1; } };
   function render() {
     frame = 0; if (disposed || !state) return;
     const { v, tvRect, phoneRect } = state, hr = host.getBoundingClientRect();
@@ -91,8 +92,8 @@ export async function createPinScene(host, { modelUrl, tvTextures, phoneTextures
     phone.position.set(0, 0, 0); root.updateMatrixWorld(true); // PinPhone is a root node: world = local
     const c = new THREE.Box3().setFromObject(phoneScreen).getCenter(new THREE.Vector3());
     phone.position.copy(want.sub(c)); root.updateMatrixWorld(true);
-    swap(state.idx); let fading = false;
-    if (fadeStart) { const t = Math.min(1, (performance.now() - fadeStart) / 200); for (const m of [mats.tv, mats.phone]) m.uniforms.mixv.value = t; if (t < 1) fading = true; else fadeStart = 0; }
+    swap(mats.tv, tvMaps, state.idx); swap(mats.phone, phoneMaps, state.phoneIdx); let fading = false;
+    if (fadeStart) { fadeStart = 0; for (const m of [mats.tv, mats.phone]) { if (!m.userData.fade) continue; const t = Math.min(1, (performance.now() - m.userData.fade) / 200); m.uniforms.mixv.value = t; if (t < 1) fading = fadeStart = 1; else m.userData.fade = 0; } }
     renderer.render(scene, camera);
     if (fading) frame = requestAnimationFrame(render);
   }
@@ -103,7 +104,7 @@ export async function createPinScene(host, { modelUrl, tvTextures, phoneTextures
   canvas.addEventListener('webglcontextlost', lost);
   host.append(canvas); resize();
   const api = {
-    update(v, idx, tvRect, phoneRect) { state = { v, idx, tvRect, phoneRect }; invalidate(); },
+    update(v, idx, phoneIdx, tvRect, phoneRect) { state = { v, idx, phoneIdx, tvRect, phoneRect }; invalidate(); },
     dispose() { if (disposed) return; disposed = true; cancelAnimationFrame(frame); ro.disconnect(); canvas.removeEventListener('webglcontextlost', lost); root.traverse(n => { n.geometry?.dispose(); [].concat(n.material || []).forEach(m => m.dispose?.()); }); disposeList.forEach(x => x.dispose()); env.dispose(); pmrem.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove(); }
   };
   return api;

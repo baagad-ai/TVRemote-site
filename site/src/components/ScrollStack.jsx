@@ -5,7 +5,9 @@ import { useEffect, useRef } from 'react';
 import { useEnvironment } from '../environment';
 
 export const ScrollStackItem = ({ children, itemClassName = '' }) => <article className={`scroll-stack-card ${itemClassName}`}>{children}</article>;
-export default function ScrollStack({ children, itemScale = .02, itemStackDistance = 24, baseScale = .94 }) {
+// stackTop (site addition): where the first card settles, px from the viewport top (a number or a function); the
+// original's 8% of the viewport otherwise.
+export default function ScrollStack({ children, itemScale = .02, itemStackDistance = 24, baseScale = .94, stackTop = null }) {
   const ref = useRef(null), { motion } = useEnvironment();
   useEffect(() => {
     const root = ref.current, wide = matchMedia('(min-width: 1000px) and (min-height: 760px)');
@@ -15,19 +17,23 @@ export default function ScrollStack({ children, itemScale = .02, itemStackDistan
     const restore = () => { for (const [card, style] of original) card.setAttribute('style', style); cache.clear(); };
     const geometry = () => {
       restore();
-      tops = cards.map(card => card.getBoundingClientRect().top + scrollY);
-      endTop = root.querySelector('.scroll-stack-end').getBoundingClientRect().top + scrollY;
+      // Offsets relative to the stack itself: content above can change height later (pinned sections add their
+      // spacers after this runs) without moving anything inside the stack.
+      const base = root.getBoundingClientRect().top;
+      tops = cards.map(card => card.getBoundingClientRect().top - base);
+      endTop = root.querySelector('.scroll-stack-end').getBoundingClientRect().top - base;
     };
     const update = () => {
       frame = 0;
       if (!enabled) return;
-      const top = scrollY, height = innerHeight, stackPosition = height * .08;
+      const top = scrollY, height = innerHeight, origin = root.getBoundingClientRect().top + top, stackPosition = stackTop == null ? height * .08 : typeof stackTop === 'function' ? stackTop() : stackTop;
       cards.forEach((card, i) => {
-        const start = tops[i] - stackPosition - itemStackDistance * i;
-        const end = tops[i] + height * .2;
-        const release = endTop - height * .82;
+        const cardTop = origin + tops[i];
+        const start = cardTop - stackPosition - itemStackDistance * i;
+        const end = cardTop + height * .2;
+        const release = origin + endTop - height * .82;
         const scale = 1 - progress(top, start, end) * (1 - (baseScale + i * itemScale));
-        const translateY = top < start ? 0 : Math.max(0, Math.min(top, release) - tops[i] + stackPosition + itemStackDistance * i);
+        const translateY = top < start ? 0 : Math.max(0, Math.min(top, release) - cardTop + stackPosition + itemStackDistance * i);
         const transform = `translate3d(0,${translateY.toFixed(2)}px,0) scale(${scale.toFixed(3)})`;
         if (cache.get(i) !== transform) { card.style.transform = transform; cache.set(i, transform); }
       });
@@ -36,8 +42,8 @@ export default function ScrollStack({ children, itemScale = .02, itemStackDistan
     const configure = () => {
       enabled = motion && wide.matches;
       cancelAnimationFrame(frame); frame = 0; restore();
+      root.dataset.stackActive = String(enabled); // before measuring: the active state can change the card spacing
       if (enabled) { geometry(); schedule(); }
-      root.dataset.stackActive = String(enabled);
     };
     cards = [...root.querySelectorAll('.scroll-stack-card')];
     cards.forEach(card => original.set(card, card.getAttribute('style') || ''));
@@ -57,6 +63,6 @@ export default function ScrollStack({ children, itemScale = .02, itemStackDistan
       window.removeEventListener('scroll', schedule); window.removeEventListener('resize', resized);
       wide.removeEventListener('change', configure); root.removeEventListener('focusin', focus);
     };
-  }, [motion, itemScale, itemStackDistance, baseScale]);
+  }, [motion, itemScale, itemStackDistance, baseScale, stackTop]);
   return <div ref={ref} className="scroll-stack-scroller"><div className="scroll-stack-inner">{children}<div className="scroll-stack-end" /></div></div>;
 }

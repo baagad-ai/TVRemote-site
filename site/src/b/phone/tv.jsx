@@ -15,7 +15,7 @@ export function TV({ results = 1, fx = 0, fy = 0, pulse = 0, query = 'lofi beats
     {results < 1 && <g opacity={1 - results}>
       <rect x={HX} y="150" width="300" height="22" rx="11" fill={LINE} />
       {Array.from({ length: 5 }, (_, i) => <rect key={i} x={HX + i * (HW + HGAP)} y={HY} width={HW} height={HH} rx="16" fill={PANEL} stroke={LINE} strokeWidth="2" />)}
-      {Array.from({ length: 4 }, (_, i) => <rect key={i} x={HX + i * 356} y={HY + HH + 110} width="330" height="186" rx="16" fill={PANEL} opacity=".8" />)}
+      {Array.from({ length: 4 }, (_, i) => <rect key={i} x={HX + i * 356} y={HY + HH + 110} width="330" height="186" rx="16" fill={PANEL} stroke={LINE} strokeWidth="1" />)}
       <rect x={HX + homeFocus * (HW + HGAP) - 9} y={HY - 9} width={HW + 18} height={HH + 18} rx="22" fill="none" stroke={LIME} strokeWidth="9" />
     </g>}
     {results > 0 && <g opacity={results}>
@@ -23,9 +23,9 @@ export function TV({ results = 1, fx = 0, fy = 0, pulse = 0, query = 'lofi beats
       <rect x="400" y="68" width="760" height="64" rx="32" fill={PANEL} stroke={LINE} strokeWidth="3" /><circle cx="444" cy="98" r="13" fill="none" stroke={PAPER} strokeWidth="4" /><path d="M454 108l12 12" stroke={PAPER} strokeWidth="4" strokeLinecap="round" />
       <text x="484" y="111" fill={PAPER} fontFamily={FONT} fontSize="34">{query}</text>
       <rect x={GX} y="182" width="120" height="18" rx="9" fill={LINE} />
-      {Array.from({ length: 6 }, (_, i) => { const [x, y] = tile(i); return <g key={i}><rect x={x} y={y} width={GW} height={GH} rx="16" fill={PANEL} /><rect x={x} y={y} width={GW} height={GH} rx="16" fill={LINE} opacity={.25 + (i % 3) * .12} />
+      {Array.from({ length: 6 }, (_, i) => { const [x, y] = tile(i); return <g key={i}><rect x={x} y={y} width={GW} height={GH} rx="16" fill={PANEL} stroke={LINE} strokeWidth="1" />
         <circle cx={x + GW - 56} cy={y + 56} r="30" fill={LINE} /><rect x={x + 22} y={y + GH - 48} width={GW * .52} height="20" rx="10" fill={LINE} />
-        <rect x={x} y={y + GH + 20} width={GW * .78} height="16" rx="8" fill={LINE} /><rect x={x} y={y + GH + 46} width={GW * .5} height="14" rx="7" fill={LINE} opacity=".7" /></g>; })}
+        <rect x={x} y={y + GH + 20} width={GW * .78} height="16" rx="8" fill={LINE} /><rect x={x} y={y + GH + 46} width={GW * .5} height="14" rx="7" fill={PANEL} stroke={LINE} strokeWidth="1" /></g>; })}
       <rect x={rx - g} y={ry - g} width={GW + 2 * g} height={GH + 2 * g} rx="22" fill="none" stroke={LIME} strokeWidth="9" />
       {pulse > 0 && <rect x={rx} y={ry} width={GW} height={GH} rx="16" fill={LIME} opacity={.12 * pulse} />}
     </g>}

@@ -140,15 +140,7 @@ body[data-route=landing] .b-hero h1,.b-h1{font-size:88px;line-height:1.02;letter
 .b-rooms-inset .b-frame img{border-radius:24px}
 .b-rooms-inset .b-small{max-width:22ch}
 
-/* ---------- 5 · Guests (board mock_guests_stack: bg 50%; grid 440px 1fr gap 70; cards 36px pad, 1fr 240px, h3 40). ---------- */
-.b-guests{background:var(--bg50)}
-.b-guests-grid{display:grid;grid-template-columns:440px 1fr;gap:70px;align-items:start}
-.b-guests-head{position:sticky;top:calc(var(--header) + 40px)}
-.b-guest-card{display:grid;grid-template-columns:1fr 240px;gap:40px;padding:36px;margin-bottom:28px;background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:0 -20px 60px -20px #000;transform-origin:top center}
-.b-guest-card h3{font-size:40px!important;margin-top:16px!important}
-.b-guest-card .b-frame{align-self:start}
-.b-guests-stack [data-stack-active=true] .b-guest-card{margin-bottom:180px}
-.b-guests-stack .scroll-stack-end{height:1px}
+/* 5 · Guests: src/b/sections/guests.css */
 
 /* ---------- 6 · Gallery (board mock_gallery B: bg 50%; 7 phones 220px, gap 26, arc translateY(|i-3|*34) rotate((i-3)*4deg)). ---------- */
 .b-gallery{background:var(--bg50)}
@@ -238,12 +230,10 @@ body[data-route=landing] .site-footer{width:min(var(--wrap),calc(100% - 64px));m
   .pin-scene{transform-origin:30% 50%;zoom:.85}
   .b-closing-grid{grid-template-columns:1fr minmax(0,520px)}.b-closing-still{width:100%;height:auto;aspect-ratio:640/460}
   .b-proof-grid{grid-template-columns:1fr minmax(0,460px)}
-  .b-guests-grid{grid-template-columns:360px 1fr;gap:48px}
 }
 @media (max-width:1099px){body[data-route=landing] .site-header nav{display:none}}
 @media (max-width:999px){
   .b-guests-grid,.b-proof-grid,.b-split-grid,.b-download-grid,.b-split-head,body[data-route=landing] .questions-section,.b-closing-grid{grid-template-columns:1fr;gap:28px}
-  .b-guests-head{position:static}
   .b-stepper{display:grid;grid-template-columns:repeat(2,1fr)}
   .b-closing-grid{padding-block:60px}
 }
@@ -258,8 +248,8 @@ body[data-route=landing] .site-footer{width:min(var(--wrap),calc(100% - 64px));m
   .b-lede{font-size:16px}
   .b-section{padding-block:44px}
   .b-hero{height:auto;display:flex;flex-direction:column;padding-top:var(--header)}
-  .b-hero-scene{position:relative;inset:auto;height:330px;order:2}
-  .b-hero-loop img{object-position:40% 50%}
+  .b-hero-scene{position:relative;inset:auto;height:auto;aspect-ratio:4/5;order:2} /* PM 20:29: a 4:5 box (poster hero-390-4x5.webp) */
+  .b-hero-loop img,.b-hero-video{object-position:50% 50%}
   .b-hero-scrim{inset:-1px 0 0;background:linear-gradient(0deg,#0b0e0d 0%,transparent 30%),linear-gradient(180deg,#0b0e0d 0,rgb(11 14 13/.6) 24px,transparent 60px)} /* Design: 60px top fade, no edge */
   .b-hero-copy{order:1;padding:24px 0 10px}
   .b-hide-m{display:none}.b-show-m{display:inline}
@@ -277,9 +267,6 @@ body[data-route=landing] .site-footer{width:min(var(--wrap),calc(100% - 64px));m
   .b-rooms-media{position:relative;right:auto;top:auto;width:calc(100% + 40px);height:auto;margin-left:-20px}
   .b-rooms-vignette{background:linear-gradient(0deg,#0b0e0d 0%,transparent 40%)}
   .b-rooms-copy{padding-top:0;margin-top:-40px}
-  .b-guest-card{grid-template-columns:1fr;padding:24px}
-  .b-guest-card h3{font-size:30px!important}
-  .b-guest-card .b-frame{width:200px;justify-self:center}
   .b-gallery-box{height:auto;margin-top:28px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:30px}
   .b-arc{justify-content:flex-start;gap:16px;padding-inline:20px;height:auto}
   .b-arc li{width:200px;transform:none;scroll-snap-align:center}

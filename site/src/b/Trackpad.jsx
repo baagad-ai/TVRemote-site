@@ -2,9 +2,9 @@
 // the phone tile FIRST (2 rows; it is also the demo pad), the drawn TV tile (2 cols: YouTube logo + results), then the
 // board's 7 gesture tiles (Pointer "Coming soon", dashed). WebGL slot: free (DOM + SVG). No screenshots, no video.
 // Auto demo, one 10.00 s timeline (Design's clock, phone/clock.js) drives BOTH the phone (<PhoneLoop name="trackpad"
-// t={t} />) and the TV focus, so a phone press shows on the TV in the same frame (the ring starts 33 ms = 2 frames
-// later, as in Design's loop): rest on tile 1 | 1.0 s swipe right -> tile 2 | 3.4 s tap = OK, pulse 1 -> 1.06 -> 1 in
-// 0.3 s | 5.8 s swipe left -> tile 1 | hold to 10.0 s. Every value is a pure function of t, so t = 10 renders as t = 0.
+// t={t} />) and the TV focus from the same t: rest on tile 1 | 1.0 s swipe right (0.8 s glide), the TV focus moves to
+// tile 2 two frames after the glide ends | 3.4 s tap = OK, pulse 1 -> 1.06 -> 1 in 0.3 s | 5.8 s swipe left, focus
+// back to tile 1 after that glide | hold to 10.0 s. Every value is a pure function of t, so t = 10 renders as t = 0.
 // Moves: the focus ring (React Bits Star Border) slides one tile in 0.25 s power2.out (GSAP), settling on the tile.
 // Visitors: a swipe on the pad (>= 24 px, direction locked) or an arrow key moves the focus one tile; a tap / Enter is
 // OK; an edge gives a 6 px nudge back over 0.18 s, no wrap. No cursor, finger dot or trail on the TV, no long press.
@@ -21,11 +21,13 @@ import { useLoopClock, clamp } from './phone/clock.js';
 const TX = 150, TY = 247, TW = 421, TH = 248, PX = 446, PY = 360, COLS = 3, RING = 6;
 const tileXY = i => [TX + (i % COLS) * PX, TY + Math.floor(i / COLS) * PY];
 const PANEL = '#151b16', LINE = '#354032', PAPER = '#eeeee6', MUTED = '#b0b9a2';
-// The 10 s beats (seconds) and the TV reaction, 2 frames after each phone press (Design's loop offset).
-export const BEATS = { right: 1.0, ok: 3.4, left: 5.8 }, REACT = 1 / 30, STILL_T = 3.65; // STILL_T = Design's trackpad still (just after OK, focus on tile 2)
+// The 10 s beats (seconds). Design's PhoneLoop.jsx (SWIPE_R 1, TAP 3.4, SWIPE_L 5.8, SW_D .8, TV_D .25) does not export
+// its constants, so they are mirrored here: the TV focus moves 2 frames after each 0.8 s glide ends (1.867 s, 6.667 s,
+// done 2.117 s / 6.917 s); the OK pulse is unchanged, 33 ms after the press (3.433 s).
+export const BEATS = { right: 1.0, ok: 3.4, left: 5.8 }, GLIDE = .8, FOCUS_LAG = .067, OK_LAG = 1 / 30, STILL_T = 3.65; // STILL_T = Design's trackpad still (just after OK, focus on tile 2)
 const out2 = x => 1 - (1 - clamp(x)) ** 2; // power2.out
-const slide = (t, at) => out2((t - at - REACT) / .25);
-const pulseAt = (t, at) => { const x = t - at - REACT; return x < 0 || x > .3 ? 1 : x < .15 ? 1 + .06 * out2(x / .15) : 1 + .06 * (1 - out2((x - .15) / .15)); };
+const slide = (t, at) => out2((t - at - GLIDE - FOCUS_LAG) / .25);
+const pulseAt = (t, at) => { const x = t - at - OK_LAG; return x < 0 || x > .3 ? 1 : x < .15 ? 1 + .06 * out2(x / .15) : 1 + .06 * (1 - out2((x - .15) / .15)); };
 export const focusAt = t => slide(t, BEATS.right) - slide(t, BEATS.left); // 0 = tile 1, 1 = tile 2 (column)
 export const scaleAt = t => pulseAt(t, BEATS.ok);
 

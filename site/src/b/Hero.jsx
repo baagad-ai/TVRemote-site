@@ -19,9 +19,10 @@ export function StarCta({ button = 'hero', inView = true }) {
 }
 export default function Hero() {
   const { ready, motion, gpu } = useEnvironment(), root = useRef(null), media = useRef(null), video = useRef(null);
-  const [desktop, setDesktop] = useState(false);
+  const [desktop, setDesktop] = useState(false), [small, setSmall] = useState(false);
   const inView = useInView(root, { threshold: .3 });
   useEffect(() => { if (!ready) return; const q = matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)'), u = () => setDesktop(q.matches && !lowEnd()); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
+  useEffect(() => { if (!ready) return; const q = matchMedia('(max-width: 899px)'), u = () => setSmall(q.matches); u(); q.addEventListener('change', u); return () => q.removeEventListener('change', u); }, [ready]);
   const lease = useGpuLease(ready && gpu && desktop && inView, 'grainient');
   // Header: transparent over the hero, solid ink once past it (guide, Global).
   useEffect(() => {
@@ -40,13 +41,17 @@ export default function Hero() {
     return () => { cancelAnimationFrame(frame); removeEventListener('scroll', schedule); node.style.transform = ''; };
   }, [motion]);
   // A whitelisted Blender loop (media.js) replaces the coded push-in; played only in view, never faster than 1x.
-  const playVideo = ready && motion && desktop && HERO.mp4 && !navigator.connection?.saveData;
-  useEffect(() => { const v = video.current; if (!v) return; v.playbackRate = 1; if (playVideo && inView && !document.hidden) v.play().catch(() => {}); else v.pause(); }, [playVideo, inView]);
+  // Build's loops, webm first then mp4: 16:9 at desktop sizes, the 4:5 loop in the 390 scene (poster alone until it
+  // exists). Poster first: the <img> is the loop's frame 0 in a fixed box; the video (same poster) sits over it.
+  // No size is assumed for the video files (CSS fills the box). No Save-Data / low-end.
+  const loop = small ? (HERO.mp44x5 && !lowEnd() ? { webm: HERO.webm4x5, mp4: HERO.mp44x5, poster: HERO.crop } : null) : desktop && HERO.mp4 ? { webm: HERO.webm, mp4: HERO.mp4, poster: HERO.src } : null;
+  const playVideo = Boolean(ready && motion && loop && !navigator.connection?.saveData);
+  useEffect(() => { const v = video.current; if (!v) return; v.playbackRate = 1; if (playVideo && inView && !document.hidden) v.play().catch(() => {}); else v.pause(); }, [playVideo, inView, small]);
   return <section ref={root} className={['b-hero', motion && inView && !playVideo && 'is-looping'].filter(Boolean).join(' ')} id="hero" data-track-section="hero" aria-labelledby="hero-title">
     <div className="b-hero-scene">
       <div className="b-hero-move" ref={media}><div className="b-hero-loop">
-        <picture><source media="(max-width: 899px)" srcSet={HERO.crop} width="780" height="660" /><img src={HERO.src} srcSet={HERO.srcset} sizes="100vw" width="1920" height="1200" alt="An illustrated living room: a phone with The Remote's YouTube search typed for lofi beats, in front of a drawn TV showing YouTube results, lit by a lime light under the console." fetchPriority="high" loading="eager" decoding="async" /></picture>
-        {playVideo && <video ref={video} className="b-hero-video" data-track-loop="hero" muted loop playsInline preload="auto" poster={HERO.src} width="1920" height="1200" aria-hidden="true">{HERO.webm && <source src={HERO.webm} type="video/webm" />}<source src={HERO.mp4} type="video/mp4" /></video>}
+        <picture><source media="(max-width: 899px)" srcSet={HERO.crop} width="720" height="900" /><img src={HERO.src} srcSet={HERO.srcset} sizes="100vw" width="1920" height="1080" alt="An illustrated living room: a phone with The Remote's YouTube search typed for lofi beats, in front of a drawn TV showing YouTube results, lit by a lime light under the console." fetchPriority="high" loading="eager" decoding="async" /></picture>
+        {playVideo && <video key={loop.mp4} ref={video} className="b-hero-video" data-track-loop="hero" muted loop playsInline preload="auto" poster={loop.poster} aria-hidden="true">{loop.webm && <source src={loop.webm} type="video/webm" />}<source src={loop.mp4} type="video/mp4" /></video>}
       </div></div>
       {lease && <div className="b-grain-live" aria-hidden="true"><Grainient className="b-grainient" colors={['#0b0e0d', '#151b16', '#d4fa7b']} speed={.15} grainAmount={.08} interactive={false} clickSwirl={false} intro={false} dpr={1} /></div>}
       <div className="b-grain" aria-hidden="true" />

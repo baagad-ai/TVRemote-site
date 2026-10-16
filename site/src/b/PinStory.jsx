@@ -40,7 +40,7 @@ export function stepValue(p) { // continuous 0..2 with plateaus
 const CAM = [{ s: 1.06, x: 14, y: -10 }, { s: 1, x: 0, y: 0 }, { s: .97, x: -8, y: 6 }];
 const lerp = (a, b, t) => a + (b - a) * t;
 
-function Scene({ v, idx, eager = false, sceneRef }) {
+function Scene({ v, idx, phoneIdx = idx, eager = false, sceneRef }) {
   const i = Math.min(1, Math.floor(v)), t = v - i, a = CAM[i], b = CAM[Math.min(2, i + 1)];
   const cam = { s: lerp(a.s, b.s, t), x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t) };
   const op = k => (k === idx ? 1 : 0);
@@ -49,8 +49,8 @@ function Scene({ v, idx, eager = false, sceneRef }) {
         else a code-drawn TV (SVG, lime glow) + the phone with its phoneScreenSvg screen, following the steps. */}
     {PIN.fallback && <img className="pin-fallback" src={PIN.fallback} alt="" width="1120" height="1240" decoding="async" />}
     <div className={`pin-tv${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-tv-layer" style={{ opacity: k === 0 ? 1 : op(k) }}><DrawnTV state={s.drawn} focus={0} idPrefix={`pin${k}`} /></div>)}<span className="b-tag pin-tag">Illustrated TV · results open after Send</span></div>
-    <div className={`pin-phone${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-phone-layer" style={{ opacity: k === 0 ? 1 : op(k) }}><PhoneLoop name="typing" step={k} playing={false} /></div>)}</div>
-    <p className="pin-bubble" style={{ opacity: idx === 1 ? 1 : 0 }}>{SENT}</p>
+    <div className={`pin-phone${PIN.fallback ? ' is-geom' : ''}`}>{!PIN.fallback && STEPS.map((s, k) => <div key={s.id} className="pin-phone-layer" style={{ opacity: k === 0 ? 1 : (k === phoneIdx ? 1 : 0) }}><PhoneLoop name="typing" step={k} playing={false} /></div>)}</div>
+    <p className="pin-bubble" style={{ opacity: phoneIdx === 1 ? 1 : 0 }}>{SENT}</p>
   </div>;
 }
 // 390 / reduced-motion stills: Build's re-render per step when it lands (PIN.stills), else a code-drawn interim (the
@@ -67,7 +67,10 @@ export default function PinStory() {
   const { ready, motion, gpu } = useEnvironment(), root = useRef(null), stage = useRef(null);
   const [fits, setFits] = useState(false), [focusMode, setFocusMode] = useState(false), [v, setV] = useState(1), [idx, setIdx] = useState(1);
   const pinned = ready && motion && fits && !focusMode;
-  const [near, setNear] = useState(false), sceneRef = useRef(null), host = useRef(null), live = useRef(null), vRef = useRef(1), idxRef = useRef(1);
+  const [near, setNear] = useState(false), sceneRef = useRef(null), host = useRef(null), live = useRef(null), vRef = useRef(1), idxRef = useRef(1), phoneRef = useRef(1);
+  // Step 02 "Send it": the phone keeps the typed search (typing step 0: "lofi beats", keyboard up) until step 02's snap
+  // has finished, then shows step 1 (sent). The TV switches at the step change as before.
+  const [sent, setSent] = useState(true), sentRef = useRef(true);
   const lease = useGpuLease(pinned && near && gpu && !lowEnd() && Boolean(PIN.model), 'pin');
   const [is3d, setIs3d] = useState(false);
   // "Near" = the pin's top has come up past 60% of the viewport (never at load: the hero's Grainient owns the slot).
@@ -85,8 +88,9 @@ export default function PinStory() {
     return () => { ctrl.abort(); api?.dispose(); live.current = null; setIs3d(false); };
   }, [lease]);
   const push = value => { const node = sceneRef.current, api = live.current; if (!node || !api) return; const tv = node.querySelector('.pin-tv').getBoundingClientRect(), ph = node.querySelector('.pin-phone').getBoundingClientRect(), hr = host.current.getBoundingClientRect(), g = host.current.firstChild.style;
-    g.left = `${tv.left - hr.left}px`; g.top = `${tv.top - hr.top}px`; g.width = `${tv.width}px`; g.height = `${tv.height}px`; api.update(value, idxRef.current, { left: tv.left, top: tv.top, width: tv.width, height: tv.height }, { left: ph.left + 8, top: ph.top + 8, width: ph.width - 16, height: ph.height - 16 }); };
-  useEffect(() => { vRef.current = v; idxRef.current = idx; requestAnimationFrame(() => push(v)); }, [v, idx, is3d]);
+    g.left = `${tv.left - hr.left}px`; g.top = `${tv.top - hr.top}px`; g.width = `${tv.width}px`; g.height = `${tv.height}px`; api.update(value, idxRef.current, phoneRef.current, { left: tv.left, top: tv.top, width: tv.width, height: tv.height }, { left: ph.left + 8, top: ph.top + 8, width: ph.width - 16, height: ph.height - 16 }); };
+  const phoneIdx = pinned && idx === 1 && !sent ? 0 : idx;
+  useEffect(() => { vRef.current = v; idxRef.current = idx; phoneRef.current = phoneIdx; requestAnimationFrame(() => push(v)); }, [v, idx, phoneIdx, is3d]);
   useEffect(() => {
     if (!ready) return;
     const update = () => setFits(innerWidth >= 900 && innerHeight >= 640); update();
@@ -100,18 +104,22 @@ export default function PinStory() {
     return () => { node.removeEventListener('focusin', enter); node.removeEventListener('focusout', leave); };
   }, []);
   useEffect(() => {
-    if (!pinned) { setV(1); setIdx(1); return; }
+    const setSentBoth = x => { if (sentRef.current !== x) { sentRef.current = x; setSent(x); } };
+    if (!pinned) { setV(1); setIdx(1); setSentBoth(true); return; }
     const node = root.current, before = node.getBoundingClientRect(), wasAbove = before.bottom < 0;
-    setV(0); setIdx(0);
+    setV(0); setIdx(0); setSentBoth(false);
+    // Settled on step 02 = its snap tween finished, or scrolling stopped right on the snap point (no tween needed).
+    const settle = self => { if (stepIndex(self.progress) === 1 && Math.abs(self.progress - .5) < .01) setSentBoth(true); };
     // Guide §2: pin, end +=300%, scrub 0.5, snap 0/.5/1 (0.35 s power2.out) — each snap point is inside a hold.
     const st = ScrollTrigger.create({ trigger: stage.current, pin: true, pinSpacing: true, start: 'top top', end: '+=300%', scrub: .5, anticipatePin: 1, invalidateOnRefresh: true,
-      snap: { snapTo: [0, .5, 1], duration: .35, ease: 'power2.out', delay: .15 },
-      onUpdate: self => { setV(stepValue(self.progress)); setIdx(stepIndex(self.progress)); },
+      snap: { snapTo: [0, .5, 1], duration: .35, ease: 'power2.out', delay: .15, onComplete: () => settle(st) },
+      onUpdate: self => { setV(stepValue(self.progress)); setIdx(stepIndex(self.progress)); if (stepIndex(self.progress) !== 1) setSentBoth(false); },
       onToggle: self => { if (self.isActive) document.dispatchEvent(new CustomEvent('remote:loop', { detail: { k: 'pin', el: node } })); } });
-    setV(stepValue(st.progress)); setIdx(stepIndex(st.progress));
+    setV(stepValue(st.progress)); setIdx(stepIndex(st.progress)); settle(st);
+    const scrollEnd = () => settle(st); ScrollTrigger.addEventListener('scrollEnd', scrollEnd);
     if (wasAbove) { const delta = node.getBoundingClientRect().height - before.height; if (delta) scrollBy(0, delta); }
     document.fonts.ready.then(() => ScrollTrigger.refresh());
-    return () => { const h = node.getBoundingClientRect(), above = h.bottom < 0, height = h.height; st.kill(true); if (above) { const delta = node.getBoundingClientRect().height - height; if (delta) scrollBy(0, delta); } };
+    return () => { ScrollTrigger.removeEventListener('scrollEnd', scrollEnd); const h = node.getBoundingClientRect(), above = h.bottom < 0, height = h.height; st.kill(true); if (above) { const delta = node.getBoundingClientRect().height - height; if (delta) scrollBy(0, delta); } };
   }, [pinned]);
   const step = idx;
   return <section ref={root} className={`b-pin ${pinned ? 'is-pinned' : 'is-stacked'}${is3d ? ' is-3d' : ''}`} id="search-proof" data-track-section="search" aria-labelledby="pin-title">
@@ -119,7 +127,7 @@ export default function PinStory() {
     <div ref={stage} className="b-pin-stage">
       {pinned && <div ref={host} className="pin-canvas-host" aria-hidden="true"><span className="pin-glow" /></div>}
       <div className="b-wrap b-pin-grid">
-        {pinned && <div className="b-pin-media" aria-hidden="true"><Scene v={v} idx={idx} eager sceneRef={sceneRef} /></div>}
+        {pinned && <div className="b-pin-media" aria-hidden="true"><Scene v={v} idx={idx} phoneIdx={phoneIdx} eager sceneRef={sceneRef} /></div>}
         <div className="b-pin-copy">
           <p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />01 / YouTube search</p>
           <h2 id="pin-title"><span className="b-h2-desk">Search YouTube <em>from your phone.</em></span><span className="b-h2-m">Type on your phone. <em>Results on the TV.</em></span></h2>

@@ -7,6 +7,7 @@ import { DownloadLink } from '../Download';
 import { useEnvironment } from '../environment';
 import { useGpuLease, useInView, lowEnd } from './lease';
 import { ROOMS } from './media';
+import { PhoneLoop, GuestCard } from './slots';
 
 const Eyebrow = ({ children, className = '' }) => <p className={`b-eyebrow ${className}`}><span className="b-dot" aria-hidden="true" />{children}</p>;
 const Frame = ({ src, alt, w = 342, h = 706, className = '' }) => <div className={`b-frame ${className}`}><img src={src} alt={alt} width={w} height={h} loading="lazy" decoding="async" /></div>;
@@ -18,7 +19,7 @@ const ROOM_LIST = [['living', 'Living room'], ['bedroom', 'Bedroom'], ['kitchen'
 function RoomMedia({ id, play }) {
   const r = ROOMS[id], video = useRef(null);
   useEffect(() => { const v = video.current; if (!v) return; v.playbackRate = 1; if (play) v.play().catch(() => {}); else v.pause(); }, [play]);
-  return <div className="room-media"><img src={r.poster} width="1200" height="936" alt={r.board ? 'Illustrated rooms: a living room lit in lime and a bedroom beside it.' : `Illustrated rooms with the ${id} lit in lime.`} loading="lazy" decoding="async" />
+  return <div className="room-media"><picture>{r.crop !== r.poster && <source media="(max-width: 899px)" srcSet={r.crop} />}<img src={r.poster} width="1200" height="936" alt={r.own ? `Illustrated rooms with the ${id} lit in lime.` : 'Illustrated rooms: a living room lit in lime and a bedroom beside it.'} loading="lazy" decoding="async" /></picture>
     {play && r.mp4 && <video ref={video} data-track-loop={`rooms-${id}`} muted playsInline loop preload="metadata" poster={r.poster} aria-hidden="true">{r.webm && <source src={r.webm} type="video/webm" />}<source src={r.mp4} type="video/mp4" /></video>}</div>;
 }
 export function Rooms() {
@@ -42,21 +43,27 @@ export function Rooms() {
     </div>
   </section>;
 }
-// 5 · Guests: the repo's ScrollStack (native scroll), cards settle at 0/70/140 px with scale .92/.96/1 and release
-// before the gallery; a plain list on narrow screens, under reduced motion and with focus inside.
+// 5 · Guests (CONCEPT-B-GUIDE.md §5, board gen.py mock_guests_stack): grid 440px 1fr gap 70, the heading column sticky
+// on the left; three step cards in the repo's ScrollStack (native scroll) settling at 0 / 70 / 140 px with scale .92 /
+// .96 / 1, released before the gallery. Each card: tag, h3 40px, lede, and Design's code-drawn phone (240px) on the right:
+// step 1 the live invite loop (<PhoneLoop name="invite" />; Design's still under reduced motion), steps 2-3 <GuestCard>.
+// Copy is the board's, minus the code-expiry sentence (guest invite codes don't expire). Generic names only (Design).
+// Reduced motion, narrow screens and keyboard focus inside: a plain list (ScrollStack restores the document flow).
 const GUESTS = [
-  ['Invite a guest', 'Guests scan the QR with their phone camera, or type the code. Codes expire after 2 minutes.', 'assets/board/guests-invite-540.webp', 'Inviting a guest to Living Room TV in The Remote: the name My phone, a QR code and an invite code, waiting for the guest.'],
-  ['Their phone, full remote', 'Arrows, media, volume, YouTube search and links, on their own Android phone.', 'assets/board/guests-guest-remote-540.webp', "A guest's own phone with The Remote connected to Living Room TV."],
-  ['Your list', 'Remove guests any time, or limit one to Media and volume only.', 'assets/board/guests-primary-guest-list-540.webp', 'The guest list for Living Room TV on a Primary remote: two guests on their guest phones with Remove buttons, an Invite a guest button, and This phone, My phone, connected.']
+  ['Invite a guest', 'Guests scan the QR with their phone camera, or type the code.'],
+  ['Their phone, full remote', 'Arrows, media, volume, YouTube search and links, on their own Android phone.'],
+  ['Your list', 'Remove guests any time, or limit one to Media and volume only.']
 ];
+const guestStackTop = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header')) || 84) + 32;
 export function Guests() {
+  const { ready, motion } = useEnvironment();
   return <section className="b-section b-guests" id="guests" data-track-section="guests" aria-labelledby="guests-title">
     <div className="b-wrap b-guests-grid">
       <div className="b-guests-head"><Eyebrow>Friends over</Eyebrow><h2 id="guests-title">Hand out the remote, <em>not your phone.</em></h2>
         <p className="b-lede">Invite a guest from The Remote. They join on your home Wi-Fi from their own Android phone.</p></div>
-      <div className="b-guests-stack"><ScrollStack itemScale={.04} baseScale={.92} itemStackDistance={70}>{GUESTS.map(([title, text, src, alt], i) => <ScrollStackItem key={title} itemClassName="b-guest-card">
-        <div><span className="b-tag">Step {i + 1}</span><h3>{title}</h3><p className="b-lede">{text}</p></div>
-        <Frame src={src} alt={alt} w={540} h={1170} />
+      <div className="b-guests-stack"><ScrollStack itemScale={.04} baseScale={.92} itemStackDistance={70} stackTop={guestStackTop}>{GUESTS.map(([title, text], i) => <ScrollStackItem key={title} itemClassName="b-guest-card">
+        <div className="b-guest-copy"><span className="b-tag">Step {i + 1}</span><h3>{title}</h3><p className="b-lede">{text}</p></div>
+        <div className="b-guest-phone">{i === 0 && ready && motion ? <PhoneLoop name="invite" /> : <GuestCard i={i} />}</div>
       </ScrollStackItem>)}</ScrollStack></div>
     </div>
   </section>;

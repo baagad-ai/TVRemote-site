@@ -135,8 +135,7 @@
           0.8502,
           2.6257
         ]
-      ],
-      "embedded_default": "phone-search (540x1170 WebP)"
+      ]
     },
     "TVScreen": {
       "aspect": "16:9",
@@ -178,43 +177,6 @@
     "crossfade": "0.2 s emissive/opacity mix between the old and new map (two stacked MeshBasicMaterials or a mix uniform); time-based, triggered when progress crosses a swap point"
   },
   "textures": {
-    "phone-search": {
-      "file": "textures/phone-search.webp",
-      "size": [
-        540,
-        1170
-      ],
-      "screen": "PhoneScreen",
-      "what": "Real YouTube search sheet capture, \"lofi beats\" typed, keyboard up. No caret, no cursor."
-    },
-    "phone-search-typing": {
-      "file": "textures/phone-search-typing.webp",
-      "size": [
-        540,
-        1170
-      ],
-      "screen": "PhoneScreen",
-      "what": "Optional typing beat: same sheet with \"lofi\" typed.",
-      "optional": true
-    },
-    "phone-sent": {
-      "file": "textures/phone-sent.webp",
-      "size": [
-        540,
-        1170
-      ],
-      "screen": "PhoneScreen",
-      "what": "Real remote screen, sheet closed, status line \"YouTube search action sent. Check the TV.\""
-    },
-    "phone-share": {
-      "file": "textures/phone-share.webp",
-      "size": [
-        540,
-        1170
-      ],
-      "screen": "PhoneScreen",
-      "what": "Real share-sheet capture (assets/showcase/youtube-share.png, unmodified): Shared to The Remote · Open YouTube video?"
-    },
     "tv-home": {
       "file": "textures/tv-home.webp",
       "size": [
@@ -256,18 +218,8 @@
         0.0,
         0.3333
       ],
-      "PhoneScreen": "phone-search",
       "TVScreen": "tv-home",
-      "optional_typing_beat": {
-        "PhoneScreen": "phone-search-typing",
-        "until": 0.12,
-        "note": "show 'lofi' first, swap to 'lofi beats' at 0.12; the camera is still, so the swap is safe"
-      },
-      "copy": "Type a YouTube search on your phone.",
-      "still": {
-        "desktop_16x10": "pin-step-1-16x10.webp",
-        "mobile_4x5": "pin-step-1.webp"
-      }
+      "copy": "Type a YouTube search on your phone."
     },
     {
       "id": "results",
@@ -281,13 +233,8 @@
         0.45,
         0.6667
       ],
-      "PhoneScreen": "phone-sent",
       "TVScreen": "tv-results",
-      "copy": "Send, and the results open on the TV.",
-      "still": {
-        "desktop_16x10": "pin-step-2-16x10.webp",
-        "mobile_4x5": "pin-step-2.webp"
-      }
+      "copy": "Send, and the results open on the TV."
     },
     {
       "id": "link",
@@ -301,13 +248,8 @@
         0.84,
         1.0
       ],
-      "PhoneScreen": "phone-share",
       "TVScreen": "tv-playing",
-      "copy": "Share a YouTube link from your phone. It plays on the TV.",
-      "still": {
-        "desktop_16x10": "pin-step-3-16x10.webp",
-        "mobile_4x5": "pin-step-3.webp"
-      }
+      "copy": "Share a YouTube link from your phone. It plays on the TV."
     }
   ],
   "timeline": {
@@ -334,32 +276,11 @@
     ],
     "texture_swaps": [
       {
-        "at": 0.12,
-        "screen": "PhoneScreen",
-        "from": "phone-search-typing",
-        "to": "phone-search",
-        "optional": true
-      },
-      {
-        "at": 0.46,
-        "screen": "PhoneScreen",
-        "from": "phone-search",
-        "to": "phone-sent",
-        "why": "Send happens on the phone first"
-      },
-      {
         "at": 0.48,
         "screen": "TVScreen",
         "from": "tv-home",
         "to": "tv-results",
         "why": "results open only after Send; settled before the 0.5 snap"
-      },
-      {
-        "at": 0.85,
-        "screen": "PhoneScreen",
-        "from": "phone-sent",
-        "to": "phone-share",
-        "why": "the link is shared from the phone first"
       },
       {
         "at": 0.87,
@@ -377,9 +298,7 @@
     "note": "The stills are Cycles renders of the same scene with a wall, floor and a lime bias light; the live scene will be flatter. Verify poster-to-WebGL parity on the snapped states."
   },
   "fallback": {
-    "when": "reduced motion · Save-Data · deviceMemory<4 · no WebGL2 · off-screen · innerWidth<900",
-    "desktop": "pin-step-N-16x10.webp per step, crossfaded by the same ScrollTrigger",
-    "mobile_390": "pin-step-N.webp (4:5 phone-over-TV), stacked, no pin"
+    "when": "reduced motion · Save-Data · deviceMemory<4 · no WebGL2 · off-screen · innerWidth<900"
   },
   "materials": "Brand tints only (#0b0e0d / #eeeee6 shades); BiasStrip is lime emissive (#d4fa7b). The YouTube logo appears only inside the TV textures.",
   "claims": "No cursor or pointer on either screen, no caret, no long press, generic names only (Living Room TV / Living room). The TV shows results only after Send (texture order enforces it)."

@@ -51,6 +51,8 @@ export function normaliseContract(raw, base) {
       if (sw.optional && !typing) continue;
       list.push({ at: sw.at, url: tex(sw.to) });
     }
+    // The contract no longer names phone textures (the site draws the phone screens: phoneScreenSvg); the caller's win.
+    for (const k of ['phone', 'tv']) if (!screens[k].every(e => e.url)) delete screens[k];
   }
   return { model: url(raw.model || raw.glb || 'pin-tv-phone.glb'), phoneMesh: raw.nodes?.phone_screen || raw.meshes?.phone || 'PhoneScreen', tvMesh: raw.nodes?.tv_screen || raw.meshes?.tv || 'TVScreen', steps, moves, screens, cameras: raw.cameras || null, flipY: raw.screen_texture?.flipY ?? raw.flipY ?? false, build: Boolean(raw.timeline) };
 }
@@ -65,7 +67,7 @@ export async function createPinScene(host, { contractUrl, modelUrl, tvTextures, 
     if (modelUrl) contract.model = new URL(modelUrl, location.href).href;
   } else contract = { model: new URL(modelUrl, location.href).href, phoneMesh: 'PhoneScreen', tvMesh: 'TVScreen', steps: PLACEHOLDER.steps.map(s => ({ ...s })), moves: PLACEHOLDER.moves, cameras: null, flipY: false, placeholder: true };
   contract.steps.forEach((s, i) => { s.phone ||= phoneTextures[i]; s.tv ||= tvTextures[i]; });
-  contract.screens ||= { phone: contract.steps.map(s => ({ at: s.swapAt, url: s.phone })), tv: contract.steps.map(s => ({ at: s.swapAt, url: s.tv })) };
+  contract.screens ||= {}; contract.screens.phone ||= contract.steps.map(s => ({ at: s.swapAt, url: s.phone })); contract.screens.tv ||= contract.steps.map(s => ({ at: s.swapAt, url: s.tv }));
 
   let disposed = false, frame = 0, progress = 0, shown = -1, width = 1, height = 1;
   const disposeList = [];
