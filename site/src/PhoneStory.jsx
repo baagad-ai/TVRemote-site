@@ -62,8 +62,8 @@ export default function PhoneStory({ Destination, heroOnly = false }) {
 }
 // Everyday controls: ONE phone for the whole section (Design rule). On desktop the Remote/Search toggle and
 // opening a panel swap what that phone shows; every screen is stacked inside one fixed 1080×2340 box, so
-// its size and position never change. On mobile the phone follows the toggle and each panel shows its own
-// screenshot inside it at one fixed height. Typing starts open; typing.png and reconnect-pair-again.png are
+// its size and position never change. Mobile uses the same single phone (toggle, then phone, then panels);
+// the panels carry no phones of their own. Typing starts open; typing.png and reconnect-pair-again.png are
 // image slots (rendered only if the file exists). Typing is YouTube search only.
 const typingShot = slot(SLOTS.typing), reconnectShot = slot(SLOTS.reconnect);
 const controlScreens = {
@@ -84,7 +84,7 @@ export function ControlsProof() {
   const pick = id => { setView(id); setShown(id); };
   const fallback = view || (controlScreens.typing ? 'typing' : 'remote');
   const toggle = id => event => { const open = event.currentTarget.open; if (open && controlScreens[id]) setShown(id); else if (!open) setShown(current => current === id ? fallback : current); };
-  return <section className="controls-proof page-width" aria-labelledby="controls-title"><div className="controls-copy"><p className="eyebrow">And the everyday controls</p><h2 id="controls-title">Navigation, volume <br /><em>and YouTube on one screen.</em></h2><p>Navigation, volume and YouTube actions on one screen. Switch to Search to type a YouTube search on your phone keyboard.</p><div className="app-picker" role="group" aria-label="Choose an app screen">{[['remote', 'Remote'], ['search', 'Search']].map(([id, label]) => <button key={id} type="button" disabled={!ready} aria-pressed={view === id} onClick={() => pick(id)}>{label}<span className="selection-mark" aria-hidden="true">{view === id ? "✓" : "○"}</span></button>)}</div><p className="fine-print">App previews. Available controls vary by TV.</p>
-    <div className="control-panels">{controlPanels.map(([id, title, body, open]) => <details key={id} className="tv-detail-proof" open={open} onToggle={toggle(id)}><summary>{title}</summary>{body}{controlScreens[id] && <figure className="panel-shot"><div className="native-phone-shell"><ScreenImg shot={controlScreens[id]} /></div></figure>}</details>)}</div></div>
-    <figure className="native-phone control-phone"><div className="native-phone-shell"><div className="control-screens">{Object.entries(controlScreens).filter(([, shot]) => shot).map(([id, shot]) => <div key={id} className={`control-screen ${shown === id ? 'is-shown' : ''} ${(view ?? shown) === id ? 'is-view' : ''}`}><ScreenImg shot={shot} /></div>)}</div></div><figcaption><span className="caption-desktop">{controlScreens[shown][2]}</span><span className="caption-mobile">{controlScreens[view ?? shown][2]}</span></figcaption></figure></section>;
+  return <section className="controls-proof page-width" aria-labelledby="controls-title"><div className="controls-copy"><p className="eyebrow">And the everyday controls</p><h2 id="controls-title">Navigation, volume <br /><em>and YouTube on one screen.</em></h2><p>Switch to Search to type a YouTube search on your phone keyboard.</p><div className="app-picker" role="group" aria-label="Choose an app screen">{[['remote', 'Remote'], ['search', 'Search']].map(([id, label]) => <button key={id} type="button" disabled={!ready} aria-pressed={view === id} onClick={() => pick(id)}>{label}<span className="radio-dot" aria-hidden="true" /></button>)}</div><p className="fine-print">App previews. Available controls vary by TV.</p>
+    <div className="control-panels">{controlPanels.map(([id, title, body, open]) => <details key={id} className="tv-detail-proof" open={open} onToggle={toggle(id)}><summary>{title}</summary>{body}</details>)}</div></div>
+    <figure className="native-phone control-phone"><div className="native-phone-shell"><div className="control-screens">{Object.entries(controlScreens).filter(([, shot]) => shot).map(([id, shot]) => <div key={id} className={`control-screen ${shown === id ? 'is-shown' : ''}`}><ScreenImg shot={shot} /></div>)}</div></div><figcaption>{controlScreens[shown][2]}</figcaption></figure></section>;
 }

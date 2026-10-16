@@ -47,7 +47,7 @@ export default function PinnedStory() {
     const copies = q('.pin-copy'), screens = q('.pin-screen'), card = el.querySelector('.pin-room-card'), check = el.querySelector('.pin-check'), sheet = el.querySelector('.pin-sheet'), dim = el.querySelector('.pin-dim');
     const tl = gsap.timeline({ defaults: { ease: push, duration: 1 }, scrollTrigger: { trigger: el.querySelector('.pin-track'), start: 'top top', end: 'bottom bottom', scrub: 0.4, onUpdate: self => setActive(Math.min(3, Math.floor(self.progress * 4 + 0.08))) } });
     gsap.set([...copies].slice(1), { autoAlpha: 0, y: 28 }); gsap.set([...screens].slice(1), { autoAlpha: 0, yPercent: 8, scale: 0.96 });
-    gsap.set(card, { autoAlpha: 0, yPercent: 40, scale: 0.9 }); gsap.set(check, { autoAlpha: 0, scale: 0 });
+    gsap.set(card, { autoAlpha: 0, yPercent: 10, scale: 0.94 }); gsap.set(check, { autoAlpha: 0, scale: 0 });
     const swap = (i, at) => {
       tl.to(copies[i], { autoAlpha: 0, y: -28, duration: 0.6 }, at).to(copies[i + 1], { autoAlpha: 1, y: 0, duration: 0.6 }, at + 0.35);
       if (screens[i + 1]) tl.to(screens[i], { autoAlpha: 0, scale: 0.94, yPercent: -4 }, at).to(screens[i + 1], { autoAlpha: 1, scale: 1, yPercent: 0 }, at + 0.1);
