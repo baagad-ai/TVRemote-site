@@ -13,8 +13,8 @@ import { useGpuLease, useInView, lowEnd } from './lease';
 import { HERO } from './media';
 
 const H1 = 'Your phone. Your TV. One remote.';
-export function StarCta({ button = 'hero', inView = true, color = '#d4fa7b' }) {
-  return <StarBorder as="div" className="star-cta" color={color} duration={6} thickness={1} radius={999} hover="none" clickPulse={false} backgroundColor="transparent" borderColor="transparent" textColor="#0b0e0d"><DownloadLink button={button} /></StarBorder>;
+export function StarCta({ button = 'hero', inView = true, color = '#d4fa7b', children }) {
+  return <StarBorder as="div" className="star-cta" color={color} duration={6} thickness={1} radius={999} hover="none" clickPulse={false} backgroundColor="transparent" borderColor="transparent" textColor="#0b0e0d">{children || <DownloadLink button={button} />}</StarBorder>;
 }
 export default function Hero() {
   const { ready, motion, gpu } = useEnvironment(), root = useRef(null), media = useRef(null), video = useRef(null);
@@ -77,7 +77,7 @@ export default function Hero() {
         ? <BlurText fallback={<h1 id="hero-title" className="b-h1">Your phone.<br /><em>Your TV.</em><br />One remote.</h1>} as="h1" id="hero-title" text={H1} className="b-h1" animateBy="words" direction="top" delay={60} stepDuration={.4} trigger="load" wordClassName={[, , 'is-lime', 'is-lime']} breakAfter={[1, 3]} />
         : <h1 id="hero-title" className="b-h1">Your phone.<br /><em>Your TV.</em><br />One remote.</h1>}
       <p className="b-lede">A free phone remote for Android{'\u00a0'}TV and Google{'\u00a0'}TV. Type a YouTube search on your phone; the results open on your TV.</p>
-      <div className="b-hero-actions"><StarCta inView={inView} /><a className="b-ghost" href="#search-proof">Watch it work <span aria-hidden="true">↓</span></a></div>
+      <div className="b-hero-actions"><StarCta inView={inView}><a className="download-cta" href="#join-beta"><span>Join the beta</span><span className="cta-arrow" aria-hidden="true">↓</span></a></StarCta><DownloadLink button="hero" className="b-ghost b-hero-apk">Download the APK</DownloadLink></div>
       <LiveCount className="is-hero" />
     </div>
   </section>;

@@ -20,14 +20,20 @@ test('production refuses inactive, invalid and unverified APK identities', () =>
   assert.doesNotThrow(() => assertPublicationReady({ apkRelease: release }, release.sha256));
 });
 
-test('Pages only invokes private metrics endpoint; preview has no production database binding', () => {
+test('Pages only invokes private metrics and beta endpoints; preview has no production metrics database binding', () => {
   const routes = JSON.parse(fs.readFileSync(new URL('_routes.json', import.meta.url)));
-  assert.deepEqual(routes, { version: 1, include: ['/api/metrics', '/api/download-count', '/api/events'], exclude: [] });
+  assert.deepEqual(routes, { version: 1, include: ['/api/metrics', '/api/download-count', '/api/events', '/api/beta-requests'], exclude: [] });
   const config = JSON.parse(fs.readFileSync(new URL('../wrangler.jsonc', import.meta.url)));
   assert.equal(config.d1_databases[0].binding, 'METRICS_DB');
   // Preview writes only to the separate test database, never the production one.
-  assert.equal(config.env.preview.d1_databases.length, 1);
+  assert.equal(config.env.preview.d1_databases.length, 2);
   assert.equal(config.env.preview.d1_databases[0].database_name, 'the-remote-metrics-preview');
+  // Join the beta (preview): the existing beta table, with Cloudflare's always-pass test challenge secret only.
+  assert.equal(config.env.preview.d1_databases[1].binding, 'BETA_DB');
+  assert.equal(config.env.preview.d1_databases[1].database_name, 'the-remote-beta-requests');
+  assert.equal(config.env.preview.vars.TURNSTILE_SECRET_KEY, '1x0000000000000000000000000000000AA');
+  assert.equal(config.vars.TURNSTILE_SECRET_KEY, undefined);
+  assert.equal(config.vars.TURNSTILE_TEST_MODE, undefined);
   assert.notEqual(config.env.preview.d1_databases[0].database_id, config.d1_databases[0].database_id);
   // Wildcard origins are a preview-only convenience; production stays an exact origin list.
   assert.equal(config.vars.EVENTS_ALLOW_ORIGIN_WILDCARD, undefined);

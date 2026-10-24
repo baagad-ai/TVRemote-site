@@ -9,7 +9,7 @@ const { render } = createRequire(import.meta.url)('../.build/render.cjs');
 const fixture = { apkRelease: { id: 'test-release', url: `https://example.com/downloads/${'a'.repeat(64)}/test-release.apk`, version: '0.1.0-beta.7', versionCode: 7, minSdk: 26, bytes: 2097152, sha256: 'a'.repeat(64) } };
 for (const value of [{}, { apkRelease: null }, config, fixture]) {
   const markup = render('landing', value);
-  assert(!/data-beta-request-form|turnstile|beta-enrollment/i.test(markup));
+  assert(!/data-beta-request-form|beta-enrollment/i.test(markup));
   if (approvedRelease(value)) {
     assert(markup.includes(`href="${value.apkRelease.url}"`), 'Prerendered APK must work without JavaScript');
     assert(markup.includes('data-download-cta="hero"'));

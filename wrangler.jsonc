@@ -28,6 +28,11 @@
           "database_name": "the-remote-metrics-preview",
           "database_id": "184c8200-32d2-470d-ba16-ff27e3febf9f",
           "migrations_dir": "analytics/migrations"
+        },
+        {
+          "binding": "BETA_DB",
+          "database_name": "the-remote-beta-requests",
+          "database_id": "361c5549-6046-4d2c-8a34-23bdcce72db0"
         }
       ],
       "vars": {
@@ -38,7 +43,10 @@
         "METRICS_DAILY_CAP": "1000",
         "METRICS_PER_MINUTE": "20",
         "EVENTS_DAILY_CAP": "20000",
-        "EVENTS_PER_MINUTE": "120"
+        "EVENTS_PER_MINUTE": "120",
+        "BETA_ALLOW_PREVIEW_ORIGINS": "true",
+        "TURNSTILE_TEST_MODE": "true",
+        "TURNSTILE_SECRET_KEY": "1x0000000000000000000000000000000AA"
       }
     }
   }

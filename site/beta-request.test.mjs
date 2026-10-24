@@ -229,8 +229,9 @@ test("provider whitespace and submitted email text are handled without HTML or U
 
 test("retained beta client is absent from the current public page", () => {
   const html = fs.readFileSync(new URL("index.html", import.meta.url), "utf8");
-  assert.doesNotMatch(html, /<form|data-beta-request-form|data-request-result|data-request-status|beta-request\.js|turnstile/i);
+  assert.doesNotMatch(html, /data-beta-request-form|data-request-result|data-request-status|beta-request\.js/i);
   assert.match(html, /id="download"/);
+  assert.match(html, /id="join-beta"/); // the current Join the beta form (src/b/BetaJoin.jsx), not this retained client
 });
 
 

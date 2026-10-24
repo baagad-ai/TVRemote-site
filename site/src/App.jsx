@@ -10,6 +10,7 @@ import SmoothScroll from './SmoothScroll';
 import Hero from './b/Hero';
 import PinStory from './b/PinStory';
 import BTrackpad from './b/Trackpad';
+import BetaJoin from './b/BetaJoin';
 import { Rooms, Guests as BGuests, Gallery, Proof, ProofMarquee, TypeSplit, Closing as BClosing, TRADEMARK } from './b/Sections';
 
 export function Header({ privacy = false }) {
@@ -84,5 +85,5 @@ function useOffscreenPause() {
     nodes.forEach(n => io.observe(n)); return () => io.disconnect();
   }, [ready]);
 }
-function Landing({ config }) { useEntryReveal(); useOffscreenPause(); return <><Header /><main id="main" tabIndex={-1}><Hero /><ProofMarquee /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><DownloadFinale /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
+function Landing({ config }) { useEntryReveal(); useOffscreenPause(); return <><Header /><main id="main" tabIndex={-1}><Hero /><BetaJoin /><ProofMarquee /><PinStory /><BTrackpad /><Rooms /><BGuests /><Gallery /><Proof /><TypeSplit /><DownloadFinale /><GuidesPreview /><Questions /><BClosing /></main><Footer /><MobileCta /></>; }
 export default function App({ route = 'landing', config }) { return <EnvironmentProvider><SmoothScroll /><DownloadProvider config={config}><a className="skip-link" href="#main">Skip to content</a>{route === 'not-found' ? <NotFound config={config} /> : route === 'privacy' ? <Privacy /> : route.startsWith('guides') ? <GuidesPage slug={route.split('/')[1]} /> : <Landing config={config} />}</DownloadProvider></EnvironmentProvider>; }

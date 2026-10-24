@@ -1296,6 +1296,24 @@ html.is-save-data .b-closing .b-grain.is-band::after{animation:none}
 @media (min-width:1200px){body[data-route=landing] main .b-rooms-copy>.b-lede{max-width:min(30ch,360px)!important}} /* 23:27 PM: the paragraph only; chips stay on one row */
 
 .site-footer .footer-sha,body[data-route=landing] .site-footer .footer-sha{flex-basis:100%;grid-column:1/-1;margin:0;color:var(--paper);font-size:12px!important;line-height:1.6;overflow-wrap:anywhere}.footer-sha code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--paper);background:none;padding:0;border:0;overflow-wrap:anywhere;word-break:break-all}
+/* Join the beta (hero primary CTA target). Brand colours only: ink #0b0e0d, lime #d4fa7b, paper #eeeee6. */
+.b-beta{background:#0b0e0d}
+.b-beta-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.b-beta .b-lede{color:#eeeee6}
+.b-beta-card{padding:34px;border:1px solid #d4fa7b;border-radius:28px;background:#0b0e0d}
+.b-beta-card form{display:grid;gap:12px}
+.b-beta-card label{font:600 16px/1.4 Work Sans,Work Sans Fallback,system-ui,sans-serif;color:#eeeee6}
+.b-beta-card input[type=email]{min-height:56px;padding:14px 18px;border:1px solid #eeeee6;border-radius:14px;background:#0b0e0d;color:#eeeee6;font:16px/1.4 Work Sans,Work Sans Fallback,system-ui,sans-serif;width:100%;box-sizing:border-box}
+.b-beta-card input[type=email]:focus-visible{outline:3px solid #d4fa7b;outline-offset:2px;border-color:#d4fa7b}
+.b-beta-help{margin:0;font-size:15px;line-height:1.5;color:#eeeee6}
+.b-beta-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.b-beta-check{min-height:65px}
+.b-beta-submit{justify-content:center;border-radius:999px;font-size:16px;cursor:pointer}
+.b-beta-submit:focus-visible{outline:3px solid #eeeee6;outline-offset:3px}
+.b-beta-submit:disabled{cursor:progress}
+.b-beta-error{margin:0;min-height:1.5em;font-size:15px;color:#d4fa7b}
+.b-beta-done{margin:0;font:500 22px/1.4 Outfit,Outfit Fallback,system-ui,sans-serif;color:#d4fa7b}
+@media (max-width:899px){.b-beta-grid{grid-template-columns:1fr;gap:24px}.b-beta-card{padding:22px}.b-hero-actions .b-hero-apk{display:inline-flex}}
 
 /* ---------- 3 · Swipe and tap (CONCEPT-B-GUIDE.md §3, board gen.py:226-243). Section bg = the 30% panel mix; the cards sit
    straight on it (--panel, 1px --line, r28, padding 22). Grid 300px 1fr 1fr 1fr: phone tile first (2 rows), TV tile 2 cols,
