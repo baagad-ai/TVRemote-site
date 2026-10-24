@@ -9,10 +9,11 @@ const faq=JSON.parse(fs.readFileSync(new URL('./src/faq.json', import.meta.url),
 const root=path.dirname(fileURLToPath(import.meta.url));
 const canonical=siteUrl(process.env.SITE_URL);
 const articles=JSON.parse(fs.readFileSync(path.join(root,'src/guides.json'),'utf8'));
-assert.equal(articles.length,29);
+assert.equal(articles.length,34);
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const routes=['index.html','privacy/index.html','guides/index.html',...articles.map(a=>'guides/'+a.slug+'/index.html')];
 for(const article of articles)assert.equal(read('content/guides/'+article.slug+'.md').trim(),article.body.trim(),'Article body and metadata must stay in sync');
+for(const article of articles){const page=read('guides/'+article.slug+'/index.html'),ld=[...page.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));if(/^## Common questions\s*$/m.test(article.body)){assert.equal(ld.length,1,article.slug+' FAQPage JSON-LD');for(const q of ld[0].mainEntity)assert(page.includes(q.name.replaceAll('&','&amp;').replaceAll("'",'&#x27;'))||page.includes(q.name),article.slug+' FAQ question must be visible: '+q.name);}}
 for(const route of routes){
  const html=read(route);
  assert.equal((html.match(/<h1\b/g)||[]).length,1,route+' needs one H1');

@@ -34,12 +34,19 @@ const { render } = createRequire(import.meta.url)(path.join(scratch, 'render.cjs
 const browserBuild = await build({ metafile: true, entryPoints: { app: path.join(root, 'src/client.jsx') }, outdir: path.join(root, 'runtime'), bundle: true, splitting: true, format: 'esm', platform: 'browser', target: 'es2022', jsx: 'automatic', minify: true, sourcemap: false, chunkNames: 'chunk-[hash]', define: { ...define, 'process.env.NODE_ENV': '"production"' }, legalComments: 'eof', logLevel: 'warning' });
 const generated = new Set(Object.keys(browserBuild.metafile.outputs).map(file => path.basename(file)));
 for (const name of await fs.readdir(path.join(root, 'runtime'))) if (/^chunk-[A-Z0-9]+\.js$/.test(name) && !generated.has(name)) await fs.unlink(path.join(root, 'runtime', name));
+function articleFaq(body) {
+  const section = body.split(/^## Common questions\s*$/m)[1]; if (!section) return [];
+  const plain = text => text.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1').replace(/\s+/g, ' ').trim();
+  return section.split(/^## /m)[0].split(/^### /m).slice(1).map(chunk => { const [q, ...rest] = chunk.trim().split(/\r?\n/); return { q: plain(q), a: plain(rest.join(' ')) }; }).filter(item => item.q && item.a);
+}
 function document(route, markup) {
   const privacy = route === 'privacy', article = articles.find(a => route === `guides/${a.slug}`), guides = route === 'guides', prefix = article ? '../../' : privacy || guides ? '../' : '';
   const suffix = route === 'landing' ? '' : route + '/';
   // Google Search Console ownership token (homepage only), copied verbatim from the owner.
   const verification = route === 'landing' ? '<meta name="google-site-verification" content="UZdeG9wcSvyzel4qHdnVUz0J00bSkjQ0E3jjGAxkb5w" />' : '';
-  const faqSchema = route === 'landing' ? `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(item => ({ '@type': 'Question', name: item.q, acceptedAnswer: { '@type': 'Answer', text: item.a } })) }).replaceAll('<', '\\u003c')}</script>` : '';
+  // FAQPage JSON-LD: the landing FAQ, or a guide's visible "## Common questions" section (### question + answer paragraph).
+  const faqItems = route === 'landing' ? faq : article ? articleFaq(article.body) : [];
+  const faqSchema = faqItems.length ? `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqItems.map(item => ({ '@type': 'Question', name: item.q, acceptedAnswer: { '@type': 'Answer', text: item.a } })) }).replaceAll('<', '\\u003c')}</script>` : '';
   const escape = text => text.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
   const title = escape(article ? article.title : guides ? 'Android TV and Google TV guides and answers' : privacy ? 'Privacy policy | The Remote' : 'The Remote: free Android TV and Google TV remote for your phone');
   const description = escape(article ? article.description : guides ? 'Practical answers about phone remotes for Android TV and Google TV: pairing, YouTube search, shared links, guests, trackpad gestures, missing TVs and lost remotes.' : privacy ? 'How The Remote handles local app data, optional diagnostics, website analytics, and download click counts.' : 'A free phone remote for Android TV and Google TV. Search YouTube from your phone, share links to the right TV, and invite guests to use their own phones. No ads, no sign-up.');

@@ -152,7 +152,7 @@ export function Gallery() {
 // ends with its own ✦ and the same gap after it (padding-right = gap), so translating the track by -50% lands exactly
 // on the next "Free". ~40 px/s: the duration is the measured copy width / 40. Transform only. Paused on hover and
 // off-screen (IntersectionObserver); the Pause/Play button handles keyboard pausing (no focus-within pause, QA 22:37). Reduced motion: one static row that wraps, no copy, no trailing ✦.
-const MARQ = ['Free', 'No ads', 'No account', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
+const MARQ = ['Free', 'No ads', 'No sign-up', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
 const MarqCopy = ({ hidden }) => <ul className="b-marq-copy" aria-hidden={hidden || undefined}>{MARQ.map(f => <li key={f}><span>{f}</span><span className="b-marq-sep" aria-hidden="true">✦</span></li>)}</ul>;
 export function ProofMarquee() {
   const { ready, motion } = useEnvironment(), band = useRef(null), copy = useRef(null), [dur, setDur] = useState(60), [off, setOff] = useState(false), [paused, setPaused] = useState(false);
@@ -174,7 +174,7 @@ export function ProofMarquee() {
 // 7 · Proof (Baagad 16 Oct): six facts, none ever dim. When the band comes into view (IntersectionObserver, once) the
 // checks tick in one after another, 150 ms apart, and stay fully checked: full-strength text, lime checks. Before
 // hydration, without JS and under reduced motion they are all checked straight away. Plus the live counter, unchanged.
-const FACTS = ['Free', 'No ads', 'No account', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
+const FACTS = ['Free', 'No ads', 'No sign-up', 'Android 8.0 or later', 'Same home Wi-Fi', 'Android\u00a0TV and Google\u00a0TV'];
 export function Proof() {
   const { ready, motion } = useEnvironment(), list = useRef(null), [ticked, setTicked] = useState(FACTS.length), [armed, setArmed] = useState(false);
   useEffect(() => {
