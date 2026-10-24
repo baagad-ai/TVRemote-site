@@ -38,4 +38,4 @@ The Remote's phone typing is for YouTube search only. For passwords, Wi-Fi or ot
 
 ## Where The Remote fits
 
-The Remote is a free phone remote for Android TV and Google TV. No ads, no account. You need an Android phone (Android 8.0 or later; there's no iPhone version) and a TV with Android TV Remote Service v2, on the same home Wi-Fi. [Download the app](https://theremote-site.pages.dev/#download)
+The Remote is a free phone remote for Android TV and Google TV. No ads, no sign-up. You need an Android phone (Android 8.0 or later; there's no iPhone version) and a TV with Android TV Remote Service v2, on the same home Wi-Fi. [Download the app](https://theremote-site.pages.dev/#download)

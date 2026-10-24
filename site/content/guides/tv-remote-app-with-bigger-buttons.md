@@ -16,6 +16,6 @@ The language screen includes हिन्दी, ಕನ್ನಡ, বাংল�
 
 ## What you need
 
-The Remote is free, with no ads and no account. It runs on Android phones with Android 8.0 or later (no iPhone version). Your TV needs Android TV Remote Service v2, on the same home Wi-Fi.
+The Remote is free, with no ads and no sign-up. It runs on Android phones with Android 8.0 or later (no iPhone version). Your TV needs Android TV Remote Service v2, on the same home Wi-Fi.
 
 [Download the app](https://theremote-site.pages.dev/#download)

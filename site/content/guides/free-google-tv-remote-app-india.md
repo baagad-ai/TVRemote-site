@@ -1,6 +1,6 @@
 # Which free phone remote apps work with Google TV in India?
 
-The free options are Google's Google TV app and Google Home app, your TV maker's own app if it has one, and The Remote. The Remote is a free Android remote with no ads and no account. Its app language list includes हिन्दी, ಕನ್ನಡ, বাংলা, தமிழ், తెలుగు and मराठी, alongside English.
+The free options are Google's Google TV app and Google Home app, your TV maker's own app if it has one, and The Remote. The Remote is a free Android remote with no ads and no sign-up. Its app language list includes हिन्दी, ಕನ್ನಡ, বাংলা, தமிழ், తెలుగు and मराठी, alongside English.
 
 ## Google's own apps
 
@@ -10,7 +10,7 @@ The Google TV app works as a phone remote for Android TV and Google TV. You pair
 
 Some brands have their own app. Sony's BRAVIA Connect, for example, supports listed BRAVIA models. [Sony: BRAVIA Connect or Google TV app](https://www.sony.com/electronics/support/articles/00347983) Check your TV brand's support page.
 
-## The Remote: no ads, no account, Indian app languages
+## The Remote: no ads, no sign-up, Indian app languages
 
 - Free, with no ads, no sign-up and no in-app purchases.
 - Search YouTube by typing on your phone. The results open on the TV.

@@ -1,6 +1,6 @@
 # Google TV app vs The Remote: which phone remote should I use?
 
-Both are free phone remotes for Android TV and Google TV, and both pair with the code your TV shows. Use Google's Google TV app if you want Google's official remote, with phone typing in any text box that accepts it. Use The Remote if you want a remote with no account and no ads, plus YouTube search from your phone, YouTube links that play on the TV, TVs organised by room and Guest access. Many people keep both.
+Both are free phone remotes for Android TV and Google TV, and both pair with the code your TV shows. Use Google's Google TV app if you want Google's official remote, with phone typing in any text box that accepts it. Use The Remote if you want a remote with no sign-up and no ads, plus YouTube search from your phone, YouTube links that play on the TV, TVs organised by room and Guest access. Many people keep both.
 
 ## What Google's Google TV app does
 
@@ -8,7 +8,7 @@ According to Google, the Google TV app's remote can play and control media, turn
 
 ## What The Remote adds
 
-- **No account and no ads.** No sign-up, no sign-in, no in-app purchases.
+- **No sign-up and no ads.** No sign-in, no in-app purchases.
 - **YouTube search from your phone.** Type the search on your phone, and the results open in YouTube on the TV.
 - **YouTube links that play on the TV.** Share a link to The Remote, pick the TV, and it plays there.
 - **TVs organised by room.** Name each TV and give it a room, like Living Room TV or Bedroom.

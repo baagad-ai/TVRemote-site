@@ -9,6 +9,11 @@
       "database_name": "the-remote-download-metrics",
       "database_id": "0b9109ef-88b4-4521-9fcc-d043a09e9ef8",
       "migrations_dir": "analytics/migrations"
+    },
+    {
+      "binding": "BETA_DB",
+      "database_name": "the-remote-beta-requests",
+      "database_id": "361c5549-6046-4d2c-8a34-23bdcce72db0"
     }
   ],
   "vars": {
@@ -31,8 +36,8 @@
         },
         {
           "binding": "BETA_DB",
-          "database_name": "the-remote-beta-requests",
-          "database_id": "361c5549-6046-4d2c-8a34-23bdcce72db0"
+          "database_name": "the-remote-beta-requests-preview",
+          "database_id": "ae28797b-cb5b-4a64-91ba-b21c8b7fa1bc"
         }
       ],
       "vars": {

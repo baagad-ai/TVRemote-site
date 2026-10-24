@@ -48,4 +48,4 @@ For Google TV app feedback, open your profile picture, choose **Help & feedback*
 
 With The Remote, you can search YouTube from your phone: type the query on your Android phone and send it to YouTube on a selected compatible Android TV or Google TV over your home network. Its phone typing is for YouTube search only; for other TV apps, use the methods above. It requires Android TV Remote Service v2; whether the TV accepts the search depends on the device and its YouTube version. [The Remote’s compatibility and search details](https://theremote-site.pages.dev/#compatibility)
 
-[Download the app](https://theremote-site.pages.dev/#download) on your Android phone. It's free, with no ads and no account. Before installing, check that your TV is compatible and on the same home network as your phone.
+[Download the app](https://theremote-site.pages.dev/#download) on your Android phone. It's free, with no ads and no sign-up. Before installing, check that your TV is compatible and on the same home network as your phone.

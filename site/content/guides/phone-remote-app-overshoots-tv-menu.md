@@ -32,6 +32,6 @@ The pad greys out and shows "Reconnecting to Living Room TV…", with your TV's 
 
 ## What you need
 
-The Remote is free, with no ads and no account. It runs on Android phones with Android 8.0 or later (no iPhone version). Your TV needs Android TV Remote Service v2, on the same home Wi-Fi as your phone. The trackpad works over that same TV connection, with no extra permission. Available controls vary by TV model and app. Prefer buttons? See [Larger controls and Easy remote](https://theremote-site.pages.dev/guides/tv-remote-app-with-bigger-buttons/).
+The Remote is free, with no ads and no sign-up. It runs on Android phones with Android 8.0 or later (no iPhone version). Your TV needs Android TV Remote Service v2, on the same home Wi-Fi as your phone. The trackpad works over that same TV connection, with no extra permission. Available controls vary by TV model and app. Prefer buttons? See [Larger controls and Easy remote](https://theremote-site.pages.dev/guides/tv-remote-app-with-bigger-buttons/).
 
 [Download the app](https://theremote-site.pages.dev/#download)

@@ -24,6 +24,6 @@ The Remote finds your TV again after days away, even if its address changed. If 
 
 ## It's a code, not a password
 
-You don't make it up and you don't need to remember it. There's no account behind it either: The Remote doesn't ask you to sign in.
+You don't make it up and you don't need to remember it. There's no sign-up behind it either: The Remote doesn't ask you to sign in.
 
 [Download the app](https://theremote-site.pages.dev/#download) on your Android phone (Android 8.0 or later). It works with Android TV and Google TV devices that support Android TV Remote Service v2. There's no iPhone version.

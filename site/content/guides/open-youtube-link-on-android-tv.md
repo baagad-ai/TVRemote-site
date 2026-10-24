@@ -48,4 +48,4 @@ Check the TV for the result. Its YouTube app, signed-in account and the video’
 
 A shared video deserves a quick check before it reaches a bigger screen. The Remote keeps that choice explicit: review the link, choose the TV, then send it.
 
-[Download the app](https://theremote-site.pages.dev/#download) on your Android phone. It's free, with no ads and no account. Before installing, check that your TV is compatible and on the same home network as your phone.
+[Download the app](https://theremote-site.pages.dev/#download) on your Android phone. It's free, with no ads and no sign-up. Before installing, check that your TV is compatible and on the same home network as your phone.

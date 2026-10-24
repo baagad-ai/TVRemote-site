@@ -1,6 +1,6 @@
 # Is there an app that sends a YouTube link to my TV?
 
-Yes. On your Android phone, share a YouTube link to The Remote, pick the TV, and it plays on your Android TV or Google TV. It works with a link you found in YouTube, got in WhatsApp or opened in a browser. The Remote is free, with no ads and no account.
+Yes. On your Android phone, share a YouTube link to The Remote, pick the TV, and it plays on your Android TV or Google TV. It works with a link you found in YouTube, got in WhatsApp or opened in a browser. The Remote is free, with no ads and no sign-up.
 
 ## Share the link to The Remote, then pick the TV
 

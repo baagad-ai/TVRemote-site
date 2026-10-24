@@ -72,7 +72,7 @@ export default function Hero() {
       <div className="b-hero-scrim" aria-hidden="true" />
     </div>
     <div className="b-wrap b-hero-copy">
-      <p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />No ads. No account.<span className="b-hide-m"> Nothing to sign in to.</span></p>
+      <p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />No ads. No sign-up.<span className="b-hide-m"> Nothing to sign in to.</span></p>
       {ready && motion
         ? <BlurText fallback={<h1 id="hero-title" className="b-h1">Your phone.<br /><em>Your TV.</em><br />One remote.</h1>} as="h1" id="hero-title" text={H1} className="b-h1" animateBy="words" direction="top" delay={60} stepDuration={.4} trigger="load" wordClassName={[, , 'is-lime', 'is-lime']} breakAfter={[1, 3]} />
         : <h1 id="hero-title" className="b-h1">Your phone.<br /><em>Your TV.</em><br />One remote.</h1>}

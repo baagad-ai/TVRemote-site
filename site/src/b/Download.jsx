@@ -20,7 +20,7 @@ export default function DownloadFinale() {
   return <section className="b-section b-download" id="download" data-track-section="download" aria-labelledby="download-title">
     <div className="b-wrap">
       <div className="b-download-grid">
-        <div className="b-download-intro"><p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />Get The Remote</p><h2 id="download-title" tabIndex={-1}>Free. No ads. <em>No account.</em></h2><p className="b-lede">The Remote is free for Android phones and works with compatible Android TV and Google TV.</p></div>
+        <div className="b-download-intro"><p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />Get The Remote</p><h2 id="download-title" tabIndex={-1}>Free. No ads. <em>No sign-up.</em></h2><p className="b-lede">The Remote is free for Android phones and works with compatible Android TV and Google TV.</p></div>
         <div className="b-card">
           <span className="b-tag">Android phone APK</span>
           {release ? <><h3>The Remote for Android.</h3>

@@ -32,6 +32,6 @@ Anyone who pairs their phone with the TV's code becomes a Primary remote for tha
 
 Android TV and Google TV devices with Android TV Remote Service v2, including Google TV devices that support the Android TV Remote Service, such as Chromecast with Google TV and Google TV Streamer. Available controls vary by model and firmware. Not sure what yours runs? See [how to tell if your TV is Android TV or Google TV](https://theremote-site.pages.dev/guides/is-my-tv-android-tv-or-google-tv/).
 
-The Remote is free for Android phones (Android 8.0 or later; no iPhone version), with no ads and no account.
+The Remote is free for Android phones (Android 8.0 or later; no iPhone version), with no ads and no sign-up.
 
 [Download the app](https://theremote-site.pages.dev/#download)

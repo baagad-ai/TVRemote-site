@@ -1,6 +1,6 @@
 # The YouTube keyboard on Android TV is slow. Is there a quicker way?
 
-Yes. Type the search on your phone instead of the TV. The Remote is a free Android app with its own YouTube search: you type on your phone keyboard, and the results open in YouTube on your Android TV or Google TV. It has no ads and no account.
+Yes. Type the search on your phone instead of the TV. The Remote is a free Android app with its own YouTube search: you type on your phone keyboard, and the results open in YouTube on your Android TV or Google TV. It has no ads and no sign-up.
 
 ## Why the TV keyboard feels slow
 

@@ -25,6 +25,6 @@ The widgets show the TVs you've saved in The Remote, with the names and rooms yo
 
 ## Where The Remote fits
 
-The Remote is a free phone remote for Android TV and Google TV, with no ads and no account. Search YouTube from your phone and the results open on the TV. Share a YouTube link and it plays on the TV. Your phone needs Android 8.0 or later. Your TV needs Android TV Remote Service v2, on the same home Wi-Fi.
+The Remote is a free phone remote for Android TV and Google TV, with no ads and no sign-up. Search YouTube from your phone and the results open on the TV. Share a YouTube link and it plays on the TV. Your phone needs Android 8.0 or later. Your TV needs Android TV Remote Service v2, on the same home Wi-Fi.
 
 [Download the app](https://theremote-site.pages.dev/#download)

@@ -24,6 +24,6 @@ Only Android TV and Google TV include this service. That's why phone remotes bui
 
 ## Where The Remote fits
 
-The Remote is a free phone remote for Android TV and Google TV devices with Android TV Remote Service v2. Search YouTube by typing on your phone and the results open on the TV. Share a YouTube link and it plays on the TV. No ads, no account. Your phone needs Android 8.0 or later.
+The Remote is a free phone remote for Android TV and Google TV devices with Android TV Remote Service v2. Search YouTube by typing on your phone and the results open on the TV. Share a YouTube link and it plays on the TV. No ads, no sign-up. Your phone needs Android 8.0 or later.
 
 [Download the app](https://theremote-site.pages.dev/#download)

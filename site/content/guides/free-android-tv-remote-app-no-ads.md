@@ -1,6 +1,6 @@
 # Is there a free Android TV remote app with no ads?
 
-Yes. The Remote is a free Android TV and Google TV remote for Android phones, with no ads, no sign-up and no account. There are no in-app purchases or subscriptions either. Google's own Google TV app also includes a free remote, if you'd rather use that.
+Yes. The Remote is a free Android TV and Google TV remote for Android phones, with no ads and no sign-up. There are no in-app purchases or subscriptions either. Google's own Google TV app also includes a free remote, if you'd rather use that.
 
 ## The Remote is free, with no ads and nothing to subscribe to
 

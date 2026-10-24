@@ -26,7 +26,7 @@ const BOARD_FAQ = ['Is The Remote really free?', 'Which TVs does it work with?',
 const faqItem = item => { const i = faq.indexOf(item); return <details key={item.q} data-track="faq-open" data-track-item={`faq-${String(i + 1).padStart(2, '0')}`}><summary>{item.q}</summary><p>{item.a}</p></details>; };
 function Questions() {
   const top = BOARD_FAQ.map(q => faq.find(item => item.q === q)), rest = faq.filter(item => !top.includes(item));
-  return <section className="questions-section page-width" id="faq" aria-labelledby="faq-title"><div><p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />Questions, answered</p><h2 id="faq-title">Free, no account, installs from this site.</h2></div><div className="faq-list">{top.map(faqItem)}<details className="faq-more"><summary>More questions</summary><div className="faq-more-list">{rest.map(faqItem)}</div></details></div></section>;
+  return <section className="questions-section page-width" id="faq" aria-labelledby="faq-title"><div><p className="b-eyebrow"><span className="b-dot" aria-hidden="true" />Questions, answered</p><h2 id="faq-title">Free, no sign-up, installs from this site.</h2></div><div className="faq-list">{top.map(faqItem)}<details className="faq-more"><summary>More questions</summary><div className="faq-more-list">{rest.map(faqItem)}</div></details></div></section>;
 }
 function MobileCta() {
   const ref = useRef(null), [visible, setVisible] = useState(false), { ready } = useEnvironment();
@@ -48,7 +48,7 @@ function MobileCta() {
     document.addEventListener('focusin', update); document.addEventListener('focusout', update); window.addEventListener('scroll', update, { passive: true }); window.addEventListener('resize', update); visualViewport?.addEventListener('resize', update); narrow.addEventListener('change', update); update();
     return () => { observer.disconnect(); resize.disconnect(); reserve.disconnect(); document.removeEventListener('focusin', update); document.removeEventListener('focusout', update); window.removeEventListener('scroll', update); window.removeEventListener('resize', update); visualViewport?.removeEventListener('resize', update); narrow.removeEventListener('change', update); };
   }, [ready]);
-  return <div ref={ref} className={`mobile-cta-bar ${visible ? 'is-visible' : ''}`} data-mobile-cta-bar aria-hidden={!visible} inert={!visible}><DownloadLink button="footer" /><span>Free Android APK. No ads. No account.</span></div>;
+  return <div ref={ref} className={`mobile-cta-bar ${visible ? 'is-visible' : ''}`} data-mobile-cta-bar aria-hidden={!visible} inert={!visible}><DownloadLink button="footer" /><span>Free Android APK. No ads. No sign-up.</span></div>;
 }
 // Concept B "Living Room" (approved 16 Oct 2026): hero -> the single pin -> trackpad bento -> rooms -> guests ->
 // gallery -> proof band -> type split -> download, guides, FAQ, lime close. The earlier landing sections stay in

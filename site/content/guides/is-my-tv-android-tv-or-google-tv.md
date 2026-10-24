@@ -26,4 +26,4 @@ If your home screen comes from a box or stick plugged into the TV, the box is wh
 
 The Remote works with Android TV and Google TV devices that support Android TV Remote Service v2. Here's [what Android TV Remote Service is](https://theremote-site.pages.dev/guides/what-is-android-tv-remote-service/). Available controls vary by model and firmware.
 
-It's free for Android phones (Android 8.0 or later), with no ads and no account. [Download the app](https://theremote-site.pages.dev/#download)
+It's free for Android phones (Android 8.0 or later), with no ads and no sign-up. [Download the app](https://theremote-site.pages.dev/#download)

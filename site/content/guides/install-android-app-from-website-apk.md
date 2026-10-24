@@ -25,6 +25,6 @@ An app installed this way doesn't update through an app store. Download the late
 
 The Remote isn't on Google Play. You download it from our website and install it on your phone in the steps above. The download section on our home page shows the current version, file size and SHA-256 checksum. Once it's installed, pick your TV and enter the code it shows.
 
-The Remote is a free phone remote for Android TV and Google TV, with no ads and no account. It needs Android 8.0 or later. There's no iPhone version.
+The Remote is a free phone remote for Android TV and Google TV, with no ads and no sign-up. It needs Android 8.0 or later. There's no iPhone version.
 
 [Download the app](https://theremote-site.pages.dev/#download)

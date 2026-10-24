@@ -1,6 +1,6 @@
 # How can guests control my Google TV without a Google account?
 
-Invite them from The Remote. A guest joins on your home Wi-Fi with a short invite code from your phone, then controls the TV from their own Android phone, with no account and without your phone open.
+Invite them from The Remote. A guest joins on your home Wi-Fi with a short invite code from your phone, then controls the TV from their own Android phone, with no sign-up and without your phone open.
 
 ## Chromecast guest mode is no longer supported
 
@@ -40,6 +40,6 @@ The access an invite gives never expires. The Remote removes a guest by itself o
 
 ## Where The Remote fits
 
-The Remote is a free phone remote for Android TV and Google TV devices with Android TV Remote Service v2. That includes Google TV devices that support the Android TV Remote Service, such as Chromecast with Google TV and Google TV Streamer. No ads, and [no account](https://theremote-site.pages.dev/guides/tv-remote-app-without-account/) for you or your guests. There's no iPhone version. New to pairing? See [what the code on your TV is for](https://theremote-site.pages.dev/guides/tv-pairing-code-when-connecting-phone/).
+The Remote is a free phone remote for Android TV and Google TV devices with Android TV Remote Service v2. That includes Google TV devices that support the Android TV Remote Service, such as Chromecast with Google TV and Google TV Streamer. No ads, and [no sign-up](https://theremote-site.pages.dev/guides/tv-remote-app-without-account/) for you or your guests. There's no iPhone version. New to pairing? See [what the code on your TV is for](https://theremote-site.pages.dev/guides/tv-pairing-code-when-connecting-phone/).
 
 [Download the app](https://theremote-site.pages.dev/#download)

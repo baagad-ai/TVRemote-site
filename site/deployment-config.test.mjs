@@ -28,9 +28,13 @@ test('Pages only invokes private metrics and beta endpoints; preview has no prod
   // Preview writes only to the separate test database, never the production one.
   assert.equal(config.env.preview.d1_databases.length, 2);
   assert.equal(config.env.preview.d1_databases[0].database_name, 'the-remote-metrics-preview');
-  // Join the beta (preview): the existing beta table, with Cloudflare's always-pass test challenge secret only.
+  // Join the beta: production uses the real beta table; preview uses its own separate table and only
+  // Cloudflare's always-pass test challenge secret, so preview submissions never reach the real tester list.
+  assert.equal(config.d1_databases[1].binding, 'BETA_DB');
+  assert.equal(config.d1_databases[1].database_name, 'the-remote-beta-requests');
   assert.equal(config.env.preview.d1_databases[1].binding, 'BETA_DB');
-  assert.equal(config.env.preview.d1_databases[1].database_name, 'the-remote-beta-requests');
+  assert.equal(config.env.preview.d1_databases[1].database_name, 'the-remote-beta-requests-preview');
+  assert.notEqual(config.env.preview.d1_databases[1].database_id, config.d1_databases[1].database_id);
   assert.equal(config.env.preview.vars.TURNSTILE_SECRET_KEY, '1x0000000000000000000000000000000AA');
   assert.equal(config.vars.TURNSTILE_SECRET_KEY, undefined);
   assert.equal(config.vars.TURNSTILE_TEST_MODE, undefined);

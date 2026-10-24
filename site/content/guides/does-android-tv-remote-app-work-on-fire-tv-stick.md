@@ -22,4 +22,4 @@ The Remote works with Android TV and Google TV devices that support Android TV R
 
 Check the home screen and the settings menu. Here's [how to tell if your TV is Android TV or Google TV](https://theremote-site.pages.dev/guides/is-my-tv-android-tv-or-google-tv/).
 
-If you also have a Google TV or Android TV in the house, The Remote is a free phone remote for it, with no ads and no account. [Download the app](https://theremote-site.pages.dev/#download)
+If you also have a Google TV or Android TV in the house, The Remote is a free phone remote for it, with no ads and no sign-up. [Download the app](https://theremote-site.pages.dev/#download)

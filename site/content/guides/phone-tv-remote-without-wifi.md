@@ -24,6 +24,6 @@ That's the awkward loop: the TV needs a remote to rejoin Wi-Fi, and a Wi-Fi remo
 
 ## The Remote needs your home Wi-Fi
 
-The Remote is a Wi-Fi remote. Your Android phone (Android 8.0 or later) and your Android TV or Google TV (with Android TV Remote Service v2) need to be on the same home Wi-Fi. It's free, with no ads and no account.
+The Remote is a Wi-Fi remote. Your Android phone (Android 8.0 or later) and your Android TV or Google TV (with Android TV Remote Service v2) need to be on the same home Wi-Fi. It's free, with no ads and no sign-up.
 
 [Download the app](https://theremote-site.pages.dev/#download)

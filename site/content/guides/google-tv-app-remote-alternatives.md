@@ -1,6 +1,6 @@
 # What are the alternatives to the Google TV app remote?
 
-The main alternatives are Google's Google Home app, your TV maker's own app (Sony BRAVIA Connect, for example), NVIDIA's SHIELD TV app for SHIELD owners, and independent apps. One independent option is The Remote: a free Android remote with no ads and no account, plus YouTube search from your phone, YouTube links that play on the TV, TVs by room, and Guest access for friends on their own phones.
+The main alternatives are Google's Google Home app, your TV maker's own app (Sony BRAVIA Connect, for example), NVIDIA's SHIELD TV app for SHIELD owners, and independent apps. One independent option is The Remote: a free Android remote with no ads and no sign-up, plus YouTube search from your phone, YouTube links that play on the TV, TVs by room, and Guest access for friends on their own phones.
 
 ## Google Home: Google's other official remote
 
@@ -18,7 +18,7 @@ If your Android TV is an NVIDIA SHIELD, NVIDIA's SHIELD TV app is a phone remote
 
 Many independent remote apps work with Android TV and Google TV. Some are free with ads or paid upgrades, so check each listing.
 
-The Remote is free, with no ads, no account and no sign-up. It adds:
+The Remote is free, with no ads and no sign-up. It adds:
 
 - YouTube search typed on your phone, with the results opening on the TV
 - YouTube links shared to The Remote, which play on the TV you pick

@@ -1,6 +1,6 @@
 # Is there an app to search YouTube on my TV from my phone?
 
-Yes. The Remote is a free Android app that lets you type a YouTube search on your phone, and the results open in YouTube on your Android TV or Google TV. It has no ads and no account.
+Yes. The Remote is a free Android app that lets you type a YouTube search on your phone, and the results open in YouTube on your Android TV or Google TV. It has no ads and no sign-up.
 
 ## Type the search on your phone, and the results open on the TV
 
@@ -29,6 +29,6 @@ The Remote's phone typing is for YouTube search only. It doesn't type into other
 
 ## Where The Remote fits
 
-The Remote is a free phone remote for Android TV and Google TV. Search YouTube from your phone, share a YouTube link and it plays on the TV, and keep your TVs organised by room. No ads, no account.
+The Remote is a free phone remote for Android TV and Google TV. Search YouTube from your phone, share a YouTube link and it plays on the TV, and keep your TVs organised by room. No ads, no sign-up.
 
 [Download the app](https://theremote-site.pages.dev/#download)
